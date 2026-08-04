@@ -1,0 +1,50 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#121417" />
+      <stop offset="1" stop-color="#08090b" />
+    </linearGradient>
+    <radialGradient id="blueGlow" cx="0.5" cy="0.92" r="0.62">
+      <stop offset="0" stop-color="#54a8ff" stop-opacity="0.9" />
+      <stop offset="0.5" stop-color="#2563eb" stop-opacity="0.32" />
+      <stop offset="1" stop-color="#2563eb" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="spire" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#cfe7ff" />
+      <stop offset="1" stop-color="#2f6fe0" />
+    </linearGradient>
+    <radialGradient id="orb" cx="0.38" cy="0.33" r="0.74">
+      <stop offset="0" stop-color="#eafff4" />
+      <stop offset="0.28" stop-color="#5ee0a6" />
+      <stop offset="0.62" stop-color="#23c184" />
+      <stop offset="1" stop-color="#0b5e3e" />
+    </radialGradient>
+    <radialGradient id="orbRim" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0.82" stop-color="#ffffff" stop-opacity="0" />
+      <stop offset="0.93" stop-color="#dffff0" stop-opacity="0.55" />
+      <stop offset="1" stop-color="#0a3a28" stop-opacity="0.85" />
+    </radialGradient>
+  </defs>
+
+  <!-- near-black rounded square -->
+  <rect width="256" height="256" rx="56" fill="url(#bg)" />
+  <rect x="1.5" y="1.5" width="253" height="253" rx="54.5" stroke="#ffffff" stroke-opacity="0.06" />
+
+  <!-- PS2-style blue glow + spire base -->
+  <ellipse cx="128" cy="232" rx="122" ry="58" fill="url(#blueGlow)" />
+  <rect x="120" y="118" width="16" height="108" rx="8" fill="url(#spire)" />
+  <ellipse cx="128" cy="226" rx="46" ry="12" fill="#2f6fe0" fill-opacity="0.5" />
+
+  <!-- chrome/green Xbox-style orb -->
+  <circle cx="128" cy="116" r="70" fill="url(#orb)" />
+  <circle cx="128" cy="116" r="70" fill="url(#orbRim)" />
+
+  <!-- faint cross emblem -->
+  <g stroke="#eafff4" stroke-opacity="0.5" stroke-width="9" stroke-linecap="round">
+    <line x1="128" y1="78" x2="128" y2="154" />
+    <line x1="90" y1="116" x2="166" y2="116" />
+  </g>
+
+  <!-- specular highlight -->
+  <ellipse cx="104" cy="90" rx="22" ry="14" fill="#ffffff" fill-opacity="0.35" />
+</svg>

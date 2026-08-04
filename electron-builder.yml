@@ -1,0 +1,47 @@
+appId: com.nostalgia.app
+productName: Nostalgia
+copyright: Copyright © Nostalgia
+
+# Native modules are already prebuilt for Electron's ABI (see scripts/fetch-native.mjs);
+# do not let electron-builder recompile them (the bundled sqlite needs ClangCL).
+npmRebuild: false
+
+directories:
+  buildResources: resources
+  output: dist
+
+files:
+  - out/**
+  - package.json
+  # The BrowserWindow icon is resolved at runtime as ../../resources/icon.ico
+  # relative to out/main, so the folder must ship inside the app too.
+  - resources/icon.ico
+  - resources/icon.png
+
+# better-sqlite3 is a native module and must stay unpacked from the asar.
+asarUnpack:
+  - '**/node_modules/better-sqlite3/**'
+
+# aria2c.exe (the download engine) is SPAWNED, so it must live OUTSIDE the asar.
+# extraResources lands it at <resources>/aria2/aria2c.exe (process.resourcesPath).
+# Fetched by scripts/fetch-aria2.mjs (runs in the dist script).
+extraResources:
+  - from: resources/aria2
+    to: aria2
+
+win:
+  icon: resources/icon.ico
+  target:
+    - nsis
+    - portable
+
+nsis:
+  oneClick: false
+  # perMachine installs to C:\Program Files\Nostalgia (default $PROGRAMFILES64\<productName>),
+  # requiring a one-time UAC elevation at install. The app itself runs UNELEVATED; its
+  # mutable data lives in Documents\Nostalgia (see app.setPath('userData', …) in
+  # src/main/index.ts), NOT in Program Files, which non-admin users can't write to.
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico

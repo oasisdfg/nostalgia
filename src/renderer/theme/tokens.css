@@ -1,0 +1,31 @@
+/* Nostalgia design tokens - the single source of truth for color.
+   Colors are "R G B" triplets, consumed via rgb(var(--token) / <alpha>).
+   Radius, shadow, and type scale live in tailwind.config.ts. */
+:root {
+  color-scheme: dark;
+
+  /* Layered near-black surfaces - neutral charcoal (no blue/navy cast) */
+  --n-bg: 13 13 14; /* base background */
+  --n-surface: 23 23 24; /* raised: sidebar, top bar, cards */
+  --n-surface-2: 34 34 36; /* hover / nested raised */
+  --n-overlay: 42 42 44; /* menus, popovers, tooltips */
+
+  /* Borders / hairlines */
+  --n-border: 46 46 49;
+  --n-border-strong: 66 67 70;
+
+  /* Foreground - neutral light grays */
+  --n-fg: 235 235 237; /* primary text */
+  --n-fg-muted: 158 158 162; /* secondary text */
+  --n-fg-faint: 106 106 110; /* tertiary / disabled / placeholder */
+
+  /* Accent - restrained emerald */
+  --n-accent: 45 200 140;
+  --n-accent-hover: 66 214 157;
+  --n-accent-fg: 6 18 13; /* text on accent */
+
+  /* Status */
+  --n-danger: 233 110 110;
+  --n-warning: 226 168 78;
+  --n-positive: 45 200 140;
+}

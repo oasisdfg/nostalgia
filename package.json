@@ -1,0 +1,49 @@
+{
+  "name": "nostalgia",
+  "version": "0.0.0",
+  "description": "Nostalgia",
+  "private": true,
+  "author": "Nostalgia",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "start": "electron-vite preview",
+    "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.json --noEmit",
+    "rebuild": "node scripts/fetch-native.mjs && node scripts/fetch-aria2.mjs",
+    "icons": "node scripts/gen-icons.mjs",
+    "package": "node scripts/fetch-aria2.mjs && electron-vite build && node scripts/package-portable.mjs",
+    "dist": "node scripts/prepare-wincodesign.mjs && node scripts/fetch-aria2.mjs && electron-vite build && electron-builder --win"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "saxes": "^6.0.0",
+    "yauzl": "^2.10.0"
+  },
+  "devDependencies": {
+    "@noriginmedia/norigin-spatial-navigation": "^3.1.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@tanstack/react-query": "^5.62.7",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "electron": "33.4.11",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "lucide-react": "^0.468.0",
+    "png-to-ico": "^2.1.8",
+    "postcss": "^8.4.49",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "simple-icons": "^16.23.0",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11",
+    "zod": "^3.24.1",
+    "zustand": "^5.0.2"
+  }
+}
