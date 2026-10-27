@@ -2,7 +2,7 @@
 
 **This document is the standing reference for ALL renderer UI work.** Every new feature,
 view, or component must follow it. When a PR adds UI that violates a rule here, the PR is
-wrong - not the guide. (Referenced from CLAUDE.md §11.)
+wrong - not the guide.
 
 ## Principles
 

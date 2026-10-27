@@ -36,3 +36,11 @@ dist-packager/
 .next/
 .svelte-kit/
 coverage/
+
+# Local-only Claude Code project docs (kept on disk, not published)
+CLAUDE.md
+BUILD_PLAN.md
+.claude/
+
+# Old run logs
+log/
