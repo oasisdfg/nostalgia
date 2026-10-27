@@ -13,4 +13,7 @@ export const qk = {
   cacheStats: ['cache', 'stats'] as const,
   downloadItems: ['downloads', 'items'] as const,
   updateStatus: ['updates', 'status'] as const,
+  recomps: ['recomps'] as const,
+  recompsForGame: (gameId: number) => ['recomps', 'game', gameId] as const,
+  recompProgress: (id: string) => ['recompProgress', id] as const,
 };

@@ -11,7 +11,7 @@ export interface LaunchPrompt {
 }
 
 export type UiMode = 'desktop' | 'bigscreen';
-export type UiView = 'library' | 'downloads' | 'settings';
+export type UiView = 'library' | 'downloads' | 'settings' | 'ports';
 /** Sidebar console-list filter: 'library' shows only consoles you have games saved for;
  *  'browse' shows every console for catalog browsing. */
 export type SidebarMode = 'library' | 'browse';

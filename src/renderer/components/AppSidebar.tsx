@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { LayoutGrid, Compass, Download, Settings as SettingsIcon, Tv, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { LayoutGrid, Compass, Boxes, Download, Settings as SettingsIcon, Tv, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { FocusSection, Focusable } from './Focusable';
 import { ConsoleLogo } from './SystemIcon';
 import { SidebarUpdatePill } from './UpdatePill';
@@ -90,7 +90,7 @@ export function AppSidebar() {
   );
 
   const libraryActive = view === 'library' && activeSystemId == null && sidebarMode === 'library';
-  const browseActive = sidebarMode === 'browse';
+  const browseActive = sidebarMode === 'browse' && view !== 'ports';
 
   return (
     <FocusSection
@@ -108,6 +108,9 @@ export function AppSidebar() {
           setSidebarMode('browse');
           setView('library');
         })}
+        {row('ports', 'Native Ports', boxed(<Boxes className="h-4 w-4" />, view === 'ports'), view === 'ports', () =>
+          setView('ports'),
+        )}
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-auto p-1.5">
         {visibleSystems.map((s) => {

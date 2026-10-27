@@ -6,6 +6,7 @@ import type { UpdateMode, UpdateStatusDTO } from '@shared/contracts/ipc';
 import { broadcastEvent } from '../ipc/registry';
 import { hasOpenSession } from '../db/repositories/playSessionsRepo';
 import { isBusy } from '../storage/downloadManager';
+import { isInstalling as isPortInstalling } from '../recomps/installer';
 import { shutdownOnce } from '../lifecycle/shutdown';
 
 /**
@@ -195,6 +196,7 @@ export async function checkNow(): Promise<UpdateStatusDTO> {
 export function canInstallNow(): { ok: boolean; reason?: string } {
   if (hasOpenSession(processStartedAt)) return { ok: false, reason: 'A game is running.' };
   if (isBusy()) return { ok: false, reason: 'A download is in progress.' };
+  if (isPortInstalling()) return { ok: false, reason: 'A Native Port is installing.' };
   return { ok: true };
 }
 

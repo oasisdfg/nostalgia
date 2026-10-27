@@ -3,6 +3,7 @@ import { Cpu, SlidersHorizontal, Link2 } from 'lucide-react';
 import { useUiStore } from '@renderer/store/uiStore';
 import { useDownloadEvents } from '@renderer/query/useDownloads';
 import { useUpdateEvents } from '@renderer/query/useUpdates';
+import { useRecompEvents } from '@renderer/query/useRecomps';
 import { useLaunchEvents } from '@renderer/query/useLaunch';
 import { useScrapeEvents } from '@renderer/query/useScrape';
 import { useSavesEvents } from '@renderer/query/useSaves';
@@ -14,6 +15,7 @@ import { getPlatformTheme, consoleAccentVars } from '@renderer/theme/consoleThem
 import { consoleBackdropStyle, gameBackdropStyle } from '@renderer/components/ConsoleBackdrop';
 import { LibraryView } from './LibraryView';
 import { DownloadsView } from '@renderer/components/DownloadsView';
+import { PortsView } from '@renderer/components/PortsView';
 import { SystemsSettings } from './settings/SystemsSettings';
 import { GeneralSettings } from './settings/GeneralSettings';
 import { SourcesSettings } from './settings/SourcesSettings';
@@ -23,6 +25,7 @@ type SettingsTab = 'general' | 'systems' | 'sources';
 export function DesktopShell() {
   useDownloadEvents();
   useUpdateEvents();
+  useRecompEvents();
   useLaunchEvents();
   useScrapeEvents();
   useSavesEvents();
@@ -86,6 +89,8 @@ export function DesktopShell() {
             </div>
           ) : view === 'downloads' ? (
             <DownloadsView />
+          ) : view === 'ports' ? (
+            <PortsView />
           ) : (
             <LibraryView />
           )}

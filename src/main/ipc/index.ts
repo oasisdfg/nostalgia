@@ -18,6 +18,8 @@ import { registerWindowHandlers } from './handlers/window';
 import { registerLaunchboxHandlers } from './handlers/launchbox';
 import { registerSourcesHandlers } from './handlers/sources';
 import { registerUpdatesHandlers } from './handlers/updates';
+import { registerRecompsHandlers } from './handlers/recomps';
+import { recompExternalUrls } from '../recomps/registry';
 
 export interface IpcDeps {
   /** Called when the renderer completes an app:health round-trip. */
@@ -35,7 +37,9 @@ export function registerIpc(deps: IpcDeps = {}): void {
   // hardcoded emulator-download URLs are allowed - the renderer cannot open an
   // arbitrary URL, so this can't be abused to launch attacker-chosen links.
   const openExternalSchema = z.object({ url: z.string().url() });
-  const allowed = new Set<string>(EMULATOR_DOWNLOAD_URLS);
+  // Native Ports' project pages and GitHub repos are vetted constants from the bundled
+  // registry, the same way the emulator download URLs are.
+  const allowed = new Set<string>([...EMULATOR_DOWNLOAD_URLS, ...recompExternalUrls()]);
   // Trailers (LaunchBox VideoURL) are YouTube links - allow the YouTube hosts by exact
   // host match (not an open redirect: only youtube.com/youtu.be, https only).
   const YOUTUBE_HOSTS = new Set(['www.youtube.com', 'youtube.com', 'youtu.be', 'm.youtube.com']);
@@ -68,4 +72,5 @@ export function registerIpc(deps: IpcDeps = {}): void {
   registerLaunchboxHandlers();
   registerSourcesHandlers();
   registerUpdatesHandlers();
+  registerRecompsHandlers();
 }

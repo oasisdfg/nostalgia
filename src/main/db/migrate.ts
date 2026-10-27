@@ -7,6 +7,7 @@ import extract0005 from './migrations/0005_cache_extract_dir.sql?raw';
 import homeFav0006 from './migrations/0006_home_favorites.sql?raw';
 import launchbox0007 from './migrations/0007_launchbox.sql?raw';
 import rpcs3Compat0008 from './migrations/0008_rpcs3_compat.sql?raw';
+import recomps0009 from './migrations/0009_recomps.sql?raw';
 
 interface Migration {
   version: number;
@@ -24,6 +25,7 @@ const MIGRATIONS: Migration[] = [
   { version: 6, name: 'home_favorites', sql: homeFav0006 },
   { version: 7, name: 'launchbox', sql: launchbox0007 },
   { version: 8, name: 'rpcs3_compat', sql: rpcs3Compat0008 },
+  { version: 9, name: 'recomps', sql: recomps0009 },
 ];
 
 /** Applies pending migrations in version order; each runs in its own transaction. */

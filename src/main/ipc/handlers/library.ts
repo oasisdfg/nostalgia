@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { registerInvoke } from '../registry';
+import { autoLink } from '../../recomps/linker';
 import { scanLibrary } from '../../storage/ingest';
 import { scanSystemFolder } from '../../storage/folderScan';
 import { removeGameFromLibrary, uninstallGame } from '../../storage/downloadManager';
@@ -28,11 +29,18 @@ const scanFolderSchema = z.object({ systemId: z.number().int() });
 const removeSchema = z.object({ gameId: z.number().int() });
 
 export function registerLibraryHandlers(): void {
-  registerInvoke('library:scan', (req) => {
+  // A scan can bring in a game a Native Port needs - re-run auto-link afterwards.
+  registerInvoke('library:scan', async (req) => {
     const p = scanSchema.parse(req);
-    return scanLibrary(p.systemId, p.prefix);
+    const result = await scanLibrary(p.systemId, p.prefix);
+    void autoLink().catch(() => undefined);
+    return result;
   });
-  registerInvoke('library:scanFolder', (req) => scanSystemFolder(scanFolderSchema.parse(req).systemId));
+  registerInvoke('library:scanFolder', async (req) => {
+    const result = await scanSystemFolder(scanFolderSchema.parse(req).systemId);
+    void autoLink().catch(() => undefined);
+    return result;
+  });
   registerInvoke('library:remove', async (req) => {
     const p = removeSchema.parse(req);
     await removeGameFromLibrary(p.gameId);

@@ -11,6 +11,7 @@ import type {
   RateLimitState,
 } from './metadata';
 import type { CatalogListResult, CatalogGameDetail, CatalogConnectionResult, CatalogSort } from './catalog';
+import type { RecompDTO, RecompInstallState } from './recomps';
 
 // ---------------------------------------------------------------------------
 // Domain enums (mirror the SQLite CHECK constraints)
@@ -503,6 +504,22 @@ export interface IpcInvokeMap {
   'updates:restart': { request: void; response: { ok: boolean; reason?: string } };
   /** Opens the latest-release page; the URL is built in main from the publish config. */
   'updates:openReleasePage': { request: void; response: { ok: true } };
+
+  // Native Ports (recomps). No channel accepts a path or URL - only a registry id / games.id.
+  'recomps:list': { request: void; response: RecompDTO[] };
+  'recomps:forGame': { request: { gameId: number }; response: RecompDTO[] };
+  'recomps:checkUpdates': { request: { id?: string } | void; response: RecompDTO[] };
+  /** Install, or update to the latest release. Returns at once; progress via recomps:* events. */
+  'recomps:install': { request: { id: string }; response: RecompDTO };
+  'recomps:cancel': { request: { id: string }; response: RecompDTO };
+  'recomps:rollback': { request: { id: string }; response: RecompDTO };
+  'recomps:uninstall': { request: { id: string }; response: RecompDTO };
+  'recomps:link': { request: { id: string; gameId: number }; response: RecompDTO };
+  'recomps:unlink': { request: { id: string }; response: RecompDTO };
+  'recomps:launch': { request: { id: string }; response: { sessionId: number; pid: number } };
+  /** 'in-app' delivery helper: shows the linked game file in Explorer. */
+  'recomps:revealGameFile': { request: { id: string }; response: { ok: true } };
+  'recomps:revealInstall': { request: { id: string }; response: { ok: true } };
 }
 
 // ---------------------------------------------------------------------------
@@ -554,6 +571,8 @@ export interface IpcEventMap {
   };
   'updates:status': UpdateStatusDTO;
   'updates:progress': { fraction: number; bytesPerSecond: number };
+  'recomps:progress': { id: string; fraction: number; bytesReceived: number; bytesTotal: number | null };
+  'recomps:stateChanged': { id: string; state: RecompInstallState; error?: string | null };
 }
 
 // ---------------------------------------------------------------------------
@@ -645,6 +664,18 @@ export const IPC_INVOKE_CHANNELS = [
   'updates:check',
   'updates:restart',
   'updates:openReleasePage',
+  'recomps:list',
+  'recomps:forGame',
+  'recomps:checkUpdates',
+  'recomps:install',
+  'recomps:cancel',
+  'recomps:rollback',
+  'recomps:uninstall',
+  'recomps:link',
+  'recomps:unlink',
+  'recomps:launch',
+  'recomps:revealGameFile',
+  'recomps:revealInstall',
 ] as const;
 
 export const IPC_EVENT_CHANNELS = [
@@ -658,6 +689,8 @@ export const IPC_EVENT_CHANNELS = [
   'launchbox:importProgress',
   'updates:status',
   'updates:progress',
+  'recomps:progress',
+  'recomps:stateChanged',
 ] as const;
 
 // Bidirectional equality check between the runtime arrays and the map keys.

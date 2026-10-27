@@ -4,6 +4,8 @@ export interface TokenContext {
   romPath: string;
   systemSlug: string;
   emulatorDir: string;
+  /** Native Ports only: the port's install folder ({installDir}). */
+  installDir?: string;
 }
 
 /**
@@ -19,6 +21,7 @@ export function resolveArgs(template: string[], ctx: TokenContext): string[] {
     '{systemSlug}': ctx.systemSlug,
     '{emulatorDir}': ctx.emulatorDir,
   };
+  if (ctx.installDir != null) map['{installDir}'] = ctx.installDir;
   return template.map((arg) => {
     let out = arg;
     for (const [token, value] of Object.entries(map)) {

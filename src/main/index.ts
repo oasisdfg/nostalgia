@@ -19,6 +19,10 @@ import { scanSystemFolder } from './storage/folderScan';
 import { listSystems } from './db/repositories/systemsRepo';
 import { shutdownOnce } from './lifecycle/shutdown';
 import { startUpdater } from './updates/updater';
+import { autoLink } from './recomps/linker';
+import { checkPortsAtStartup } from './recomps/github';
+import { reconcileInstalls } from './recomps/installer';
+import { listInstalls } from './db/repositories/recompsRepo';
 
 const smoke = process.env.NOSTALGIA_SMOKE === '1';
 
@@ -201,6 +205,12 @@ app
           }
         }
         await reconcileInterruptedDownloads();
+        // Native Ports: settle installs a previous run left mid-flight, bind ports to the
+        // library's copies of their games (after the folder scans above found them), then
+        // refresh release info (at most every 6 h per port, unless recomps.autoCheck is off).
+        await reconcileInstalls(listInstalls());
+        await autoLink().catch((e) => boot('port auto-link failed', e));
+        await checkPortsAtStartup().catch(() => undefined);
       })();
     }
 
@@ -236,6 +246,8 @@ app
           runPhase1Smoke,
           runTorrentSmoke,
           runFolderScanSmoke,
+          runRecompsSmoke,
+          runRecompsNetSmoke,
         } = await import('./dev/smokeChecks');
         await runStorageSmoke();
         await runCatalogSmoke();
@@ -244,8 +256,10 @@ app
         await runArchiveSmoke();
         await runPhase1Smoke();
         await runFolderScanSmoke();
+        await runRecompsSmoke();
         // Network-dependent BitTorrent check - opt-in so the default smoke stays offline/fast.
         if (process.env.NOSTALGIA_SMOKE_TORRENT === '1') await runTorrentSmoke();
+        if (process.env.NOSTALGIA_SMOKE_RECOMPS_NET === '1') await runRecompsNetSmoke();
       } catch (err) {
         console.error('[smoke] FAIL: subsystem check', err);
         app.exit(1);

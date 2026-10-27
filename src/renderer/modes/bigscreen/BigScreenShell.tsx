@@ -3,6 +3,7 @@ import { useUiStore } from '@renderer/store/uiStore';
 import { useSystems } from '@renderer/query/useSystems';
 import { useDownloadEvents } from '@renderer/query/useDownloads';
 import { useUpdateEvents } from '@renderer/query/useUpdates';
+import { useRecompEvents } from '@renderer/query/useRecomps';
 import { useLaunchEvents } from '@renderer/query/useLaunch';
 import { useScrapeEvents } from '@renderer/query/useScrape';
 import { useSavesEvents } from '@renderer/query/useSaves';
@@ -22,6 +23,7 @@ const focusSoon = (key: string): void => {
 export function BigScreenShell() {
   useDownloadEvents();
   useUpdateEvents();
+  useRecompEvents();
   useLaunchEvents();
   useScrapeEvents();
   useSavesEvents();

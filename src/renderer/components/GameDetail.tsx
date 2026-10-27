@@ -6,11 +6,14 @@ import { IconButton } from './IconButton';
 import { FavoriteToggle } from './FavoriteToggle';
 import { Spinner } from './Spinner';
 import { DownloadProgress } from './DownloadProgress';
+import { PortPlayButton } from './PortPlayButton';
 import { useGameDetail } from '@renderer/query/useGameDetail';
 import { useSetFavorite } from '@renderer/query/useGames';
 import { useEnqueueDownload, useDownloadProgress } from '@renderer/query/useDownloads';
 import { useGuardedLaunch } from '@renderer/query/useLaunch';
 import { useCatalogAcquisition, useCatalogGameDetails } from '@renderer/query/useCatalog';
+import { useRecompsForGame } from '@renderer/query/useRecomps';
+import { useSetting, useSetSetting } from '@renderer/query/useSettings';
 import { useUiStore } from '@renderer/store/uiStore';
 import type { GameFileDTO } from '@shared/contracts/ipc';
 
@@ -53,6 +56,20 @@ export function GameDetail() {
   const heroUrl =
     catalog.data?.artworks?.[0] ?? catalog.data?.screenshots?.[0] ?? catalog.data?.coverUrl ?? game?.coverUrl ?? null;
   const logoUrl = catalog.data?.clearLogoUrl ?? null;
+  // Native Ports linked to this game turn Play into a choice; the last pick is remembered
+  // per game in `recomps.preferred` ({ [gameId]: recompId | 'emulator' }).
+  const ports = useRecompsForGame(game?.id ?? null).data ?? [];
+  const preferredSetting = useSetting('recomps.preferred');
+  const setSetting = useSetSetting();
+  const preferredMap =
+    preferredSetting.data?.value && typeof preferredSetting.data.value === 'object'
+      ? (preferredSetting.data.value as Record<string, string>)
+      : {};
+  const preferred = game ? (preferredMap[String(game.id)] ?? 'emulator') : 'emulator';
+  const remember = (choice: string): void => {
+    if (!game || preferred === choice) return;
+    setSetting.mutate({ key: 'recomps.preferred', value: { ...preferredMap, [String(game.id)]: choice }, encrypted: false });
+  };
 
   if (selectedGameId == null) return null;
   const close = (): void => setSelectedGameId(null);
@@ -60,21 +77,23 @@ export function GameDetail() {
   const fileDownloading =
     !!fileDl && (fileDl.state === 'queued' || fileDl.state === 'downloading' || fileDl.state === 'verifying');
   const onPlay = (): void => {
-    if (game) launch.start({ gameId: game.id, gameFileId: file?.id, systemId: game.systemId });
+    if (!game) return;
+    if (ports.length > 0) remember('emulator');
+    launch.start({ gameId: game.id, gameFileId: file?.id, systemId: game.systemId });
   };
 
   const primaryButton = (g: NonNullable<typeof game>): ReactNode => {
     if (fileCached) {
       return (
         <Button
-          variant="primary"
+          variant={ports.length > 0 && preferred !== 'emulator' ? 'secondary' : 'primary'}
           size="lg"
           fullWidth
           icon={<Play className="h-5 w-5" fill="currentColor" />}
           disabled={launch.isPending}
           onClick={onPlay}
         >
-          {launch.isPending ? 'Launching…' : 'Play'}
+          {launch.isPending ? 'Launching…' : ports.length > 0 ? 'Play (Emulator)' : 'Play'}
         </Button>
       );
     }
@@ -189,6 +208,16 @@ export function GameDetail() {
 
             <div className="flex flex-col gap-3">
               {primaryButton(game)}
+
+              {ports.map((p) => (
+                <PortPlayButton
+                  key={p.manifest.id}
+                  port={p}
+                  primary={preferred === p.manifest.id}
+                  fileName={file?.displayName ?? null}
+                  onPlay={() => remember(p.manifest.id)}
+                />
+              ))}
 
               {launch.isError && (
                 <p className="text-2xs text-danger">

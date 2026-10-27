@@ -693,3 +693,106 @@ export async function runFolderScanSmoke(): Promise<void> {
   await rm(base, { recursive: true, force: true });
   console.log('[smoke] folderScan OK');
 }
+
+/**
+ * Native Ports, offline: the bundled registry parses, migration 0009 applied, the release
+ * asset glob picks the Windows build, unsafe tags/paths are refused, and auto-link hashes
+ * an unhashed N64 file without linking it to a port it doesn't match. No network.
+ */
+export async function runRecompsSmoke(): Promise<void> {
+  const { listManifests, recompExternalUrls } = await import('../recomps/registry');
+  const { pickAsset, isSafeTag } = await import('../recomps/github');
+  const { joinInside } = await import('../recomps/paths');
+  const { autoLink } = await import('../recomps/linker');
+  const { listDtos } = await import('../recomps/service');
+
+  const manifests = listManifests();
+  const ids = new Set(manifests.map((m) => m.id));
+  if (manifests.length === 0 || ids.size !== manifests.length) throw new Error('recomps: registry empty or has duplicate ids');
+  if (!recompExternalUrls().every((u) => u.startsWith('https://'))) throw new Error('recomps: non-https allow-list url');
+
+  const db = getDb();
+  if (!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='recomp_installs'").get()) {
+    throw new Error('recomps: migration 0009 not applied');
+  }
+  const cols = db.prepare('PRAGMA table_info(play_sessions)').all() as { name: string }[];
+  if (!cols.some((c) => c.name === 'recomp_id')) throw new Error('recomps: play_sessions.recomp_id missing');
+
+  const zelda = [
+    'Zelda64Recompiled-v1.2.2-Linux-ARM64.zip',
+    'Zelda64Recompiled-v1.2.2-macOS.zip',
+    'Zelda64Recompiled-v1.2.2-Windows.zip',
+  ];
+  const soh = ['SoH-Dewey-Bravo-Mac.zip', 'SoH-Dewey-Bravo-Win64.zip', 'SoH-Dewey-Bravo.appimage'];
+  if (pickAsset(zelda, '*-Windows.zip') !== 'Zelda64Recompiled-v1.2.2-Windows.zip') throw new Error('recomps: glob (zelda)');
+  if (pickAsset(soh, '*-Win64.zip') !== 'SoH-Dewey-Bravo-Win64.zip') throw new Error('recomps: glob (soh)');
+  if (pickAsset(soh, '*-Windows.zip') !== null) throw new Error('recomps: glob matched nothing-should-match');
+  if (pickAsset(['spaghetti-windows.zip'], 'spaghetti-windows.zip') !== 'spaghetti-windows.zip') {
+    throw new Error('recomps: glob (literal)');
+  }
+  if (!isSafeTag('v1.2.2') || isSafeTag('..') || isSafeTag('a/b')) throw new Error('recomps: tag safety');
+  let escaped = false;
+  try {
+    joinInside(join(app.getPath('userData'), 'x'), '../evil.exe');
+  } catch {
+    escaped = true;
+  }
+  if (!escaped) throw new Error('recomps: joinInside allowed an escaping path');
+
+  // A hashless N64 file adopted from the games folder gets hashed by auto-link (in its
+  // .z64 form too) but - not being an accepted dump - links to nothing.
+  const base = join(app.getPath('userData'), 'smoke-recomps');
+  await rm(base, { recursive: true, force: true });
+  const storageRoot = join(base, 'games');
+  setSetting('storage.root', storageRoot);
+  const n64 = db.prepare("SELECT id FROM systems WHERE slug = 'n64'").get() as { id: number };
+  await mkdir(join(storageRoot, 'n64'), { recursive: true });
+  const rom = Buffer.alloc(4096);
+  rom.writeUInt32BE(0x37804012, 0); // .v64 byte order
+  await writeFile(join(storageRoot, 'n64', 'Not A Real Game.v64'), rom);
+  await scanSystemFolder(n64.id);
+  await autoLink();
+  const row = db.prepare("SELECT sha1 FROM game_files WHERE storage_key = 'Not A Real Game.v64'").get() as
+    | { sha1: string | null }
+    | undefined;
+  if (!row?.sha1) throw new Error('recomps: auto-link did not hash the unhashed N64 file');
+  if (listDtos().some((d) => d.linkedGameId != null)) throw new Error('recomps: linked a port to a non-matching file');
+  await rm(base, { recursive: true, force: true });
+  console.log(`[smoke] recomps: ${manifests.length} ports parsed, migration ok, glob ok, auto-link ok`);
+}
+
+/**
+ * Native Ports over the network (opt-in: NOSTALGIA_SMOKE_RECOMPS_NET=1). Installs Zelda 64:
+ * Recompiled from its real GitHub release into a throwaway recomps.dir, checks it landed at
+ * <recomps.dir>/zelda64recomp/<tag>/ with its exe, then uninstalls it.
+ */
+export async function runRecompsNetSmoke(): Promise<void> {
+  const { startInstall, uninstall } = await import('../recomps/installer');
+  const { getInstall } = await import('../db/repositories/recompsRepo');
+  const dir = join(app.getPath('userData'), 'smoke-recomps-net');
+  await rm(dir, { recursive: true, force: true });
+  setSetting('recomps.dir', dir);
+
+  startInstall('zelda64recomp');
+  const deadline = Date.now() + 180_000;
+  let row = getInstall('zelda64recomp');
+  while (Date.now() < deadline) {
+    row = getInstall('zelda64recomp');
+    if (row?.state === 'installed' || row?.state === 'failed') break;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  if (row?.state !== 'installed') throw new Error(`recomps-net: install ended as ${row?.state}: ${row?.last_error}`);
+  const expectedDir = join(dir, 'zelda64recomp', row.installed_tag!);
+  if (row.install_dir !== expectedDir) throw new Error(`recomps-net: installed to ${row.install_dir}`);
+  await fsStat(row.exe_path!);
+  console.log(`[smoke] recomps-net: installed ${row.installed_tag} -> ${row.exe_path}`);
+
+  await uninstall('zelda64recomp');
+  const gone = await fsStat(expectedDir).then(
+    () => false,
+    () => true,
+  );
+  if (!gone || getInstall('zelda64recomp')?.state !== 'not_installed') throw new Error('recomps-net: uninstall left files');
+  await rm(dir, { recursive: true, force: true });
+  console.log('[smoke] recomps-net: uninstall ok');
+}

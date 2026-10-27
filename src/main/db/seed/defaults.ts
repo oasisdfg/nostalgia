@@ -14,9 +14,11 @@ export function seedDefaultSettings(): void {
   const gamesDir = join(userData, 'games'); // local ROM library (user can repoint in Settings)
   const cacheDir = join(userData, 'cache'); // downloaded/on-demand game bytes
   const emulatorsDir = join(userData, 'emulators'); // app-managed emulator folder
+  const recompsDir = join(userData, 'recomps'); // app-managed Native Ports folder
   mkdirSync(gamesDir, { recursive: true });
   mkdirSync(cacheDir, { recursive: true });
   mkdirSync(emulatorsDir, { recursive: true });
+  mkdirSync(recompsDir, { recursive: true });
 
   const ensure = (key: string, value: unknown): void => {
     if (!getSetting(key)) setSetting(key, value, false);
@@ -26,4 +28,6 @@ export function seedDefaultSettings(): void {
   ensure('cache.sizeLimitBytes', 25 * 1024 ** 3); // 25 GB LRU cache by default
   ensure('emulators.dir', emulatorsDir);
   ensure('ui.defaultMode', 'desktop');
+  ensure('recomps.dir', recompsDir);
+  ensure('recomps.autoCheck', true);
 }
