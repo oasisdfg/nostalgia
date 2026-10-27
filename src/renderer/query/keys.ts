@@ -12,4 +12,5 @@ export const qk = {
   settingsMany: (keys: string[]) => ['settings', 'many', ...keys] as const,
   cacheStats: ['cache', 'stats'] as const,
   downloadItems: ['downloads', 'items'] as const,
+  updateStatus: ['updates', 'status'] as const,
 };

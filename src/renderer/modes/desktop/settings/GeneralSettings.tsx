@@ -1,9 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Scissors, Database, Download } from 'lucide-react';
+import { Trash2, Scissors, Database, Download, RefreshCw, Info, ExternalLink } from 'lucide-react';
 import { useSetting, useSetSetting } from '@renderer/query/useSettings';
 import { useCacheStats } from '@renderer/query/useCacheStats';
 import { useEvictCache, useClearCache } from '@renderer/query/useCache';
 import { useLaunchboxStatus, useLaunchboxImport, useLaunchboxProgress } from '@renderer/query/useLaunchbox';
+import {
+  useUpdateStatus,
+  useCheckForUpdates,
+  useRestartToUpdate,
+  useOpenReleasePage,
+} from '@renderer/query/useUpdates';
+import { useToasts } from '@renderer/components/Toast';
 import { Card } from '@renderer/components/Card';
 import { FormField } from '@renderer/components/FormField';
 import { Input } from '@renderer/components/Input';
@@ -129,6 +136,8 @@ export function GeneralSettings() {
       </Card>
 
       <LaunchboxCard />
+
+      <AboutCard />
     </div>
   );
 }
@@ -178,6 +187,113 @@ function LaunchboxCard() {
             {doImport.error instanceof Error ? doImport.error.message : 'Import failed.'}
           </p>
         )}
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Version + self-update. Updates are mandatory (no on/off switch); this card only lets
+ * the user check early and restart into a downloaded update.
+ */
+function AboutCard() {
+  const { data: status } = useUpdateStatus();
+  const check = useCheckForUpdates();
+  const restart = useRestartToUpdate();
+  const openPage = useOpenReleasePage();
+  const push = useToasts((s) => s.push);
+
+  const busy = check.isPending || status?.state === 'checking';
+  const pending = status?.state === 'available' || status?.state === 'downloading' || status?.state === 'downloaded';
+
+  const statusText = (): string => {
+    if (!status) return '';
+    if (status.mode === 'disabled') return 'Updates are off in this build.';
+    switch (status.state) {
+      case 'checking':
+        return 'Checking for updates…';
+      case 'downloading':
+        return `Downloading version ${status.version ?? ''}… ${Math.round((status.fraction ?? 0) * 100)}%`;
+      case 'downloaded':
+        return `Version ${status.version ?? ''} is ready to install.`;
+      case 'available':
+        return status.mode === 'notify'
+          ? `Version ${status.version ?? ''} is available. This copy can't update itself - download the new version from the release page.`
+          : `Version ${status.version ?? ''} is available.`;
+      case 'not-available':
+        return "You're on the latest version.";
+      case 'error':
+        return status.error ?? 'Update check failed.';
+      default:
+        return '';
+    }
+  };
+
+  return (
+    <Card
+      title={
+        <span className="flex items-center gap-2">
+          <Info className="h-4 w-4 text-accent" />
+          About
+        </span>
+      }
+      description="Nostalgia keeps itself up to date. Updates download in the background and install when you close the app."
+    >
+      <div className="space-y-3">
+        <div className="space-y-1 text-2xs text-fg-muted">
+          <p>
+            Version <span className="font-medium text-fg">{status?.currentVersion ?? ''}</span>
+            {status?.checkedAt ? ` · last checked ${new Date(status.checkedAt).toLocaleString()}` : ''}
+          </p>
+          {statusText() && <p className={status?.state === 'error' ? 'text-danger' : ''}>{statusText()}</p>}
+        </div>
+        {status?.state === 'downloading' && (
+          <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div
+              className="h-full rounded-full bg-accent transition-all"
+              style={{ width: `${Math.round((status.fraction ?? 0) * 100)}%` }}
+            />
+          </div>
+        )}
+        {pending && status?.releaseNotes && (
+          <div className="max-h-40 overflow-auto whitespace-pre-line rounded-md bg-bg/60 px-3 py-2 text-2xs text-fg-muted shadow-inset-1">
+            {status.releaseNotes}
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          {status?.mode !== 'disabled' && (
+            <Button
+              variant="secondary"
+              icon={<RefreshCw className="h-4 w-4" />}
+              disabled={busy || status?.state === 'downloading' || status?.state === 'downloaded'}
+              onClick={() => check.mutate()}
+            >
+              {busy ? 'Checking…' : 'Check for updates'}
+            </Button>
+          )}
+          {status?.mode === 'auto' && status.state === 'downloaded' && (
+            <Button
+              variant="primary"
+              icon={<RefreshCw className="h-4 w-4" />}
+              disabled={restart.isPending}
+              onClick={() =>
+                restart.mutate(undefined, {
+                  onSuccess: (r) => {
+                    if (!r.ok)
+                      push(`${r.reason ?? "Can't restart right now."} It'll install when you close Nostalgia.`, 'info');
+                  },
+                })
+              }
+            >
+              Restart now
+            </Button>
+          )}
+          {status?.mode === 'notify' && status.state === 'available' && (
+            <Button variant="primary" icon={<ExternalLink className="h-4 w-4" />} onClick={() => openPage.mutate()}>
+              Open download page
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );

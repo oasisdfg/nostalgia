@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { LayoutGrid, Compass, Download, Settings as SettingsIcon, Tv, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { FocusSection, Focusable } from './Focusable';
 import { ConsoleLogo } from './SystemIcon';
+import { SidebarUpdatePill } from './UpdatePill';
 import { useSystems } from '@renderer/query/useSystems';
 import { useGames } from '@renderer/query/useGames';
 import { useDownloadItems } from '@renderer/query/useDownloads';
@@ -124,6 +125,7 @@ export function AppSidebar() {
         })}
       </div>
       <div className="shrink-0 p-1.5">
+        <SidebarUpdatePill collapsed={collapsed} />
         {row(
           'downloads',
           'Downloads',

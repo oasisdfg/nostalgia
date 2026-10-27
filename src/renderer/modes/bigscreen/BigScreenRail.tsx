@@ -1,5 +1,6 @@
 import { FocusSection, Focusable } from '@renderer/components/Focusable';
 import { ConsoleLogo } from '@renderer/components/SystemIcon';
+import { RailUpdatePill } from '@renderer/components/UpdatePill';
 import type { SystemDTO } from '@shared/contracts/ipc';
 
 /**
@@ -55,6 +56,8 @@ export function BigScreenRail({
           )}
         </Focusable>
       ))}
+      {/* App self-update - only present when there's something to act on. */}
+      <RailUpdatePill />
     </FocusSection>
   );
 }

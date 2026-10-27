@@ -17,6 +17,7 @@ import { registerSavesHandlers } from './handlers/saves';
 import { registerWindowHandlers } from './handlers/window';
 import { registerLaunchboxHandlers } from './handlers/launchbox';
 import { registerSourcesHandlers } from './handlers/sources';
+import { registerUpdatesHandlers } from './handlers/updates';
 
 export interface IpcDeps {
   /** Called when the renderer completes an app:health round-trip. */
@@ -66,4 +67,5 @@ export function registerIpc(deps: IpcDeps = {}): void {
   registerWindowHandlers();
   registerLaunchboxHandlers();
   registerSourcesHandlers();
+  registerUpdatesHandlers();
 }

@@ -1,6 +1,6 @@
 {
   "name": "nostalgia",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Nostalgia",
   "private": true,
   "author": "Nostalgia",
@@ -14,10 +14,12 @@
     "rebuild": "node scripts/fetch-native.mjs && node scripts/fetch-aria2.mjs",
     "icons": "node scripts/gen-icons.mjs",
     "package": "node scripts/fetch-aria2.mjs && electron-vite build && node scripts/package-portable.mjs",
-    "dist": "node scripts/prepare-wincodesign.mjs && node scripts/fetch-aria2.mjs && electron-vite build && electron-builder --win"
+    "dist": "node scripts/prepare-wincodesign.mjs && node scripts/fetch-aria2.mjs && electron-vite build && electron-builder --win",
+    "release": "npm version patch && git push --follow-tags"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",
+    "electron-updater": "^6.8.11",
     "saxes": "^6.0.0",
     "yauzl": "^2.10.0"
   },

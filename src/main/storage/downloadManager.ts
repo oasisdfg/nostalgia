@@ -46,6 +46,11 @@ const RETRY_BASE_DELAY_MS = 3000;
 const retryCounts = new Map<number, number>();
 const waiters = new Map<number, { resolve: () => void; reject: (e: Error) => void }[]>();
 
+/** True while a download job is transferring or verifying (the self-update install gate). */
+export function isBusy(): boolean {
+  return active.size > 0;
+}
+
 function activeFileIds(): Set<number> {
   return new Set(Array.from(active.values()).map((j) => j.gameFileId));
 }

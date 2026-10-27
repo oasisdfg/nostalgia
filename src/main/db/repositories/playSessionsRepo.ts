@@ -11,6 +11,18 @@ export function close(id: number, exitCode: number | null): void {
   getDb().prepare('UPDATE play_sessions SET ended_at = ?, exit_code = ? WHERE id = ?').run(Date.now(), exitCode, id);
 }
 
+/**
+ * True when a session started at/after `sinceMs` has not ended - i.e. a game this run
+ * launched is still running. Scoped to this process's start so a row left open by a
+ * crash (its exit was never observed) can't block updates forever.
+ */
+export function hasOpenSession(sinceMs: number): boolean {
+  return (
+    getDb().prepare('SELECT 1 FROM play_sessions WHERE ended_at IS NULL AND started_at >= ? LIMIT 1').get(sinceMs) !==
+    undefined
+  );
+}
+
 /** Updates the denormalized per-game play stats. Call once per session close. */
 export function rollupPlay(gameId: number): void {
   getDb()

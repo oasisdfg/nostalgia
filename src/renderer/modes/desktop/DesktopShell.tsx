@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Cpu, SlidersHorizontal, Link2 } from 'lucide-react';
 import { useUiStore } from '@renderer/store/uiStore';
 import { useDownloadEvents } from '@renderer/query/useDownloads';
+import { useUpdateEvents } from '@renderer/query/useUpdates';
 import { useLaunchEvents } from '@renderer/query/useLaunch';
 import { useScrapeEvents } from '@renderer/query/useScrape';
 import { useSavesEvents } from '@renderer/query/useSaves';
@@ -21,6 +22,7 @@ type SettingsTab = 'general' | 'systems' | 'sources';
 
 export function DesktopShell() {
   useDownloadEvents();
+  useUpdateEvents();
   useLaunchEvents();
   useScrapeEvents();
   useSavesEvents();

@@ -1,0 +1,50 @@
+# Cut a release with `npm run release` (bumps the patch version, tags vX.Y.Z, pushes).
+# This builds the NSIS installer + portable exe and publishes them to GitHub Releases,
+# where installed copies of Nostalgia pick up latest.yml and update themselves.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write # create the release + upload assets
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Optional: bake the IGDB credentials into the main bundle (electron.vite.config.ts
+      # reads a repo-root .env at build time). Skipped when the secrets aren't set - the
+      # build then falls back to Settings → IGDB, same as a local build without .env.
+      - name: Write build .env
+        shell: bash
+        env:
+          IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
+          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
+        run: |
+          if [ -n "$IGDB_CLIENT_ID" ]; then
+            printf 'IGDB_CLIENT_ID=%s\nIGDB_CLIENT_SECRET=%s\n' "$IGDB_CLIENT_ID" "$IGDB_CLIENT_SECRET" > .env
+          fi
+
+      # No prepare-wincodesign.mjs here: GitHub's Windows runners already hold the
+      # symlink privilege it works around. Keep it for local `npm run dist`.
+      # Uploads the NSIS installer, latest.yml, the .blockmap, and the portable exe
+      # (the portable exe is for manual download only - it can't self-update).
+      - name: Build and publish
+        env:
+          # Publishing to this same repo. If `publish` in electron-builder.yml moves to a
+          # separate public repo (oasisdfg/nostalgia-releases), swap this for a
+          # fine-grained PAT with contents:write on that repo only: secrets.RELEASES_TOKEN.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/fetch-native.mjs && node scripts/fetch-aria2.mjs && npx electron-vite build && npx electron-builder --win --publish always

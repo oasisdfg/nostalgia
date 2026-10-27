@@ -45,10 +45,39 @@ function bakedEnv(): Record<string, string> {
   };
 }
 
+/**
+ * The auto-update publish target, read from electron-builder.yml's `publish:` block so
+ * owner/repo live in exactly one place. Baked into main so it can build the release-page
+ * URL and point the notify-only (hand-assembled portable) build at the feed, which has no
+ * app-update.yml of its own.
+ */
+function publishTarget(): Record<string, string> {
+  const yml = readFileSync(resolve('electron-builder.yml'), 'utf8');
+  // The indented lines directly under the top-level `publish:` key.
+  const lines = yml.split(/\r?\n/);
+  const start = lines.findIndex((l) => /^publish:\s*$/.test(l));
+  const block: string[] = [];
+  for (let i = start + 1; start >= 0 && i < lines.length && /^\s+\S/.test(lines[i]); i++) block.push(lines[i]);
+  const field = (k: string): string => {
+    for (const l of block) {
+      const m = /^\s+([A-Za-z]+):\s*([^\s#]+)/.exec(l);
+      if (m && m[1] === k) return m[2];
+    }
+    return '';
+  };
+  return {
+    __UPDATE_OWNER__: JSON.stringify(field('owner')),
+    __UPDATE_REPO__: JSON.stringify(field('repo')),
+  };
+}
+
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
-    define: bakedEnv(),
+    // electron-updater is BUNDLED into out/main rather than left external, so the
+    // hand-assembled `npm run package` build (which copies only better-sqlite3 into
+    // node_modules) can still load it for its notify-only update check.
+    plugins: [externalizeDepsPlugin({ exclude: ['electron-updater'] })],
+    define: { ...bakedEnv(), ...publishTarget() },
     resolve: {
       alias: {
         '@shared': resolve('src/shared'),

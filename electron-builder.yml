@@ -29,8 +29,24 @@ extraResources:
   - from: resources/aria2
     to: aria2
 
+# Auto-update feed (electron-updater reads latest.yml from the latest GitHub Release).
+# The repo must be PUBLIC: the app reads releases anonymously and never embeds a token.
+# If the source repo goes private, publish to a separate public repo (e.g.
+# oasisdfg/nostalgia-releases) - owner and repo are the only two values to change here.
+publish:
+  provider: github
+  owner: oasisdfg
+  repo: nostalgia
+  releaseType: release
+
 win:
   icon: resources/icon.ico
+  # Unsigned build: no publisherName / verifyUpdateCodeSignature. Once a code-signing
+  # certificate exists, add `publisherName: <cert subject CN>` here so electron-updater
+  # verifies the downloaded installer's signature before running it.
+  # NSIS is the self-updating install (emits latest.yml + .blockmap for differential
+  # downloads). The portable exe can't replace itself; it only gets an "update available"
+  # notice and a link to the release page.
   target:
     - nsis
     - portable

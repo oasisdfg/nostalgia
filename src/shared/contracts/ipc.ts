@@ -495,6 +495,36 @@ export interface IpcInvokeMap {
     request: void;
     response: { importedAt: number | null; gameCount: number; importing: boolean };
   };
+
+  'updates:status': { request: void; response: UpdateStatusDTO };
+  /** Manual check (Settings → About). */
+  'updates:check': { request: void; response: UpdateStatusDTO };
+  /** Quit and install a downloaded update - refused while a game or download is running. */
+  'updates:restart': { request: void; response: { ok: boolean; reason?: string } };
+  /** Opens the latest-release page; the URL is built in main from the publish config. */
+  'updates:openReleasePage': { request: void; response: { ok: true } };
+}
+
+// ---------------------------------------------------------------------------
+// App self-update (electron-updater). Covers Nostalgia itself only.
+// ---------------------------------------------------------------------------
+
+export type UpdateState = 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'not-available' | 'error';
+/** auto = NSIS install updates itself; notify = portable build, check only; disabled = dev/smoke. */
+export type UpdateMode = 'auto' | 'notify' | 'disabled';
+export interface UpdateStatusDTO {
+  state: UpdateState;
+  mode: UpdateMode;
+  /** app.getVersion() */
+  currentVersion: string;
+  /** The available/downloaded version. */
+  version: string | null;
+  /** Plain text (HTML stripped in main). */
+  releaseNotes: string | null;
+  fraction: number | null;
+  checkedAt: number | null;
+  /** Short human message - never a stack trace or URL. */
+  error: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -522,6 +552,8 @@ export interface IpcEventMap {
     fraction: number | null;
     games: number | null;
   };
+  'updates:status': UpdateStatusDTO;
+  'updates:progress': { fraction: number; bytesPerSecond: number };
 }
 
 // ---------------------------------------------------------------------------
@@ -609,6 +641,10 @@ export const IPC_INVOKE_CHANNELS = [
   'app:openExternal',
   'launchbox:import',
   'launchbox:status',
+  'updates:status',
+  'updates:check',
+  'updates:restart',
+  'updates:openReleasePage',
 ] as const;
 
 export const IPC_EVENT_CHANNELS = [
@@ -620,6 +656,8 @@ export const IPC_EVENT_CHANNELS = [
   'saves:syncProgress',
   'saves:syncStateChanged',
   'launchbox:importProgress',
+  'updates:status',
+  'updates:progress',
 ] as const;
 
 // Bidirectional equality check between the runtime arrays and the map keys.

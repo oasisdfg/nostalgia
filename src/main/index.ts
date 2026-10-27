@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { mkdirSync, existsSync, readdirSync, renameSync, cpSync, rmSync } from 'node:fs';
 import { getSetting, setSetting } from './db/repositories/settingsRepo';
 import { loadDotEnv } from './env';
-import { getDb, closeDb } from './db/connection';
+import { getDb } from './db/connection';
 import { migrate, currentSchemaVersion } from './db/migrate';
 import { seedBuiltinSystems } from './db/seed/builtinSystems';
 import { seedDefaultSettings } from './db/seed/defaults';
@@ -17,7 +17,8 @@ import { upgradeKnownEmulatorArgs, autoBindEmulators } from './emulators/detect'
 import { healEmulatorPaths } from './emulators/healPaths';
 import { scanSystemFolder } from './storage/folderScan';
 import { listSystems } from './db/repositories/systemsRepo';
-import { shutdownAria2 } from './storage/aria2/daemon';
+import { shutdownOnce } from './lifecycle/shutdown';
+import { startUpdater } from './updates/updater';
 
 const smoke = process.env.NOSTALGIA_SMOKE === '1';
 
@@ -128,8 +129,7 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 app.on('before-quit', () => {
-  shutdownAria2();
-  closeDb();
+  shutdownOnce();
 });
 
 app
@@ -254,6 +254,9 @@ app
     }
 
     const win = createWindow();
+    // Self-update: first check ~10 s after startup, then every 4 h. Disabled in dev and
+    // under smoke (no network); check-only for portable builds.
+    startUpdater();
     win.webContents.on('did-finish-load', () => boot('renderer loaded'));
     win.webContents.on('render-process-gone', (_event, details) => {
       console.error('[boot] renderer process gone', details);
