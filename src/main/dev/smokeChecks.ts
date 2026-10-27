@@ -758,7 +758,52 @@ export async function runRecompsSmoke(): Promise<void> {
   if (!row?.sha1) throw new Error('recomps: auto-link did not hash the unhashed N64 file');
   if (listDtos().some((d) => d.linkedGameId != null)) throw new Error('recomps: linked a port to a non-matching file');
   await rm(base, { recursive: true, force: true });
-  console.log(`[smoke] recomps: ${manifests.length} ports parsed, migration ok, glob ok, auto-link ok`);
+
+  // R2 - unified settings resolve to each port's own keys, and the JSON patch is nested +
+  // idempotent.
+  const { resolveWrites, applyJsonWrites } = await import('../recomps/config');
+  if (!manifests.every((m) => m.config)) throw new Error('recomps: a port is missing its config map');
+  const zeldaM = manifests.find((m) => m.id === 'zelda64recomp')!;
+  const w = resolveWrites(zeldaM, { frameCap: '60', fullscreen: 'on', resolution: 'bogus' });
+  if (w.rr_option !== 'Manual' || w.rr_manual_value !== 60 || w.wm_option !== 'Fullscreen' || 'res_option' in w) {
+    throw new Error(`recomps: resolveWrites wrong: ${JSON.stringify(w)}`);
+  }
+  const before = JSON.stringify({ Window: { Fullscreen: { Enabled: false } }, Other: 1 }, null, 4);
+  const after = applyJsonWrites(before, { 'Window.Fullscreen.Enabled': true, 'CVars.gSettings.InterpolationFPS': 60 });
+  const parsed = JSON.parse(after) as { Window: { Fullscreen: { Enabled: boolean } }; CVars: { gSettings: { InterpolationFPS: number } }; Other: number };
+  if (!parsed.Window.Fullscreen.Enabled || parsed.CVars.gSettings.InterpolationFPS !== 60 || parsed.Other !== 1) {
+    throw new Error('recomps: applyJsonWrites did not nest/keep keys');
+  }
+  if (applyJsonWrites(after, { 'Window.Fullscreen.Enabled': true }) !== after) throw new Error('recomps: json patch not idempotent');
+
+  // R2 - rollback swaps the current and previous versions (fake installs, no network).
+  const { rollback, uninstall } = await import('../recomps/installer');
+  const { upsertInstall, getInstall } = await import('../db/repositories/recompsRepo');
+  const rdir = join(base, 'recomps');
+  setSetting('recomps.dir', rdir);
+  const v1 = join(rdir, 'zelda64recomp', 'v1.0.0');
+  const v2 = join(rdir, 'zelda64recomp', 'v2.0.0');
+  for (const d of [v1, v2]) {
+    await mkdir(d, { recursive: true });
+    await writeFile(join(d, 'Zelda64Recompiled.exe'), 'x');
+  }
+  upsertInstall('zelda64recomp', {
+    state: 'installed',
+    installed_tag: 'v2.0.0',
+    install_dir: v2,
+    exe_path: join(v2, 'Zelda64Recompiled.exe'),
+    previous_tag: 'v1.0.0',
+    previous_dir: v1,
+  });
+  await rollback('zelda64recomp');
+  const rolled = getInstall('zelda64recomp');
+  if (rolled?.installed_tag !== 'v1.0.0' || rolled.previous_tag !== 'v2.0.0' || rolled.install_dir !== v1) {
+    throw new Error(`recomps: rollback did not swap versions (${rolled?.installed_tag}/${rolled?.previous_tag})`);
+  }
+  await uninstall('zelda64recomp');
+  if (getInstall('zelda64recomp')?.state !== 'not_installed') throw new Error('recomps: uninstall after rollback');
+  await rm(base, { recursive: true, force: true });
+  console.log(`[smoke] recomps: ${manifests.length} ports parsed, migration ok, glob ok, auto-link ok, config ok, rollback ok`);
 }
 
 /**

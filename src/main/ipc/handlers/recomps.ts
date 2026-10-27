@@ -9,6 +9,8 @@ import { autoLink, linkManually, unlink, fileForPort } from '../../recomps/linke
 import { launchRecomp } from '../../recomps/launch';
 import { ensureCached } from '../../launch/launcher';
 import { getInstall } from '../../db/repositories/recompsRepo';
+import { recompsDir } from '../../recomps/paths';
+import { mkdir } from 'node:fs/promises';
 
 // Every request names a port by its registry id (checked against the bundled registry)
 // or a game by games.id. No channel accepts a path or URL from the renderer.
@@ -81,6 +83,12 @@ export function registerRecompsHandlers(): void {
     const { id } = idSchema.parse(req);
     const dir = getInstall(id)?.install_dir;
     if (!dir) throw new Error("This port isn't installed.");
+    await shell.openPath(dir);
+    return { ok: true as const };
+  });
+  registerInvoke('recomps:revealDir', async () => {
+    const dir = recompsDir();
+    await mkdir(dir, { recursive: true });
     await shell.openPath(dir);
     return { ok: true as const };
   });

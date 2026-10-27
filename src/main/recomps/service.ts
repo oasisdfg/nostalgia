@@ -11,6 +11,7 @@ export function toDto(manifest: RecompManifest, row: RecompInstallRow | undefine
     manifest,
     state: row?.state ?? 'not_installed',
     installedTag: installed,
+    previousTag: row?.previous_tag ?? null,
     latestTag: latest,
     updateAvailable: row?.state === 'installed' && installed != null && latest != null && latest !== installed,
     linkedGameId: row?.linked_game_id ?? null,

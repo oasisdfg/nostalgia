@@ -11,19 +11,21 @@ export function BigScreenBrowse({
   onPreview,
   onEnterGrid,
   onOpen,
+  onOpenPorts,
 }: {
   systems: SystemDTO[];
   activeSystemId: number | null;
   onPreview: (id: number) => void;
   onEnterGrid: () => void;
   onOpen: (igdbId: number) => void;
+  onOpenPorts: () => void;
 }) {
   const activeSlug = systems.find((s) => s.id === activeSystemId)?.slug;
   const accentVars = consoleAccentVars(getPlatformTheme(activeSlug));
 
   return (
     <div className="flex h-full min-h-0" style={accentVars}>
-      <BigScreenRail systems={systems} activeSystemId={activeSystemId} onPreview={onPreview} onEnter={onEnterGrid} />
+      <BigScreenRail systems={systems} activeSystemId={activeSystemId} onPreview={onPreview} onEnter={onEnterGrid} onOpenPorts={onOpenPorts} />
       {/* scroll-py: spatial-nav focus uses scrollIntoView(nearest), which otherwise
           parks the focused card's lifted/scaled edge flush against the clip edge -
           the padding keeps a margin so the top row is never clipped. */}

@@ -14,6 +14,7 @@ import { ButtonHints, type ButtonHint } from '@renderer/components/ButtonHints';
 import { BigScreenBrowse } from './BigScreenBrowse';
 import { BigScreenDetail } from './BigScreenDetail';
 import { BigScreenMenu } from './BigScreenMenu';
+import { BigScreenPorts } from './BigScreenPorts';
 
 /** Move spatial focus on the next frame, after the target has mounted/registered. */
 const focusSoon = (key: string): void => {
@@ -33,7 +34,7 @@ export function BigScreenShell() {
   const setActiveSystemId = useUiStore((s) => s.setActiveSystemId);
   const { data: systems = [] } = useSystems(true);
 
-  const [view, setView] = useState<'browse' | 'detail'>('browse');
+  const [view, setView] = useState<'browse' | 'detail' | 'ports'>('browse');
   const [selectedIgdbId, setSelectedIgdbId] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -78,7 +79,7 @@ export function BigScreenShell() {
         // Restore focus to what's actually mounted under the menu - the rail only
         // exists in browse; focusing it from detail left spatial focus on the
         // unmounted menu button and the d-pad went dead.
-        focusSoon(st.view === 'detail' ? 'bs-detail-action' : 'bs-rail');
+        focusSoon(st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? 'bs-ports' : 'bs-rail');
       } else {
         setMenuOpen(true);
       }
@@ -106,7 +107,7 @@ export function BigScreenShell() {
       const current = getCurrentFocusKey();
       if (current && doesFocusableExist(current)) return;
       const st = stateRef.current;
-      setFocus(st.menuOpen ? 'bs-menu' : st.view === 'detail' ? 'bs-detail-action' : 'bs-grid');
+      setFocus(st.menuOpen ? 'bs-menu' : st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? 'bs-ports' : 'bs-grid');
     };
     window.addEventListener('keydown', recover, true);
     return () => window.removeEventListener('keydown', recover, true);
@@ -119,11 +120,14 @@ export function BigScreenShell() {
       const st = stateRef.current;
       if (st.menuOpen) {
         setMenuOpen(false);
-        focusSoon(st.view === 'detail' ? 'bs-detail-action' : 'bs-rail');
+        focusSoon(st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? 'bs-ports' : 'bs-rail');
       } else if (st.view === 'detail') {
         setView('browse');
         setSelectedIgdbId(null);
         focusSoon('bs-grid');
+      } else if (st.view === 'ports') {
+        setView('browse');
+        focusSoon('bs-rail-ports');
       }
     };
     window.addEventListener('keydown', onKey);
@@ -135,6 +139,7 @@ export function BigScreenShell() {
     setView('detail');
   }, []);
   const enterGrid = useCallback(() => focusSoon('bs-grid'), []);
+  const openPorts = useCallback(() => setView('ports'), []);
   const exit = useCallback(() => setMode('desktop'), [setMode]);
 
   // The header is gone (10-foot canvas is all content), so the ☰ hint doubles as the
@@ -145,7 +150,7 @@ export function BigScreenShell() {
         { glyph: 'A', label: 'Select', tone: 'bg-positive/20 text-positive' },
         { glyph: 'B', label: 'Close', tone: 'bg-danger/20 text-danger' },
       ]
-    : view === 'detail'
+    : view === 'detail' || view === 'ports'
       ? [
           { glyph: '✛', label: 'Move' },
           { glyph: 'A', label: 'Select', tone: 'bg-positive/20 text-positive' },
@@ -164,7 +169,9 @@ export function BigScreenShell() {
     <FocusProvider>
       <div className="relative flex h-screen flex-col bg-bg text-fg">
         <div className="min-h-0 flex-1">
-          {view === 'detail' && selectedIgdbId != null && activeSystemId != null ? (
+          {view === 'ports' ? (
+            <BigScreenPorts />
+          ) : view === 'detail' && selectedIgdbId != null && activeSystemId != null ? (
             <BigScreenDetail igdbId={selectedIgdbId} systemId={activeSystemId} />
           ) : (
             <BigScreenBrowse
@@ -173,6 +180,7 @@ export function BigScreenShell() {
               onPreview={setActiveSystemId}
               onEnterGrid={enterGrid}
               onOpen={openDetail}
+              onOpenPorts={openPorts}
             />
           )}
         </div>

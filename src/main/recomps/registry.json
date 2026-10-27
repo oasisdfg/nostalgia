@@ -23,7 +23,48 @@
     },
     "saveDirs": [
       "{localAppData}/Zelda64Recompiled/saves"
-    ]
+    ],
+    "config": {
+      "file": "{localAppData}/Zelda64Recompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          },
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          }
+        }
+      }
+    }
   },
   {
     "id": "2ship2harkinian",
@@ -51,7 +92,40 @@
       ],
       "delivery": "in-app"
     },
-    "saveDirs": []
+    "saveDirs": [],
+    "config": {
+      "file": "{installDir}/2ship2harkinian.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "Window.Fullscreen.Enabled": true
+          },
+          "off": {
+            "Window.Fullscreen.Enabled": false
+          }
+        },
+        "resolution": {
+          "window": {
+            "CVars.gInternalResolution": 1
+          },
+          "window2x": {
+            "CVars.gInternalResolution": 2
+          }
+        },
+        "frameCap": {
+          "30": {
+            "CVars.gInterpolationFPS": 30
+          },
+          "60": {
+            "CVars.gInterpolationFPS": 60
+          },
+          "120": {
+            "CVars.gInterpolationFPS": 120
+          }
+        }
+      }
+    }
   },
   {
     "id": "shipwright",
@@ -149,7 +223,40 @@
     },
     "saveDirs": [
       "{installDir}/Save"
-    ]
+    ],
+    "config": {
+      "file": "{installDir}/shipofharkinian.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "Window.Fullscreen.Enabled": true
+          },
+          "off": {
+            "Window.Fullscreen.Enabled": false
+          }
+        },
+        "resolution": {
+          "window": {
+            "CVars.gInternalResolution": 1
+          },
+          "window2x": {
+            "CVars.gInternalResolution": 2
+          }
+        },
+        "frameCap": {
+          "30": {
+            "CVars.gSettings.InterpolationFPS": 30
+          },
+          "60": {
+            "CVars.gSettings.InterpolationFPS": 60
+          },
+          "120": {
+            "CVars.gSettings.InterpolationFPS": 120
+          }
+        }
+      }
+    }
   },
   {
     "id": "ghostship",
@@ -177,7 +284,40 @@
       ],
       "delivery": "in-app"
     },
-    "saveDirs": []
+    "saveDirs": [],
+    "config": {
+      "file": "{installDir}/ghostship.cfg.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "Window.Fullscreen.Enabled": true
+          },
+          "off": {
+            "Window.Fullscreen.Enabled": false
+          }
+        },
+        "resolution": {
+          "window": {
+            "CVars.gInternalResolution": 1
+          },
+          "window2x": {
+            "CVars.gInternalResolution": 2
+          }
+        },
+        "frameCap": {
+          "30": {
+            "CVars.gSettings.InterpolationFPS": 30
+          },
+          "60": {
+            "CVars.gSettings.InterpolationFPS": 60
+          },
+          "120": {
+            "CVars.gSettings.InterpolationFPS": 120
+          }
+        }
+      }
+    }
   },
   {
     "id": "starship",
@@ -205,7 +345,40 @@
       ],
       "delivery": "in-app"
     },
-    "saveDirs": []
+    "saveDirs": [],
+    "config": {
+      "file": "{installDir}/starship.cfg.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "Window.Fullscreen.Enabled": true
+          },
+          "off": {
+            "Window.Fullscreen.Enabled": false
+          }
+        },
+        "resolution": {
+          "window": {
+            "CVars.gInternalResolution": 1
+          },
+          "window2x": {
+            "CVars.gInternalResolution": 2
+          }
+        },
+        "frameCap": {
+          "30": {
+            "CVars.gInterpolationFPS": 30
+          },
+          "60": {
+            "CVars.gInterpolationFPS": 60
+          },
+          "120": {
+            "CVars.gInterpolationFPS": 120
+          }
+        }
+      }
+    }
   },
   {
     "id": "spaghettikart",
@@ -229,7 +402,40 @@
       ],
       "delivery": "in-app"
     },
-    "saveDirs": []
+    "saveDirs": [],
+    "config": {
+      "file": "{installDir}/spaghettify.cfg.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "Window.Fullscreen.Enabled": true
+          },
+          "off": {
+            "Window.Fullscreen.Enabled": false
+          }
+        },
+        "resolution": {
+          "window": {
+            "CVars.gInternalResolution": 1
+          },
+          "window2x": {
+            "CVars.gInternalResolution": 2
+          }
+        },
+        "frameCap": {
+          "30": {
+            "CVars.gInterpolationFPS": 30
+          },
+          "60": {
+            "CVars.gInterpolationFPS": 60
+          },
+          "120": {
+            "CVars.gInterpolationFPS": 120
+          }
+        }
+      }
+    }
   },
   {
     "id": "paperboat",
@@ -253,7 +459,40 @@
       ],
       "delivery": "in-app"
     },
-    "saveDirs": []
+    "saveDirs": [],
+    "config": {
+      "file": "{installDir}/paperboat.cfg.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "Window.Fullscreen.Enabled": true
+          },
+          "off": {
+            "Window.Fullscreen.Enabled": false
+          }
+        },
+        "resolution": {
+          "window": {
+            "CVars.gInternalResolution": 1
+          },
+          "window2x": {
+            "CVars.gInternalResolution": 2
+          }
+        },
+        "frameCap": {
+          "30": {
+            "CVars.gSettings.InterpolationFPS": 30
+          },
+          "60": {
+            "CVars.gSettings.InterpolationFPS": 60
+          },
+          "120": {
+            "CVars.gSettings.InterpolationFPS": 120
+          }
+        }
+      }
+    }
   },
   {
     "id": "banjorecomp",
@@ -279,6 +518,47 @@
     },
     "saveDirs": [
       "{localAppData}/BanjoRecompiled/saves"
-    ]
+    ],
+    "config": {
+      "file": "{localAppData}/BanjoRecompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          },
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          }
+        }
+      }
+    }
   }
 ]

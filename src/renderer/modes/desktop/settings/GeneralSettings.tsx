@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Scissors, Database, Download, RefreshCw, Info, ExternalLink } from 'lucide-react';
+import { Trash2, Scissors, Database, Download, RefreshCw, Info, ExternalLink, Boxes, FolderOpen } from 'lucide-react';
+import { invoke } from '@renderer/bridge/ipc';
 import { useSetting, useSetSetting } from '@renderer/query/useSettings';
 import { useCacheStats } from '@renderer/query/useCacheStats';
 import { useEvictCache, useClearCache } from '@renderer/query/useCache';
@@ -136,6 +137,8 @@ export function GeneralSettings() {
       </Card>
 
       <LaunchboxCard />
+
+      <PortsSettingsCard />
 
       <AboutCard />
     </div>
@@ -294,6 +297,65 @@ function AboutCard() {
             </Button>
           )}
         </div>
+      </div>
+    </Card>
+  );
+}
+
+/** Native Ports: where ports are installed, and whether to look for port updates at startup. */
+function PortsSettingsCard() {
+  const dirSetting = useSetting('recomps.dir');
+  const autoCheck = useSetting('recomps.autoCheck');
+  const setSetting = useSetSetting();
+  const [dir, setDir] = useState('');
+  useEffect(() => {
+    if (typeof dirSetting.data?.value === 'string') setDir(dirSetting.data.value);
+  }, [dirSetting.data]);
+  const auto = autoCheck.data?.value !== false;
+
+  return (
+    <Card
+      title={
+        <span className="flex items-center gap-2">
+          <Boxes className="h-4 w-4 text-accent" />
+          Native Ports
+        </span>
+      }
+      description="PC ports of console games, installed and kept up to date by Nostalgia."
+    >
+      <div className="space-y-4">
+        <FormField label="Native Ports folder" hint="New installs go here. Ports already installed stay where they are.">
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <FolderPicker
+                value={dir}
+                onChange={(folderPath) => {
+                  setDir(folderPath);
+                  setSetting.mutate({ key: 'recomps.dir', value: folderPath, encrypted: false });
+                }}
+                placeholder="Defaults to Documents\Nostalgia\recomps"
+              />
+            </div>
+            <Button
+              variant="ghost"
+              icon={<FolderOpen className="h-4 w-4" />}
+              onClick={() => void invoke('recomps:revealDir', undefined)}
+            >
+              Open
+            </Button>
+          </div>
+        </FormField>
+        <FormField label="Check for port updates at startup" className="max-w-xs">
+          <Select
+            value={auto ? 'on' : 'off'}
+            onChange={(e) =>
+              setSetting.mutate({ key: 'recomps.autoCheck', value: e.target.value === 'on', encrypted: false })
+            }
+          >
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </Select>
+        </FormField>
       </div>
     </Card>
   );

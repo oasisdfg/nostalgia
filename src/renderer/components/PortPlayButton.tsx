@@ -1,9 +1,10 @@
-import { Play, Download, X, RefreshCw, FolderOpen } from 'lucide-react';
+import { Play, Download, X, RefreshCw, FolderOpen, Undo2 } from 'lucide-react';
 import { Button } from './Button';
 import {
   useRecompProgress,
   useInstallRecomp,
   useCancelRecomp,
+  useRollbackRecomp,
   useLaunchRecomp,
   useRevealRecompGameFile,
   isBusy,
@@ -35,6 +36,7 @@ export function PortPlayButton({
   const cancel = useCancelRecomp();
   const launch = useLaunchRecomp();
   const reveal = useRevealRecompGameFile();
+  const rollback = useRollbackRecomp();
 
   if (isBusy(port)) {
     return (
@@ -106,6 +108,17 @@ export function PortPlayButton({
           </Button>
         )}
       </div>
+      {port.previousTag && (
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<Undo2 className="h-3.5 w-3.5" />}
+          disabled={rollback.isPending}
+          onClick={() => rollback.mutate(m.id)}
+        >
+          Roll back {m.name} to {port.previousTag}
+        </Button>
+      )}
       {m.gameFile.delivery === 'in-app' && !port.fileDelivered && (
         <div className="flex items-center justify-between gap-3 rounded-md bg-bg/60 px-3 py-2 shadow-inset-1">
           <p className="min-w-0 text-2xs text-fg-muted">

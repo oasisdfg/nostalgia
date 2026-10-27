@@ -1,11 +1,26 @@
 import { useState } from 'react';
-import { Boxes, Play, Download, RefreshCw, X, ExternalLink, FolderOpen, Trash2, Link2, Unlink, Check } from 'lucide-react';
+import {
+  Boxes,
+  Play,
+  Download,
+  RefreshCw,
+  X,
+  ExternalLink,
+  FolderOpen,
+  Trash2,
+  Link2,
+  Unlink,
+  Check,
+  Undo2,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { FocusSection, Focusable } from './Focusable';
 import { Button } from './Button';
 import { Badge } from './Badge';
 import { Spinner } from './Spinner';
 import { EmptyState } from './EmptyState';
 import { ConsoleLogo } from './SystemIcon';
+import { PortSettings, portSettingOptions } from './PortSettings';
 import { invoke } from '@renderer/bridge/ipc';
 import { well } from '@renderer/theme/classes';
 import { useSystems } from '@renderer/query/useSystems';
@@ -15,6 +30,7 @@ import {
   useRecompProgress,
   useInstallRecomp,
   useCancelRecomp,
+  useRollbackRecomp,
   useUninstallRecomp,
   useLinkRecomp,
   useUnlinkRecomp,
@@ -83,7 +99,10 @@ function PortCard({ port }: { port: RecompDTO }) {
   const unlink = useUnlinkRecomp();
   const launch = useLaunchRecomp();
   const reveal = useRevealRecompInstall();
+  const rollback = useRollbackRecomp();
   const [picking, setPicking] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const hasSettings = portSettingOptions(m).length > 0;
 
   const busy = isBusy(port);
   const installed = port.state === 'installed';
@@ -180,11 +199,37 @@ function PortCard({ port }: { port: RecompDTO }) {
 
       {port.lastError && !busy && <p className="text-2xs text-danger">{port.lastError}</p>}
 
+      {showSettings && (
+        <div className="space-y-2">
+          <PortSettings manifest={m} />
+          <p className="text-2xs text-fg-faint">Applied to the port's own settings each time you play.</p>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         {primary}
         {installed && port.updateAvailable && !busy && (
           <Button variant="secondary" icon={<RefreshCw className="h-4 w-4" />} onClick={() => install.mutate(m.id)}>
             Update to {port.latestTag}
+          </Button>
+        )}
+        {installed && port.previousTag && !busy && (
+          <Button
+            variant="ghost"
+            icon={<Undo2 className="h-4 w-4" />}
+            disabled={rollback.isPending}
+            onClick={() => rollback.mutate(m.id)}
+          >
+            Roll back to {port.previousTag}
+          </Button>
+        )}
+        {hasSettings && (
+          <Button
+            variant="ghost"
+            icon={<SlidersHorizontal className="h-4 w-4" />}
+            onClick={() => setShowSettings((v) => !v)}
+          >
+            {showSettings ? 'Hide settings' : 'Settings'}
           </Button>
         )}
         <Button

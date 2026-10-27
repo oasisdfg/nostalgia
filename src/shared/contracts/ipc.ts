@@ -520,6 +520,8 @@ export interface IpcInvokeMap {
   /** 'in-app' delivery helper: shows the linked game file in Explorer. */
   'recomps:revealGameFile': { request: { id: string }; response: { ok: true } };
   'recomps:revealInstall': { request: { id: string }; response: { ok: true } };
+  /** Opens the managed Native Ports folder (recomps.dir) - main resolves the path. */
+  'recomps:revealDir': { request: void; response: { ok: true } };
 }
 
 // ---------------------------------------------------------------------------
@@ -676,6 +678,7 @@ export const IPC_INVOKE_CHANNELS = [
   'recomps:launch',
   'recomps:revealGameFile',
   'recomps:revealInstall',
+  'recomps:revealDir',
 ] as const;
 
 export const IPC_EVENT_CHANNELS = [

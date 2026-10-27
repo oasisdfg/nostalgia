@@ -15,7 +15,7 @@ import { configPatchesForExe, type ConfigPatch } from './detect';
  * if absent. Values are written verbatim (callers pass literal tokens like 'true'/'1'). Returns
  * the new content (=== input when nothing changed).
  */
-function applyPatch(content: string, patch: ConfigPatch): string {
+export function applyPatch(content: string, patch: Pick<ConfigPatch, 'section' | 'set'>): string {
   const eol = content.includes('\r\n') ? '\r\n' : '\n';
   const lines = content.split(/\r?\n/);
   const wantSection = patch.section ?? null;

@@ -24,6 +24,27 @@ export interface RecompGameFileReq {
   placePath?: string;
 }
 
+/** The unified per-port settings Nostalgia can set for the user (one UI for every port). */
+export type PortSettingKey = 'fullscreen' | 'resolution' | 'frameCap';
+export const PORT_SETTING_KEYS: PortSettingKey[] = ['fullscreen', 'resolution', 'frameCap'];
+export type ConfigScalar = string | number | boolean;
+
+/**
+ * How the unified settings map onto a port's own config file. Each option maps a choice id
+ * (e.g. 'on', 'original2x', '60') to the key/value writes that select it. JSON keys are
+ * dotted paths into nested objects; INI/TOML keys are `section.key` (or a bare top-level key).
+ * Applied before launch, to an EXISTING file only (backed up once, idempotent).
+ */
+export interface RecompConfigMap {
+  /** tokens {installDir} {localAppData} {appData} {documents} */
+  file: string;
+  format: 'json' | 'ini';
+  options: Partial<Record<PortSettingKey, Record<string, Record<string, ConfigScalar>>>>;
+}
+
+/** The user's picks for one port: setting → choice id. Absent = leave the port's own value. */
+export type RecompUserConfig = Partial<Record<PortSettingKey, string>>;
+
 export interface RecompManifest {
   id: string; // stable slug, e.g. "zelda64recomp"
   name: string; // "Zelda 64: Recompiled"
@@ -42,6 +63,8 @@ export interface RecompManifest {
   gameFile: RecompGameFileReq;
   /** folders the port writes saves to; tokens {appData} {localAppData} {documents} {installDir} */
   saveDirs: string[];
+  /** unified settings → this port's config file (optional) */
+  config?: RecompConfigMap;
 }
 
 export type RecompInstallState = 'not_installed' | 'downloading' | 'verifying' | 'extracting' | 'installed' | 'failed';
@@ -50,6 +73,8 @@ export interface RecompDTO {
   manifest: RecompManifest;
   state: RecompInstallState;
   installedTag: string | null;
+  /** the version kept on disk for rollback, after an update */
+  previousTag: string | null;
   latestTag: string | null;
   updateAvailable: boolean;
   /** games.id this port is linked to, when linked */
@@ -100,6 +125,19 @@ export const recompManifestSchema = z.object({
     })
     .refine((g) => g.delivery !== 'copy' || g.placePath, "'copy' delivery needs placePath"),
   saveDirs: z.array(z.string()),
+  config: z
+    .object({
+      file: z.string().min(1),
+      format: z.enum(['json', 'ini']),
+      options: z
+        .object({
+          fullscreen: z.record(z.record(z.union([z.string(), z.number(), z.boolean()]))),
+          resolution: z.record(z.record(z.union([z.string(), z.number(), z.boolean()]))),
+          frameCap: z.record(z.record(z.union([z.string(), z.number(), z.boolean()]))),
+        })
+        .partial(),
+    })
+    .optional(),
 });
 
 export const recompRegistrySchema = z.array(recompManifestSchema);

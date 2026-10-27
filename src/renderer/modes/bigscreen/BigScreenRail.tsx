@@ -1,3 +1,4 @@
+import { Boxes } from 'lucide-react';
 import { FocusSection, Focusable } from '@renderer/components/Focusable';
 import { ConsoleLogo } from '@renderer/components/SystemIcon';
 import { RailUpdatePill } from '@renderer/components/UpdatePill';
@@ -14,11 +15,13 @@ export function BigScreenRail({
   activeSystemId,
   onPreview,
   onEnter,
+  onOpenPorts,
 }: {
   systems: SystemDTO[];
   activeSystemId: number | null;
   onPreview: (id: number) => void;
   onEnter: () => void;
+  onOpenPorts: () => void;
 }) {
   return (
     <FocusSection
@@ -56,6 +59,20 @@ export function BigScreenRail({
           )}
         </Focusable>
       ))}
+      {/* Native Ports - PC ports of console games, after the consoles. */}
+      <Focusable focusKey="bs-rail-ports" ariaLabel="Native Ports" focusClassName="" className="rounded-lg" onSelect={onOpenPorts}>
+        {(focused) => (
+          <div
+            title="Native Ports"
+            className={`flex flex-col items-center justify-center gap-1 rounded-lg py-3 transition-colors ${
+              focused ? 'bg-surface-2 text-fg' : 'text-fg-muted'
+            }`}
+          >
+            <Boxes className="h-7 w-7" />
+            <span className="text-2xs font-medium">Ports</span>
+          </div>
+        )}
+      </Focusable>
       {/* App self-update - only present when there's something to act on. */}
       <RailUpdatePill />
     </FocusSection>

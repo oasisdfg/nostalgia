@@ -10,6 +10,7 @@ import { discoverSavesForGame } from '../saves/discovery';
 import { getManifest } from './registry';
 import { deliverFile, fileForPort } from './linker';
 import { isInstallingPort } from './installer';
+import { applyPortConfig } from './config';
 
 /**
  * Starts an installed port for its linked game. Mirrors launcher.launch() minus the
@@ -30,6 +31,9 @@ export async function launchRecomp(recompId: string): Promise<{ sessionId: numbe
   const installDir = row.install_dir;
 
   await deliverFile(recompId);
+  // The user's unified settings (fullscreen / resolution / frame cap) into the port's own
+  // config. Best-effort: a config problem must never stop the game starting.
+  await applyPortConfig(manifest, installDir).catch(() => undefined);
   const gameFileId = fileForPort(recompId, gameId);
   // Only fetch the file when the template actually passes it ({romPath} & co.).
   const needsRom = manifest.args.some((a) => /\{rom(Path|Dir|Name)\}/.test(a));
