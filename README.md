@@ -1,6 +1,6 @@
 # Nostalgia
 
-A Windows desktop emulation frontend (LaunchBox / Playnite class) built on Electron + React + TypeScript + Vite, with a local SQLite library, on-demand game downloads behind a provider-agnostic storage layer, retro metadata scraping, and a gamepad-navigable big-screen mode.
+A Windows desktop emulation frontend (LaunchBox / Playnite class) built on Electron + React + TypeScript + Vite, with a local SQLite library, retro metadata scraping, and a gamepad-navigable big-screen mode.
 
 See [CLAUDE.md](./CLAUDE.md) for the architecture and [BUILD_PLAN.md](./BUILD_PLAN.md) for the phased build.
 
