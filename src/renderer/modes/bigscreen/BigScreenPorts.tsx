@@ -36,10 +36,18 @@ export function BigScreenPorts() {
   const shown = all.filter((p) => matchesChip(p, ui.chip));
   const detailId = ui.detailId;
 
-  // Land on the grid when the view opens (or after closing a detail).
+  // Land on the grid when the view opens - and, coming back from a port's page, on the card
+  // that was opened, so the controller doesn't jump to the top.
+  const lastOpened = useRef<string | null>(null);
   useEffect(() => {
-    if (detailId != null || isLoading) return;
-    const r = requestAnimationFrame(() => setFocus('bs-ports'));
+    if (detailId != null) {
+      lastOpened.current = detailId;
+      return;
+    }
+    if (isLoading) return;
+    const r = requestAnimationFrame(() =>
+      setFocus(lastOpened.current ? `bs-port-${lastOpened.current}` : 'bs-ports'),
+    );
     return () => cancelAnimationFrame(r);
   }, [detailId, isLoading]);
 
@@ -153,6 +161,7 @@ function BigScreenPortCard({
   return (
     <Focusable
       ariaLabel={m.name}
+      focusKey={`bs-port-${m.id}`}
       focusClassName=""
       className="rounded-xl"
       onSelect={() => onOpen(m.id)}

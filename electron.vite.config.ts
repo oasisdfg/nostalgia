@@ -73,10 +73,11 @@ function publishTarget(): Record<string, string> {
 
 export default defineConfig({
   main: {
-    // electron-updater is BUNDLED into out/main rather than left external, so the
-    // hand-assembled `npm run package` build (which copies only better-sqlite3 into
-    // node_modules) can still load it for its notify-only update check.
-    plugins: [externalizeDepsPlugin({ exclude: ['electron-updater'] })],
+    // The pure-JS runtime deps are BUNDLED into out/main rather than left external, so the
+    // hand-assembled `npm run package` build (which copies only the native better-sqlite3
+    // into node_modules) can load them: electron-updater (notify-only update check), yauzl
+    // (zip extraction) and saxes (LaunchBox import). Only native modules stay external.
+    plugins: [externalizeDepsPlugin({ exclude: ['electron-updater', 'yauzl', 'saxes'] })],
     define: { ...bakedEnv(), ...publishTarget() },
     resolve: {
       alias: {

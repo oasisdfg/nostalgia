@@ -274,7 +274,7 @@ function PortDetailBody({
             {m.status === 'beta' && <Badge tone="warning">Beta</Badge>}
           </div>
           <p className={`mt-3 ${bigScreen ? 'text-base' : 'text-sm'} text-fg-muted`}>{m.summary}</p>
-          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-2xs text-fg-muted">
+          <p className={`mt-2 flex flex-wrap gap-x-4 gap-y-1 ${bigScreen ? 'text-sm' : 'text-2xs'} text-fg-muted`}>
             {facts.map((f) => (
               <span key={f}>{f}</span>
             ))}
@@ -302,7 +302,7 @@ function PortDetailBody({
               </Button>
             </span>
           </div>
-          {port.lastError && !busy && <p className="text-2xs text-danger">{port.lastError}</p>}
+          {port.lastError && !busy && <p className={`${bigScreen ? 'text-sm' : 'text-2xs'} text-danger`}>{port.lastError}</p>}
           {launch.isError && (
             <p className="text-2xs text-danger">{launch.error instanceof Error ? launch.error.message : "Couldn't start it."}</p>
           )}
