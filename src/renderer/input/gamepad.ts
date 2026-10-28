@@ -1,7 +1,7 @@
 // Gamepad API input layer. W3C "standard" mapping - Xbox and DualShock/DualSense
 // both report mapping:"standard" in Chromium/Electron, so one index table works.
 // Directional input drives the SAME spatial-navigation engine as the keyboard via
-// synthetic arrow keys; A/B map to Enter/Escape; bumpers + menu dispatch custom
+// synthetic arrow keys; A/B map to Enter/Escape; bumpers, X, Y + menu dispatch custom
 // window events that Big Screen listens for.
 //
 // Standard button indices: 0=A/Cross 1=B/Circle 2=X/Square 3=Y/Triangle
@@ -24,6 +24,10 @@ export const GP_EVENT = {
   prevSystem: 'gp:prevsystem',
   nextSystem: 'gp:nextsystem',
   menu: 'gp:menu',
+  /** X / Square - a view's secondary action (e.g. Play the focused Native Port). */
+  x: 'gp:x',
+  /** Y / Triangle - a view's tertiary action (e.g. a port's More menu). */
+  y: 'gp:y',
 } as const;
 
 function fireKey(key: string, keyCode: number): void {
@@ -52,6 +56,8 @@ export function startGamepad(): () => void {
     { index: 1, fire: () => fireKey('Escape', 27) }, // B / Circle -> back
     { index: 4, fire: () => fireEvent(GP_EVENT.prevSystem) }, // LB / L1 -> previous system
     { index: 5, fire: () => fireEvent(GP_EVENT.nextSystem) }, // RB / R1 -> next system
+    { index: 2, fire: () => fireEvent(GP_EVENT.x) }, // X / Square -> secondary action
+    { index: 3, fire: () => fireEvent(GP_EVENT.y) }, // Y / Triangle -> tertiary action
   ];
 
   const loop = (): void => {

@@ -16,6 +16,30 @@ export type UiView = 'library' | 'downloads' | 'settings' | 'ports';
  *  'browse' shows every console for catalog browsing. */
 export type SidebarMode = 'library' | 'browse';
 
+/** Native Ports view filters - UI state, kept across opening a port's detail and back. */
+export type PortsChip = 'all' | 'ready' | 'installed' | 'updates' | 'missing';
+export interface PortsUiState {
+  search: string;
+  /** a console slug, or 'all' */
+  console: string;
+  status: 'all' | 'playable' | 'beta';
+  sort: 'console' | 'name' | 'added';
+  chip: PortsChip;
+  /** the open port detail (registry id), or null for the grid */
+  detailId: string | null;
+  /** grid scroll offset to restore when coming back from a detail */
+  scrollTop: number;
+}
+const PORTS_UI_DEFAULT: PortsUiState = {
+  search: '',
+  console: 'all',
+  status: 'all',
+  sort: 'console',
+  chip: 'all',
+  detailId: null,
+  scrollTop: 0,
+};
+
 interface UiState {
   mode: UiMode;
   view: UiView;
@@ -33,6 +57,8 @@ interface UiState {
   setDetailBackdropUrl: (url: string | null) => void;
   launchPrompt: LaunchPrompt | null;
   setLaunchPrompt: (prompt: LaunchPrompt | null) => void;
+  ports: PortsUiState;
+  setPortsUi: (patch: Partial<PortsUiState>) => void;
   setMode: (mode: UiMode) => void;
   setView: (view: UiView) => void;
   setActiveSystemId: (id: number | null) => void;
@@ -62,6 +88,8 @@ export const useUiStore = create<UiState>((set) => ({
   setDetailBackdropUrl: (detailBackdropUrl) => set({ detailBackdropUrl }),
   launchPrompt: null,
   setLaunchPrompt: (launchPrompt) => set({ launchPrompt }),
+  ports: PORTS_UI_DEFAULT,
+  setPortsUi: (patch) => set((s) => ({ ports: { ...s.ports, ...patch } })),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   setMode: (mode) => set({ mode }),
   setView: (view) => set({ view }),

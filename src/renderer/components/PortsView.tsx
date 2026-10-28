@@ -1,341 +1,222 @@
-import { useState } from 'react';
-import {
-  Boxes,
-  Play,
-  Download,
-  RefreshCw,
-  X,
-  ExternalLink,
-  FolderOpen,
-  Trash2,
-  Link2,
-  Unlink,
-  Check,
-  Undo2,
-  SlidersHorizontal,
-  FileText,
-} from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Boxes, RefreshCw } from 'lucide-react';
 import { FocusSection, Focusable } from './Focusable';
-import { Button } from './Button';
-import { Badge } from './Badge';
-import { Spinner } from './Spinner';
+import { IconButton } from './IconButton';
+import { SearchBar } from './SearchBar';
+import { Select } from './Select';
 import { EmptyState } from './EmptyState';
+import { CardSkeleton } from './Skeleton';
 import { ConsoleLogo } from './SystemIcon';
-import { PortProgress } from './PortProgress';
-import { PortSettings, portSettingOptions } from './PortSettings';
-import { invoke } from '@renderer/bridge/ipc';
-import { well } from '@renderer/theme/classes';
-import { useSystems } from '@renderer/query/useSystems';
-import { useGames } from '@renderer/query/useGames';
-import {
-  useRecomps,
-  useInstallRecomp,
-  useCancelRecomp,
-  useRollbackRecomp,
-  useUninstallRecomp,
-  useLinkRecomp,
-  useUnlinkRecomp,
-  useLaunchRecomp,
-  useRevealRecompInstall,
-  useCheckRecompUpdates,
-  isBusy,
-  installLabel,
-  useRevealRecompBuildLog,
-  usePickRecompFiles,
-  useClearRecompPicked,
-  useLocateRecompExe,
-} from '@renderer/query/useRecomps';
+import { PortCard } from './PortCard';
+import { PortDetailPage } from './PortDetailPage';
+import { useConsoles, filterPorts, groupByConsole, matchesChip, CHIPS } from './portsModel';
+import { useRecomps, useRecompArt, useCheckRecompUpdates } from '@renderer/query/useRecomps';
+import { useUiStore, type PortsUiState } from '@renderer/store/uiStore';
 import type { RecompDTO } from '@shared/contracts/recomps';
-import { DISPLAY_ONLY_CONSOLES } from '@shared/contracts/catalog';
+
+// The Catalog's grid, verbatim, so port cards are exactly library-card sized.
+const GRID = 'grid grid-cols-[repeat(auto-fill,190px)] gap-4 -mx-1.5 px-1.5 py-2.5';
+const CARD_W = 190;
+const GAP = 16;
+
+const FIELD = '!bg-surface/40 !py-2 text-sm backdrop-blur-sm';
 
 /**
- * Native Ports: fan-made PC builds of console games that run from the user's own copy.
- * One card per registry entry - install state, the linked library game, and actions.
+ * How many 190px cards fit one row of the container (for the pinned "Ready to play" row).
+ * A callback ref, so it re-attaches when the grid remounts after a detail page.
+ */
+function useColumns(): [(el: HTMLDivElement | null) => void, number] {
+  const [el, setEl] = useState<HTMLDivElement | null>(null);
+  const [cols, setCols] = useState(6);
+  useEffect(() => {
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setCols(Math.max(1, Math.floor((e.contentRect.width + GAP) / (CARD_W + GAP)))));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [el]);
+  return [setEl, cols];
+}
+
+/**
+ * Native Ports: PC ports of console games, browsed like the Catalog - a full-width grid of
+ * the original games' covers, header filters, state chips, and per-console sections. A
+ * port opens its detail page; Escape / Back returns here with filters and scroll kept.
  */
 export function PortsView() {
+  const ui = useUiStore((s) => s.ports);
+  const setUi = useUiStore((s) => s.setPortsUi);
   const { data: ports = [], isLoading } = useRecomps();
   const check = useCheckRecompUpdates();
+  const consoles = useConsoles();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [rowRef, cols] = useColumns();
+  const art = useRecompArt(ports.map((p) => p.manifest.id)).data ?? {};
+
+  const open = (id: string): void => setUi({ detailId: id, scrollTop: scrollRef.current?.scrollTop ?? 0 });
+  const back = (): void => setUi({ detailId: null });
+
+  // Coming back from a detail: put the grid where it was.
+  const scrollTop = ui.scrollTop;
+  useLayoutEffect(() => {
+    if (ui.detailId == null && scrollRef.current) scrollRef.current.scrollTop = scrollTop;
+  }, [ui.detailId, scrollTop]);
+
+  // Escape returns to the grid (unless a menu is open - it closes itself first).
+  useEffect(() => {
+    if (ui.detailId == null) return;
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape' && !document.querySelector('[role="menu"]')) setUi({ detailId: null });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [ui.detailId, setUi]);
+
+  if (ui.detailId != null) return <PortDetailPage id={ui.detailId} onBack={back} />;
+
+  const filtered = filterPorts(ports, ui, consoles);
+  const shown = filtered.filter((p) => matchesChip(p, ui.chip));
+  const consoleOptions = [...new Set(ports.map((p) => p.manifest.gameFile.systemSlug))].sort(
+    (a, b) => consoles.order(a) - consoles.order(b),
+  );
+  const readyAll = filtered.filter((p) => p.canPlay);
+  // Pinned shortcut row: only in the unfiltered "All" view, one row of cards at most.
+  const ready = ui.chip === 'all' && !ui.search ? readyAll.slice(0, cols) : [];
+
+  const card = (p: RecompDTO, keyPrefix = ''): JSX.Element => (
+    <PortCard key={keyPrefix + p.manifest.id} port={p} coverUrl={art[p.manifest.id]?.coverUrl ?? null} onOpen={open} />
+  );
 
   return (
-    <div className="h-full overflow-auto">
-      <div className="mx-auto max-w-5xl px-6 py-6">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-lg font-semibold">Native Ports</h1>
-            <p className="mt-1 max-w-2xl text-sm text-fg-muted">
-              PC versions of console games, built by fans. Each one runs from your own copy of the original game and
-              becomes a second way to play it.
-            </p>
-          </div>
-          <Button
-            variant="secondary"
-            icon={<RefreshCw className={`h-4 w-4 ${check.isPending ? 'animate-spin' : ''}`} />}
-            disabled={check.isPending}
-            onClick={() => check.mutate(undefined)}
-          >
-            {check.isPending ? 'Checking…' : 'Check for updates'}
-          </Button>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 px-5 py-3">
+        <div className="mr-auto flex items-baseline gap-2">
+          <h1 className="text-lg font-semibold">Native Ports</h1>
+          <span className="text-sm text-fg-muted">{ports.length} ports</span>
         </div>
-        {isLoading ? (
-          <Spinner label="Loading ports…" />
-        ) : ports.length === 0 ? (
-          <EmptyState icon={<Boxes className="h-6 w-6" />} title="No ports available" />
-        ) : (
-          <FocusSection className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {ports.map((p) => (
-              <PortCard key={p.manifest.id} port={p} />
+        <SearchBar value={ui.search} onChange={(search) => setUi({ search })} />
+        <div className="flex items-center gap-1.5">
+          {ui.console !== 'all' && <ConsoleLogo slug={ui.console} className="text-fg-muted" />}
+          <Select value={ui.console} onChange={(e) => setUi({ console: e.target.value })} aria-label="Console" className={`w-40 ${FIELD}`}>
+            <option value="all">All consoles</option>
+            {consoleOptions.map((slug) => (
+              <option key={slug} value={slug}>
+                {consoles.name(slug)}
+              </option>
             ))}
-          </FocusSection>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PortCard({ port }: { port: RecompDTO }) {
-  const m = port.manifest;
-  const { data: systems = [] } = useSystems();
-  const system = systems.find((s) => s.slug === m.gameFile.systemSlug);
-  const { data: games } = useGames({ systemId: system?.id ?? -1, sort: 'title', order: 'asc' });
-  const linked = games?.items.find((g) => g.id === port.linkedGameId) ?? null;
-  const install = useInstallRecomp();
-  const cancel = useCancelRecomp();
-  const uninstall = useUninstallRecomp();
-  const unlink = useUnlinkRecomp();
-  const launch = useLaunchRecomp();
-  const reveal = useRevealRecompInstall();
-  const rollback = useRollbackRecomp();
-  const buildLog = useRevealRecompBuildLog();
-  const pick = usePickRecompFiles();
-  const clearPicked = useClearRecompPicked();
-  const locate = useLocateRecompExe();
-  const consoleName = system?.name ?? DISPLAY_ONLY_CONSOLES[m.gameFile.systemSlug] ?? m.gameFile.systemSlug;
-  const [picking, setPicking] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const hasSettings = portSettingOptions(m).length > 0;
-
-  const busy = isBusy(port);
-  const installed = port.state === 'installed';
-  const external = m.assetKind === 'external' && !m.build;
-  const openProject = (): void => void invoke('app:openExternal', { url: m.homepage });
-
-  const primary = busy ? (
-    <div className="flex min-w-0 flex-1 items-center gap-3">
-      <PortProgress port={port} />
-      <Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} onClick={() => cancel.mutate(m.id)}>
-        Cancel
-      </Button>
-    </div>
-  ) : installed ? (
-    <Button
-      variant="primary"
-      icon={<Play className="h-4 w-4" fill="currentColor" />}
-      disabled={!port.canPlay || launch.isPending}
-      title={port.gameReady === 'missing' ? `Link your copy of ${m.originalTitle} first` : undefined}
-      onClick={() => launch.mutate(m.id)}
-    >
-      {launch.isPending ? 'Starting…' : 'Play'}
-    </Button>
-  ) : external ? (
-    <>
-      <Button variant="primary" icon={<ExternalLink className="h-4 w-4" />} onClick={openProject}>
-        Get from project page
-      </Button>
-      <Button variant="secondary" icon={<FolderOpen className="h-4 w-4" />} onClick={() => locate.mutate(m.id)}>
-        Locate exe…
-      </Button>
-    </>
-  ) : (
-    <Button variant="primary" icon={<Download className="h-4 w-4" />} onClick={() => install.mutate(m.id)}>
-      {installLabel(port)}
-    </Button>
-  );
-
-  return (
-    <div className="flex flex-col gap-4 rounded-lg bg-surface p-5 shadow-e1">
-      <div className="flex items-start gap-3">
-        <ConsoleLogo slug={m.gameFile.systemSlug} className="mt-0.5 text-fg-muted" />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-base font-semibold text-fg">{m.name}</h2>
-            <Badge tone={m.status === 'playable' ? 'positive' : 'warning'}>{m.status}</Badge>
-            {port.updateAvailable && <Badge tone="accent">Update available</Badge>}
-          </div>
-          <p className="mt-0.5 text-2xs text-fg-faint">
-            {m.originalTitle}
-            {installed && port.installedTag ? ` · ${port.installedTag}` : ''}
-          </p>
+          </Select>
         </div>
+        <Select
+          value={ui.status}
+          onChange={(e) => setUi({ status: e.target.value as PortsUiState['status'] })}
+          aria-label="Status"
+          className={`w-32 ${FIELD}`}
+        >
+          <option value="all">Any status</option>
+          <option value="playable">Playable</option>
+          <option value="beta">Beta</option>
+        </Select>
+        <Select
+          value={ui.sort}
+          onChange={(e) => setUi({ sort: e.target.value as PortsUiState['sort'] })}
+          aria-label="Sort"
+          className={`w-40 ${FIELD}`}
+        >
+          <option value="console">By console</option>
+          <option value="name">By name</option>
+          <option value="added">Recently added</option>
+        </Select>
+        <IconButton
+          icon={<RefreshCw className={`h-4 w-4 ${check.isPending ? 'animate-spin' : ''}`} />}
+          label="Check for updates"
+          disabled={check.isPending}
+          onClick={() => check.mutate(undefined)}
+        />
       </div>
 
-      <p className="text-sm text-fg-muted">{m.summary}</p>
-      {m.build && !installed && <p className="text-2xs text-fg-faint">Needs {m.build.requirements}</p>}
+      <PortChips ports={filtered} />
 
-      {/* The game it runs from: linked (and whether the dump is a known-good one), or a prompt. */}
-      <div className={`${well} px-3 py-2 text-2xs`}>
-        {linked ? (
-          <div className="flex items-center justify-between gap-3">
-            <span className="min-w-0 truncate text-fg">
-              {port.gameReady === 'verified' && <Check className="mr-1 inline h-3.5 w-3.5 text-positive" />}
-              Uses your copy of <span className="font-medium">{linked.title}</span>
-              {port.gameReady === 'unverified' && <span className="text-fg-muted"> · unverified dump</span>}
-            </span>
-            <Button variant="ghost" size="sm" icon={<Unlink className="h-3.5 w-3.5" />} onClick={() => unlink.mutate(m.id)}>
-              Unlink
-            </Button>
-          </div>
-        ) : port.pickedName ? (
-          <div className="flex items-center justify-between gap-3">
-            <span className="min-w-0 truncate text-fg">
-              {port.gameReady === 'verified' && <Check className="mr-1 inline h-3.5 w-3.5 text-positive" />}
-              <span className="font-medium">{port.pickedName}</span>
-            </span>
-            <Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} onClick={() => clearPicked.mutate(m.id)}>
-              Clear
-            </Button>
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-fg-muted">
-              Needs your {consoleName} copy of {m.originalTitle}
-              {m.gameFile.pickHint ? ` (${m.gameFile.pickHint})` : ''}
-            </span>
-            <span className="flex gap-1">
-              {m.gameFile.source === 'library' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon={<Link2 className="h-3.5 w-3.5" />}
-                  onClick={() => setPicking((v) => !v)}
-                >
-                  Link your copy
-                </Button>
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto px-5 pb-6 pt-2">
+        <div ref={rowRef}>
+          {isLoading ? (
+            <div className={GRID}>
+              {Array.from({ length: 12 }).map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
+            </div>
+          ) : shown.length === 0 ? (
+            <EmptyState
+              icon={<Boxes className="h-6 w-6" />}
+              title={ports.length === 0 ? 'No ports available' : 'No ports match'}
+              hint={ports.length === 0 ? undefined : 'Try another console, status or search.'}
+            />
+          ) : (
+            <div className="space-y-6 animate-fade-in">
+              {ready.length > 0 && (
+                <section>
+                  <SectionLabel label="Ready to play" count={readyAll.length} />
+                  <FocusSection className={GRID}>{ready.map((p) => card(p, 'ready-'))}</FocusSection>
+                </section>
               )}
-              <Button variant="ghost" size="sm" icon={<FolderOpen className="h-3.5 w-3.5" />} onClick={() => pick.mutate(m.id)}>
-                Choose files…
-              </Button>
-            </span>
-          </div>
-        )}
-        {picking && !linked && (
-          <GamePicker
-            recompId={m.id}
-            games={games?.items ?? []}
-            onDone={() => setPicking(false)}
-          />
-        )}
-      </div>
-
-      {port.lastError && !busy && (
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-2xs text-danger">{port.lastError}</p>
-          {m.build && (
-            <Button variant="ghost" size="sm" icon={<FileText className="h-3.5 w-3.5" />} onClick={() => buildLog.mutate(m.id)}>
-              Show build log
-            </Button>
-          )}
-        </div>
-      )}
-
-      {showSettings && (
-        <div className="space-y-2">
-          <PortSettings manifest={m} />
-          <p className="text-2xs text-fg-faint">Applied to the port's own settings each time you play.</p>
-        </div>
-      )}
-
-      <div className="flex flex-wrap items-center gap-2">
-        {primary}
-        {installed && port.updateAvailable && !busy && (
-          <Button
-            variant="secondary"
-            icon={<RefreshCw className="h-4 w-4" />}
-            onClick={() => (external ? openProject() : install.mutate(m.id))}
-          >
-            {external ? 'New version on project page' : m.build ? 'Rebuild with the latest code' : `Update to ${port.latestTag}`}
-          </Button>
-        )}
-        {installed && port.previousTag && !busy && (
-          <Button
-            variant="ghost"
-            icon={<Undo2 className="h-4 w-4" />}
-            disabled={rollback.isPending}
-            onClick={() => rollback.mutate(m.id)}
-          >
-            Roll back to {port.previousTag}
-          </Button>
-        )}
-        {hasSettings && (
-          <Button
-            variant="ghost"
-            icon={<SlidersHorizontal className="h-4 w-4" />}
-            onClick={() => setShowSettings((v) => !v)}
-          >
-            {showSettings ? 'Hide settings' : 'Settings'}
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          icon={<ExternalLink className="h-4 w-4" />}
-          onClick={() => void invoke('app:openExternal', { url: m.homepage })}
-        >
-          Project page
-        </Button>
-        {installed && !busy && (
-          <>
-            <Button variant="ghost" icon={<FolderOpen className="h-4 w-4" />} onClick={() => reveal.mutate(m.id)}>
-              Show files
-            </Button>
-            <Button
-              variant="danger"
-              icon={<Trash2 className="h-4 w-4" />}
-              disabled={uninstall.isPending}
-              onClick={() => uninstall.mutate(m.id)}
-            >
-              Uninstall
-            </Button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/** Manual link: pick the game from the library games on the port's console. */
-function GamePicker({
-  recompId,
-  games,
-  onDone,
-}: {
-  recompId: string;
-  games: { id: number; title: string }[];
-  onDone: () => void;
-}) {
-  const link = useLinkRecomp();
-  if (games.length === 0) {
-    return <p className="mt-2 text-fg-faint">No games for this console in your library yet.</p>;
-  }
-  return (
-    <FocusSection className="mt-2 max-h-48 overflow-auto">
-      {games.map((g) => (
-        <Focusable
-          key={g.id}
-          ariaLabel={g.title}
-          focusClassName=""
-          className="block rounded-md"
-          onSelect={() => link.mutate({ id: recompId, gameId: g.id }, { onSuccess: onDone })}
-        >
-          {(focused) => (
-            <div
-              className={`truncate rounded-md px-2 py-1.5 text-xs transition-colors ${
-                focused ? 'bg-white/10 text-fg' : 'text-fg-muted hover:bg-white/5 hover:text-fg'
-              }`}
-            >
-              {g.title}
+              {ui.sort === 'console' ? (
+                groupByConsole(shown).map((g) => (
+                  <section key={g.slug}>
+                    <SectionLabel slug={g.slug} label={consoles.name(g.slug)} count={g.ports.length} />
+                    <FocusSection className={GRID}>{g.ports.map((p) => card(p))}</FocusSection>
+                  </section>
+                ))
+              ) : (
+                <FocusSection className={GRID}>{shown.map((p) => card(p))}</FocusSection>
+              )}
             </div>
           )}
-        </Focusable>
-      ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A section heading: spacing + label, never a line (UI-STYLE). */
+function SectionLabel({ slug, label, count }: { slug?: string; label: string; count: number }) {
+  return (
+    <div className="mb-1 flex items-center gap-2">
+      {slug && <ConsoleLogo slug={slug} className="text-fg-muted" />}
+      <h2 className="text-sm font-semibold text-fg">{label}</h2>
+      <span className="text-xs tabular-nums text-fg-faint">{count}</span>
+    </div>
+  );
+}
+
+/** Segmented state chips (one active) on the well recipe. Empty chips hide, except All. */
+export function PortChips({ ports, size = 'md' }: { ports: RecompDTO[]; size?: 'md' | 'lg' }) {
+  const chip = useUiStore((s) => s.ports.chip);
+  const setUi = useUiStore((s) => s.setPortsUi);
+  const chips = CHIPS.map((c) => ({ ...c, count: ports.filter((p) => matchesChip(p, c.id)).length })).filter(
+    (c) => c.id === 'all' || c.count > 0,
+  );
+  return (
+    <FocusSection focusKey={size === 'lg' ? 'bs-port-chips' : undefined} className="shrink-0 px-5">
+      <div className="inline-flex flex-wrap gap-1 rounded-lg bg-bg/60 p-1 shadow-inset-1">
+        {chips.map((c) => (
+          <Focusable key={c.id} ariaLabel={c.label} focusClassName="" className="rounded-md" onSelect={() => setUi({ chip: c.id })}>
+            {(focused) => (
+              <span
+                className={`flex cursor-pointer items-center gap-1.5 rounded-md px-3 transition-colors ${
+                  size === 'lg' ? 'py-2 text-base' : 'py-1 text-xs'
+                } ${
+                  chip === c.id
+                    ? 'bg-surface-2 font-semibold text-fg shadow-e1'
+                    : focused
+                      ? 'bg-white/10 text-fg'
+                      : 'text-fg-muted hover:text-fg'
+                }`}
+              >
+                {c.label}
+                <span className={`tabular-nums ${chip === c.id ? 'text-accent' : 'text-fg-faint'}`}>{c.count}</span>
+              </span>
+            )}
+          </Focusable>
+        ))}
+      </div>
     </FocusSection>
   );
 }

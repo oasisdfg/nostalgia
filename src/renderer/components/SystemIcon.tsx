@@ -160,6 +160,8 @@ const LOGO_SIZE = {
   // (which stay width-bound by max-w-full and are unaffected).
   sidebar: { box: 'h-6 w-11 justify-center', logo: 'max-h-5 max-w-full', glyph: 'h-4 w-4' },
   rail: { box: 'h-9 w-24 justify-center', logo: 'max-h-7 max-w-full', glyph: 'h-6 w-6' },
+  // Corner mark on a cover card (Native Ports) - small, right-aligned.
+  chip: { box: 'h-4 w-10 justify-end', logo: 'max-h-3.5 max-w-full', glyph: 'h-3.5 w-3.5' },
 } as const;
 
 /**

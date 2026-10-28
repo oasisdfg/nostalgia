@@ -16,6 +16,9 @@ import { BigScreenDetail } from './BigScreenDetail';
 import { BigScreenMenu } from './BigScreenMenu';
 import { BigScreenPorts } from './BigScreenPorts';
 
+/** Where focus belongs in the Ports view: a port page's primary action, else the grid. */
+const portsFocusKey = (): string => (useUiStore.getState().ports.detailId != null ? 'port-primary' : 'bs-ports');
+
 /** Move spatial focus on the next frame, after the target has mounted/registered. */
 const focusSoon = (key: string): void => {
   requestAnimationFrame(() => setFocus(key));
@@ -79,7 +82,7 @@ export function BigScreenShell() {
         // Restore focus to what's actually mounted under the menu - the rail only
         // exists in browse; focusing it from detail left spatial focus on the
         // unmounted menu button and the d-pad went dead.
-        focusSoon(st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? 'bs-ports' : 'bs-rail');
+        focusSoon(st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? portsFocusKey() : 'bs-rail');
       } else {
         setMenuOpen(true);
       }
@@ -107,7 +110,7 @@ export function BigScreenShell() {
       const current = getCurrentFocusKey();
       if (current && doesFocusableExist(current)) return;
       const st = stateRef.current;
-      setFocus(st.menuOpen ? 'bs-menu' : st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? 'bs-ports' : 'bs-grid');
+      setFocus(st.menuOpen ? 'bs-menu' : st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? portsFocusKey() : 'bs-grid');
     };
     window.addEventListener('keydown', recover, true);
     return () => window.removeEventListener('keydown', recover, true);
@@ -120,7 +123,7 @@ export function BigScreenShell() {
       const st = stateRef.current;
       if (st.menuOpen) {
         setMenuOpen(false);
-        focusSoon(st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? 'bs-ports' : 'bs-rail');
+        focusSoon(st.view === 'detail' ? 'bs-detail-action' : st.view === 'ports' ? portsFocusKey() : 'bs-rail');
       } else if (st.view === 'detail') {
         setView('browse');
         setSelectedIgdbId(null);
@@ -150,7 +153,16 @@ export function BigScreenShell() {
         { glyph: 'A', label: 'Select', tone: 'bg-positive/20 text-positive' },
         { glyph: 'B', label: 'Close', tone: 'bg-danger/20 text-danger' },
       ]
-    : view === 'detail' || view === 'ports'
+    : view === 'ports'
+      ? [
+          { glyph: '✛', label: 'Move' },
+          { glyph: 'A', label: 'Open', tone: 'bg-positive/20 text-positive' },
+          { glyph: 'X', label: 'Play' },
+          { glyph: 'Y', label: 'More' },
+          { glyph: 'B', label: 'Back', tone: 'bg-danger/20 text-danger' },
+          { glyph: '☰', label: 'Menu', onClick: openMenu },
+        ]
+      : view === 'detail'
       ? [
           { glyph: '✛', label: 'Move' },
           { glyph: 'A', label: 'Select', tone: 'bg-positive/20 text-positive' },

@@ -1,52 +1,133 @@
-import { useEffect, useState } from 'react';
-import { Play, Download, RefreshCw, Undo2, X, Link2, ExternalLink, FolderOpen } from 'lucide-react';
-import { invoke } from '@renderer/bridge/ipc';
-import { FocusSection } from '@renderer/components/Focusable';
-import { Button } from '@renderer/components/Button';
-import { Badge } from '@renderer/components/Badge';
+import { useEffect, useRef, useState } from 'react';
+import { Check } from 'lucide-react';
+import { FocusSection, Focusable } from '@renderer/components/Focusable';
 import { Spinner } from '@renderer/components/Spinner';
+import { EmptyState } from '@renderer/components/EmptyState';
 import { ConsoleLogo } from '@renderer/components/SystemIcon';
-import { PortSettingsCycle } from '@renderer/components/PortSettings';
-import { PortProgress } from '@renderer/components/PortProgress';
+import { PortChips } from '@renderer/components/PortsView';
+import { PortDetailPage } from '@renderer/components/PortDetailPage';
+import { useConsoles, filterPorts, groupByConsole, matchesChip, isBusyPort } from '@renderer/components/portsModel';
 import { setFocus } from '@renderer/input/spatialNav';
-import { useSystems } from '@renderer/query/useSystems';
-import { useGames } from '@renderer/query/useGames';
-import {
-  useRecomps,
-  useInstallRecomp,
-  useCancelRecomp,
-  useRollbackRecomp,
-  useLaunchRecomp,
-  useLinkRecomp,
-  usePickRecompFiles,
-  useLocateRecompExe,
-  isBusy,
-  installLabel,
-} from '@renderer/query/useRecomps';
+import { GP_EVENT } from '@renderer/input/gamepad';
+import { useUiStore } from '@renderer/store/uiStore';
+import { useRecomps, useRecompArt, useLaunchRecomp } from '@renderer/query/useRecomps';
 import type { RecompDTO } from '@shared/contracts/recomps';
 
+const GRID = 'grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-6';
+const HEADING = 'mb-4 flex items-center gap-3 text-sm font-semibold uppercase tracking-wide text-fg-muted';
+
 /**
- * Big Screen Native Ports: one large card per port, every action a focusable button
- * (A selects, B backs out to the rail). No mouse needed anywhere.
+ * Big Screen Native Ports: the same list as the desktop view (shared model + chips), as
+ * 10-foot cards. A opens a port's page, X plays the focused port, Y opens its More menu,
+ * B backs out (detail → grid → rail). Every control is spatially focusable.
  */
 export function BigScreenPorts() {
+  const ui = useUiStore((s) => s.ports);
+  const setUi = useUiStore((s) => s.setPortsUi);
   const { data: ports = [], isLoading } = useRecomps();
+  const consoles = useConsoles();
+  const art = useRecompArt(ports.map((p) => p.manifest.id)).data ?? {};
+  const launch = useLaunchRecomp();
+  const [moreOnOpen, setMoreOnOpen] = useState(false);
+  const focused = useRef<RecompDTO | null>(null);
 
+  // Big Screen has no header filters: chips only, grouped by console.
+  const all = filterPorts(ports, { search: '', console: 'all', status: 'all', sort: 'console' }, consoles);
+  const shown = all.filter((p) => matchesChip(p, ui.chip));
+  const detailId = ui.detailId;
+
+  // Land on the grid when the view opens (or after closing a detail).
   useEffect(() => {
+    if (detailId != null || isLoading) return;
     const r = requestAnimationFrame(() => setFocus('bs-ports'));
     return () => cancelAnimationFrame(r);
-  }, []);
+  }, [detailId, isLoading]);
+
+  // X plays the focused port, Y opens it with More showing. (The detail page handles its
+  // own X/Y while open.)
+  useEffect(() => {
+    if (detailId != null) return;
+    const onX = (): void => {
+      const p = focused.current;
+      if (p?.canPlay) launch.mutate(p.manifest.id);
+    };
+    const onY = (): void => {
+      const p = focused.current;
+      if (!p) return;
+      setMoreOnOpen(true);
+      setUi({ detailId: p.manifest.id });
+    };
+    window.addEventListener(GP_EVENT.x, onX);
+    window.addEventListener(GP_EVENT.y, onY);
+    return () => {
+      window.removeEventListener(GP_EVENT.x, onX);
+      window.removeEventListener(GP_EVENT.y, onY);
+    };
+  }, [detailId, launch, setUi]);
+
+  // B / Escape on a port's page goes back to the grid - before the shell's handler would
+  // send focus all the way back to the rail.
+  useEffect(() => {
+    if (detailId == null) return;
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key !== 'Escape') return;
+      if (document.querySelector('[data-port-more]')) return; // the More overlay closes itself
+      e.stopImmediatePropagation();
+      setMoreOnOpen(false);
+      setUi({ detailId: null });
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [detailId, setUi]);
+
+  if (detailId != null) {
+    return (
+      <PortDetailPage
+        id={detailId}
+        bigScreen
+        initialMore={moreOnOpen}
+        onBack={() => setUi({ detailId: null })}
+      />
+    );
+  }
 
   return (
-    <div className="h-full overflow-auto scroll-py-10">
-      <div className="mx-auto max-w-5xl px-10 py-8">
-        <h1 className="mb-6 text-3xl font-semibold">Native Ports</h1>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 items-baseline gap-3 px-10 pt-8">
+        <h1 className="text-3xl font-semibold">Native Ports</h1>
+        <span className="text-base text-fg-muted">{ports.length} ports</span>
+      </div>
+      <div className="px-5 pt-4">
+        <PortChips ports={all} size="lg" />
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto scroll-py-10 px-10 py-6">
         {isLoading ? (
           <Spinner label="Loading ports…" />
+        ) : shown.length === 0 ? (
+          <EmptyState title="No ports here" />
         ) : (
-          <FocusSection focusKey="bs-ports" className="flex flex-col gap-5">
-            {ports.map((p) => (
-              <PortRow key={p.manifest.id} port={p} />
+          <FocusSection focusKey="bs-ports" className="space-y-10">
+            {groupByConsole(shown).map((g) => (
+              <section key={g.slug}>
+                <h2 className={HEADING}>
+                  <ConsoleLogo slug={g.slug} size="rail" className="text-fg-muted" />
+                  {consoles.name(g.slug)}
+                </h2>
+                <div className={GRID}>
+                  {g.ports.map((p) => (
+                    <BigScreenPortCard
+                      key={p.manifest.id}
+                      port={p}
+                      coverUrl={art[p.manifest.id]?.coverUrl ?? null}
+                      onOpen={(id) => {
+                        setMoreOnOpen(false);
+                        setUi({ detailId: id });
+                      }}
+                      onFocus={() => (focused.current = p)}
+                    />
+                  ))}
+                </div>
+              </section>
             ))}
           </FocusSection>
         )}
@@ -55,122 +136,65 @@ export function BigScreenPorts() {
   );
 }
 
-function PortRow({ port }: { port: RecompDTO }) {
+/** 10-foot port card: lift + scale + ring on focus (the Big Screen transform exception). */
+function BigScreenPortCard({
+  port,
+  coverUrl,
+  onOpen,
+  onFocus,
+}: {
+  port: RecompDTO;
+  coverUrl: string | null;
+  onOpen: (id: string) => void;
+  onFocus: () => void;
+}) {
   const m = port.manifest;
-  const { data: systems = [] } = useSystems();
-  const system = systems.find((s) => s.slug === m.gameFile.systemSlug);
-  const { data: games } = useGames({ systemId: system?.id ?? -1, sort: 'title', order: 'asc' });
-  const linked = games?.items.find((g) => g.id === port.linkedGameId) ?? null;
-  const install = useInstallRecomp();
-  const cancel = useCancelRecomp();
-  const rollback = useRollbackRecomp();
-  const launch = useLaunchRecomp();
-  const link = useLinkRecomp();
-  const pick = usePickRecompFiles();
-  const locate = useLocateRecompExe();
-  const external = m.assetKind === 'external' && !m.build;
-  const [picking, setPicking] = useState(false);
-  const busy = isBusy(port);
-  const installed = port.state === 'installed';
-
+  const busy = isBusyPort(port);
   return (
-    <div className="flex flex-col gap-4 rounded-2xl bg-surface p-6 shadow-e1">
-      <div className="flex items-center gap-4">
-        <ConsoleLogo slug={m.gameFile.systemSlug} size="rail" className="text-fg-muted" />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="truncate text-2xl font-semibold">{m.name}</h2>
-            <Badge tone={m.status === 'playable' ? 'positive' : 'warning'}>{m.status}</Badge>
-            {port.updateAvailable && <Badge tone="accent">Update available</Badge>}
+    <Focusable
+      ariaLabel={m.name}
+      focusClassName=""
+      className="rounded-xl"
+      onSelect={() => onOpen(m.id)}
+      onFocusChange={(f) => f && onFocus()}
+    >
+      {(focused) => (
+        <div
+          className={`overflow-hidden rounded-xl transition-all duration-150 ${
+            focused ? '-translate-y-1 scale-[1.04] shadow-e3 ring-2 ring-accent' : ''
+          }`}
+        >
+          <div className="relative aspect-[3/4] w-full bg-black">
+            {coverUrl ? (
+              <img src={coverUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-2 to-bg p-3">
+                <span className="line-clamp-4 select-none text-center text-xl font-semibold leading-snug text-fg-faint/80">
+                  {m.originalTitle}
+                </span>
+              </div>
+            )}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+            <div className="absolute left-2 top-2">
+              {busy ? (
+                <span className="block h-3 w-3 animate-pulse rounded-full bg-accent" />
+              ) : port.updateAvailable ? (
+                <span className="block h-3 w-3 rounded-full bg-accent" />
+              ) : port.canPlay ? (
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-black/70 text-positive">
+                  <Check className="h-4 w-4" />
+                </span>
+              ) : null}
+            </div>
+            {m.status === 'beta' && (
+              <span className="absolute right-2 top-2 rounded bg-black/70 px-2 py-0.5 text-sm font-medium text-warning">
+                Beta
+              </span>
+            )}
+            <p className="absolute inset-x-0 bottom-0 line-clamp-2 p-3 text-base font-semibold leading-snug text-fg">{m.name}</p>
           </div>
-          <p className="mt-1 text-base text-fg-muted">
-            {linked ? `Uses your copy of ${linked.title}` : `Needs your ${system?.name ?? ''} copy of ${m.originalTitle}`}
-          </p>
-        </div>
-      </div>
-
-      {busy && <PortProgress port={port} size="lg" />}
-      {m.build && !installed && !busy && <p className="text-base text-fg-faint">Needs {m.build.requirements}</p>}
-      {port.lastError && !busy && <p className="text-base text-danger">{port.lastError}</p>}
-
-      <div className="flex flex-wrap gap-3">
-        {busy ? (
-          <Button size="lg" variant="secondary" icon={<X className="h-5 w-5" />} onClick={() => cancel.mutate(m.id)}>
-            Cancel
-          </Button>
-        ) : installed ? (
-          port.canPlay ? (
-            <Button
-              size="lg"
-              variant="primary"
-              icon={<Play className="h-5 w-5" fill="currentColor" />}
-              disabled={launch.isPending}
-              onClick={() => launch.mutate(m.id)}
-            >
-              {launch.isPending ? 'Starting…' : 'Play'}
-            </Button>
-          ) : null
-        ) : external ? (
-          <>
-            <Button
-              size="lg"
-              variant="primary"
-              icon={<ExternalLink className="h-5 w-5" />}
-              onClick={() => void invoke('app:openExternal', { url: m.homepage })}
-            >
-              Get from project page
-            </Button>
-            <Button size="lg" variant="secondary" icon={<FolderOpen className="h-5 w-5" />} onClick={() => locate.mutate(m.id)}>
-              Locate exe…
-            </Button>
-          </>
-        ) : (
-          <Button size="lg" variant="primary" icon={<Download className="h-5 w-5" />} onClick={() => install.mutate(m.id)}>
-            {installLabel(port)}
-          </Button>
-        )}
-        {port.gameReady === 'missing' && m.gameFile.source === 'library' && (
-          <Button size="lg" variant="secondary" icon={<Link2 className="h-5 w-5" />} onClick={() => setPicking((v) => !v)}>
-            Link your copy
-          </Button>
-        )}
-        {port.gameReady === 'missing' && (
-          <Button size="lg" variant="secondary" icon={<FolderOpen className="h-5 w-5" />} onClick={() => pick.mutate(m.id)}>
-            Choose files…
-          </Button>
-        )}
-        {installed && port.updateAvailable && !busy && (
-          <Button size="lg" variant="secondary" icon={<RefreshCw className="h-5 w-5" />} onClick={() => install.mutate(m.id)}>
-            {m.build ? 'Rebuild with the latest code' : `Update to ${port.latestTag}`}
-          </Button>
-        )}
-        {installed && port.previousTag && !busy && (
-          <Button size="lg" variant="secondary" icon={<Undo2 className="h-5 w-5" />} onClick={() => rollback.mutate(m.id)}>
-            Roll back to {port.previousTag}
-          </Button>
-        )}
-      </div>
-
-      {picking && !linked && (
-        <div className="flex flex-wrap gap-3">
-          {(games?.items ?? []).length === 0 ? (
-            <p className="text-base text-fg-faint">No games for this console in your library yet.</p>
-          ) : (
-            games!.items.map((g) => (
-              <Button
-                key={g.id}
-                size="lg"
-                variant="ghost"
-                onClick={() => link.mutate({ id: m.id, gameId: g.id }, { onSuccess: () => setPicking(false) })}
-              >
-                {g.title}
-              </Button>
-            ))
-          )}
         </div>
       )}
-
-      {installed && <PortSettingsCycle manifest={m} />}
-    </div>
+    </Focusable>
   );
 }
