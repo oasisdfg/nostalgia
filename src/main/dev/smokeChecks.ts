@@ -881,6 +881,19 @@ export async function runRecompsSmoke(): Promise<void> {
   }
   await uninstall('zelda64recomp');
 
+  // v2 - art: offline here (no port names an igdbId yet and smoke has no LaunchBox DB), so a
+  // miss is cached as null; a cached hit is returned as-is without refetching; unknown ids
+  // are skipped. Never throws.
+  const { getArt } = await import('../recomps/art');
+  const { upsertArt } = await import('../db/repositories/recompsRepo');
+  const miss = await getArt(['shipwright', 'not-a-port']);
+  if (miss.shipwright?.coverUrl !== null || 'not-a-port' in miss) throw new Error('recomps: art miss/unknown id wrong');
+  upsertArt('starship', 'asset://assets/igdb/test_cover.jpg', 'asset://assets/igdb/test_hero.jpg');
+  const hit = await getArt(['starship']);
+  if (hit.starship?.coverUrl !== 'asset://assets/igdb/test_cover.jpg' || hit.starship.heroUrl !== 'asset://assets/igdb/test_hero.jpg') {
+    throw new Error('recomps: cached art not returned');
+  }
+
   // R3 - migration 0010: the 'building' state is accepted.
   db.prepare("UPDATE recomp_installs SET state = 'building' WHERE recomp_id = 'zelda64recomp'").run();
   db.prepare("UPDATE recomp_installs SET state = 'not_installed' WHERE recomp_id = 'zelda64recomp'").run();

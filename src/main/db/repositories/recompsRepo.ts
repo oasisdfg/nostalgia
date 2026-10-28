@@ -90,3 +90,31 @@ export function listCandidateFiles(systemSlug: string): {
     )
     .all(systemSlug) as ReturnType<typeof listCandidateFiles>;
 }
+
+/** A recomp_art row (migration 0011): the original game's art per port. */
+export interface RecompArtRow {
+  recomp_id: string;
+  /** asset:// URL of the cached cover (opaque; files live under assets/) */
+  cover_path: string | null;
+  /** asset:// URL of the cached hero/backdrop */
+  hero_path: string | null;
+  checked_at: number;
+}
+
+export function getArtRows(ids: string[]): Map<string, RecompArtRow> {
+  if (ids.length === 0) return new Map();
+  const rows = getDb()
+    .prepare(`SELECT * FROM recomp_art WHERE recomp_id IN (${ids.map(() => '?').join(', ')})`)
+    .all(...ids) as RecompArtRow[];
+  return new Map(rows.map((r) => [r.recomp_id, r]));
+}
+
+export function upsertArt(recompId: string, coverPath: string | null, heroPath: string | null): void {
+  getDb()
+    .prepare(
+      `INSERT INTO recomp_art (recomp_id, cover_path, hero_path, checked_at) VALUES (?, ?, ?, ?)
+       ON CONFLICT(recomp_id) DO UPDATE SET cover_path = excluded.cover_path, hero_path = excluded.hero_path,
+         checked_at = excluded.checked_at`,
+    )
+    .run(recompId, coverPath, heroPath, Date.now());
+}

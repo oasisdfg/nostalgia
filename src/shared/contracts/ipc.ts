@@ -529,6 +529,11 @@ export interface IpcInvokeMap {
   'recomps:clearPicked': { request: { id: string }; response: RecompDTO };
   /** 'external' ports: locate the exe the port's own installer put on disk (OS dialog in main). */
   'recomps:locateExe': { request: { id: string }; response: RecompDTO };
+  /** The original game's art per port, as asset:// URLs (fetched + cached in main). */
+  'recomps:art': {
+    request: { ids: string[] };
+    response: Record<string, { coverUrl: string | null; heroUrl: string | null }>;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -692,6 +697,7 @@ export const IPC_INVOKE_CHANNELS = [
   'recomps:pickGameFiles',
   'recomps:clearPicked',
   'recomps:locateExe',
+  'recomps:art',
 ] as const;
 
 export const IPC_EVENT_CHANNELS = [

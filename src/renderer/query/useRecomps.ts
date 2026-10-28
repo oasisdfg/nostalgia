@@ -16,6 +16,25 @@ export function useRecomps() {
   return useQuery({ queryKey: qk.recomps, queryFn: () => invoke('recomps:list', undefined) });
 }
 
+export interface PortArt {
+  coverUrl: string | null;
+  heroUrl: string | null;
+}
+
+/**
+ * The original game's art for a set of ports (asset:// URLs from main). One request per id
+ * set; art barely changes, so it's kept for the session.
+ */
+export function useRecompArt(ids: string[]) {
+  const sorted = [...ids].sort();
+  return useQuery({
+    queryKey: qk.recompArt(sorted),
+    queryFn: () => invoke('recomps:art', { ids: sorted }),
+    enabled: sorted.length > 0,
+    staleTime: Infinity,
+  });
+}
+
 /** Ports linked to one game (drives the split Play button). */
 export function useRecompsForGame(gameId: number | null) {
   return useQuery({

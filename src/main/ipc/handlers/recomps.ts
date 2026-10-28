@@ -8,6 +8,7 @@ import { refreshRegistry } from '../../recomps/remoteRegistry';
 import { startInstall, cancelInstall, rollback, uninstall, setLocatedExe } from '../../recomps/installer';
 import { autoLink, linkManually, unlink, resolveGamePath, setPicked, clearPicked } from '../../recomps/linker';
 import { launchRecomp } from '../../recomps/launch';
+import { getArt } from '../../recomps/art';
 import { getInstall } from '../../db/repositories/recompsRepo';
 import { recompsDir } from '../../recomps/paths';
 import { buildLogPath } from '../../recomps/builder';
@@ -28,6 +29,8 @@ const portId = z
   .regex(/^[a-z0-9-]+$/)
   .refine((id) => getManifest(id) != null, 'unknown port');
 const idSchema = z.object({ id: portId });
+// Art is asked for in bulk (a whole grid); unknown ids are simply skipped by getArt.
+const artSchema = z.object({ ids: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(500) });
 const checkSchema = z.object({ id: portId.optional() }).optional();
 const gameSchema = z.object({ gameId: z.coerce.number().int() });
 const linkSchema = z.object({ id: portId, gameId: z.coerce.number().int() });
@@ -135,6 +138,7 @@ export function registerRecompsHandlers(): void {
     }
     return dtoFor(id);
   });
+  registerInvoke('recomps:art', (req) => getArt(artSchema.parse(req).ids));
   registerInvoke('recomps:revealDir', async () => {
     const dir = recompsDir();
     await mkdir(dir, { recursive: true });
