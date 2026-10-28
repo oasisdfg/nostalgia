@@ -37,9 +37,9 @@ export function registerIpc(deps: IpcDeps = {}): void {
   // hardcoded emulator-download URLs are allowed - the renderer cannot open an
   // arbitrary URL, so this can't be abused to launch attacker-chosen links.
   const openExternalSchema = z.object({ url: z.string().url() });
-  // Native Ports' project pages and GitHub repos are vetted constants from the bundled
-  // registry, the same way the emulator download URLs are.
-  const allowed = new Set<string>([...EMULATOR_DOWNLOAD_URLS, ...recompExternalUrls()]);
+  // Native Ports' project pages and GitHub repos come from the port registry (bundled +
+  // validated remote list), read per call so the allow-list follows a registry refresh.
+  const allowed = new Set<string>(EMULATOR_DOWNLOAD_URLS);
   // Trailers (LaunchBox VideoURL) are YouTube links - allow the YouTube hosts by exact
   // host match (not an open redirect: only youtube.com/youtu.be, https only).
   const YOUTUBE_HOSTS = new Set(['www.youtube.com', 'youtube.com', 'youtu.be', 'm.youtube.com']);
@@ -52,7 +52,9 @@ export function registerIpc(deps: IpcDeps = {}): void {
     } catch {
       host = null;
     }
-    if (!allowed.has(url) && !(host && YOUTUBE_HOSTS.has(host))) return { ok: false };
+    if (!allowed.has(url) && !recompExternalUrls().includes(url) && !(host && YOUTUBE_HOSTS.has(host))) {
+      return { ok: false };
+    }
     await shell.openExternal(url);
     return { ok: true };
   });

@@ -560,5 +560,46 @@
         }
       }
     }
+  },
+  {
+    "id": "burnoutdominator",
+    "name": "Burnout Dominator Reversed",
+    "originalTitle": "Burnout Dominator",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Burnout Dominator recompiled into a native PC game. Built on your PC from source, from your own European disc image.",
+    "repo": "literalynn/BurnoutDominatorReversed",
+    "homepage": "https://github.com/literalynn/BurnoutDominatorReversed",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [
+        {
+          "label": "Europe (SLES-54627)",
+          "sha256": "dc4fc4e9700d6a5ae26531618d880541b1ff2d2deaf191f1359b98d3f63f96a5",
+          "size": 4660166656
+        }
+      ],
+      "delivery": "argv"
+    },
+    "saveDirs": [],
+    "build": {
+      "requires": [
+        "git",
+        "python"
+      ],
+      "install": [
+        "tools/install.py",
+        "--iso",
+        "{romPath}",
+        "--work-dir",
+        "{workDir}"
+      ],
+      "run": [
+        "tools/project.py",
+        "run"
+      ],
+      "requirements": "Python 3, Git, and Visual Studio 2022 or newer with “Desktop development with C++”, plus about 20 GB free. The first build takes 30 to 90 minutes."
+    }
   }
 ]

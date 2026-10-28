@@ -94,15 +94,26 @@ function accepts(manifest: RecompManifest, h: Hashes): boolean {
 
 type Candidate = ReturnType<typeof listCandidateFiles>[number];
 
-/** Whether a library file is an accepted copy, hashing it on disk when needed. */
-async function fileMatches(manifest: RecompManifest, f: Candidate): Promise<boolean> {
-  if (accepts(manifest, f)) return true;
-  if (!f.local_path) return false;
-  const forms = await diskHashes(f.local_path, manifest.gameFile.systemSlug);
-  if (!forms) return false;
-  // A file adopted from the games folder has no hashes yet - record the raw ones.
-  if (!f.sha1 && !f.md5 && !f.crc32) setHashes(f.id, forms[0], 'post_download');
-  return forms.some((h) => accepts(manifest, h));
+/** Exact-size match for an image too big to hash on the fly (links, but doesn't verify). */
+function sizeMatches(manifest: RecompManifest, f: Candidate): boolean {
+  return f.size_bytes != null && manifest.gameFile.accepted.some((a) => a.size != null && a.size === f.size_bytes);
+}
+
+/**
+ * How a library file matches the port: 'hash' (a known-good dump), 'size' (same size as a
+ * known-good disc image; the port's own installer checks the hash), or null.
+ */
+async function fileMatches(manifest: RecompManifest, f: Candidate): Promise<'hash' | 'size' | null> {
+  if (accepts(manifest, f)) return 'hash';
+  if (f.local_path) {
+    const forms = await diskHashes(f.local_path, manifest.gameFile.systemSlug);
+    if (forms) {
+      // A file adopted from the games folder has no hashes yet - record the raw ones.
+      if (!f.sha1 && !f.md5 && !f.crc32) setHashes(f.id, forms[0], 'post_download');
+      if (forms.some((h) => accepts(manifest, h))) return 'hash';
+    }
+  }
+  return sizeMatches(manifest, f) ? 'size' : null;
 }
 
 async function evaluate(manifest: RecompManifest, candidates: Candidate[]): Promise<void> {
@@ -111,10 +122,13 @@ async function evaluate(manifest: RecompManifest, candidates: Candidate[]): Prom
   // An existing link (manual or earlier auto) is never overridden - only verified.
   const pool = linked != null ? candidates.filter((c) => c.game_id === linked) : candidates;
   let match: Candidate | null = null;
+  let how: 'hash' | 'size' | null = null;
   for (const c of pool) {
-    if (await fileMatches(manifest, c).catch(() => false)) {
+    const m = await fileMatches(manifest, c).catch(() => null);
+    if (m === 'hash' || (m === 'size' && !match)) {
       match = c;
-      break;
+      how = m;
+      if (m === 'hash') break; // a verified dump beats a size match
     }
   }
   if (match) {
@@ -123,7 +137,7 @@ async function evaluate(manifest: RecompManifest, candidates: Candidate[]): Prom
   } else {
     matchedFile.delete(manifest.id);
   }
-  verified.set(manifest.id, match != null);
+  verified.set(manifest.id, how === 'hash');
 }
 
 let running: Promise<void> | null = null;

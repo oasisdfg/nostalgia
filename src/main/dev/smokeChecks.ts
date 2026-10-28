@@ -762,7 +762,7 @@ export async function runRecompsSmoke(): Promise<void> {
   // R2 - unified settings resolve to each port's own keys, and the JSON patch is nested +
   // idempotent.
   const { resolveWrites, applyJsonWrites } = await import('../recomps/config');
-  if (!manifests.every((m) => m.config)) throw new Error('recomps: a port is missing its config map');
+  if (!manifests.every((m) => m.config || m.build)) throw new Error('recomps: a release port is missing its config map');
   const zeldaM = manifests.find((m) => m.id === 'zelda64recomp')!;
   const w = resolveWrites(zeldaM, { frameCap: '60', fullscreen: 'on', resolution: 'bogus' });
   if (w.rr_option !== 'Manual' || w.rr_manual_value !== 60 || w.wm_option !== 'Fullscreen' || 'res_option' in w) {
@@ -803,7 +803,59 @@ export async function runRecompsSmoke(): Promise<void> {
   await uninstall('zelda64recomp');
   if (getInstall('zelda64recomp')?.state !== 'not_installed') throw new Error('recomps: uninstall after rollback');
   await rm(base, { recursive: true, force: true });
-  console.log(`[smoke] recomps: ${manifests.length} ports parsed, migration ok, glob ok, auto-link ok, config ok, rollback ok`);
+  // R3 - remote registry: entries validated one by one; a remote entry replaces a bundled
+  // one or adds a port, but can never add/alter a build-from-source port.
+  const { sanitizeRemote, setRemoteManifests, getManifest } = await import('../recomps/registry');
+  const zeldaRemote = { ...zeldaM, summary: 'remote summary' };
+  const accepted = sanitizeRemote([
+    zeldaRemote,
+    { ...zeldaM, id: 'new-port', name: 'New Port' },
+    { ...zeldaM, id: 'burnoutdominator' }, // names a bundled build port
+    { ...zeldaM, id: 'sneaky-build', build: { requires: [], install: ['x.py'], run: ['y.py'], requirements: '' } },
+    { id: 'Bad Id!' },
+  ]);
+  if (accepted.map((m) => m.id).join(',') !== 'zelda64recomp,new-port') {
+    throw new Error(`recomps: sanitizeRemote accepted ${accepted.map((m) => m.id).join(',')}`);
+  }
+  setRemoteManifests(accepted);
+  if (getManifest('zelda64recomp')?.summary !== 'remote summary' || !getManifest('new-port')) {
+    throw new Error('recomps: remote registry did not merge');
+  }
+  if (!getManifest('burnoutdominator')?.build) throw new Error('recomps: build port lost after merge');
+  setRemoteManifests([]);
+  // The repo's own remote registry file must validate in full (dev checkout only).
+  const remoteFile = join(app.getAppPath(), 'registry', 'recomps.json');
+  const fileText = await readFile(remoteFile, 'utf8').catch(() => null);
+  if (fileText != null) {
+    const entries = JSON.parse(fileText) as unknown[];
+    if (sanitizeRemote(entries).length !== entries.length) throw new Error('recomps: registry/recomps.json has invalid entries');
+  }
+
+  // R3 - migration 0010: the 'building' state is accepted.
+  db.prepare("UPDATE recomp_installs SET state = 'building' WHERE recomp_id = 'zelda64recomp'").run();
+  db.prepare("UPDATE recomp_installs SET state = 'not_installed' WHERE recomp_id = 'zelda64recomp'").run();
+
+  // R3 - .7z assets: a real archive round-trips through the bundled 7za (skipped if absent).
+  const { sevenZipBinaryPath, extract7z } = await import('../storage/sevenZip');
+  const sz = sevenZipBinaryPath();
+  if (sz) {
+    const { spawnSync } = await import('node:child_process');
+    const zdir = join(base, '7z');
+    await mkdir(join(zdir, 'in', 'sub'), { recursive: true });
+    await writeFile(join(zdir, 'in', 'sub', 'Port.exe'), 'port');
+    const made = spawnSync(sz, ['a', join(zdir, 'port.7z'), join(zdir, 'in', '*')], { windowsHide: true });
+    if (made.status !== 0) throw new Error('recomps: could not create a test .7z');
+    let last = 0;
+    await extract7z(join(zdir, 'port.7z'), join(zdir, 'out'), { onProgress: (f) => (last = f) });
+    if ((await readFile(join(zdir, 'out', 'sub', 'Port.exe'), 'utf8')) !== 'port') throw new Error('recomps: 7z extract');
+    void last;
+  }
+  await rm(base, { recursive: true, force: true });
+
+  console.log(
+    `[smoke] recomps: ${manifests.length} ports parsed, migration ok, glob ok, auto-link ok, config ok, rollback ok, ` +
+      `remote registry ok, 7z ${sz ? 'ok' : 'skipped (no 7za)'}`,
+  );
 }
 
 /**

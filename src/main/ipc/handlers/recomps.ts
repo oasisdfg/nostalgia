@@ -4,12 +4,15 @@ import { registerInvoke } from '../registry';
 import { getManifest } from '../../recomps/registry';
 import { listDtos, dtoFor, dtosForGame } from '../../recomps/service';
 import { checkPorts } from '../../recomps/github';
+import { refreshRegistry } from '../../recomps/remoteRegistry';
 import { startInstall, cancelInstall, rollback, uninstall } from '../../recomps/installer';
 import { autoLink, linkManually, unlink, fileForPort } from '../../recomps/linker';
 import { launchRecomp } from '../../recomps/launch';
 import { ensureCached } from '../../launch/launcher';
 import { getInstall } from '../../db/repositories/recompsRepo';
 import { recompsDir } from '../../recomps/paths';
+import { buildLogPath } from '../../recomps/builder';
+import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 
 // Every request names a port by its registry id (checked against the bundled registry)
@@ -35,6 +38,8 @@ export function registerRecompsHandlers(): void {
   });
   registerInvoke('recomps:checkUpdates', async (req) => {
     const p = checkSchema.parse(req ?? undefined);
+    // A full check also refreshes the remote port registry (new ports, fixed entries).
+    if (!p?.id) await refreshRegistry(true);
     await checkPorts(p?.id);
     return listDtos();
   });
@@ -85,6 +90,12 @@ export function registerRecompsHandlers(): void {
     if (!dir) throw new Error("This port isn't installed.");
     await shell.openPath(dir);
     return { ok: true as const };
+  });
+  registerInvoke('recomps:revealBuildLog', (req) => {
+    const log = buildLogPath(idSchema.parse(req).id);
+    if (!existsSync(log)) return { ok: false };
+    shell.showItemInFolder(log);
+    return { ok: true };
   });
   registerInvoke('recomps:revealDir', async () => {
     const dir = recompsDir();

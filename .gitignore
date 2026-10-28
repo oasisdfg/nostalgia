@@ -9,6 +9,7 @@ Thumbs.db
 
 # Fetched at build time by scripts/fetch-aria2.mjs (bundled via extraResources)
 resources/aria2/
+resources/7zip/
 
 # Added by Repo Deck
 .vs/

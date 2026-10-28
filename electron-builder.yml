@@ -28,6 +28,9 @@ asarUnpack:
 extraResources:
   - from: resources/aria2
     to: aria2
+  # 7za.exe unpacks Native Ports released as .7z (scripts/fetch-7zip.mjs); spawned, so outside the asar.
+  - from: resources/7zip
+    to: 7zip
 
 # Auto-update feed (electron-updater reads latest.yml from the latest GitHub Release).
 # The repo must be PUBLIC: the app reads releases anonymously and never embeds a token.

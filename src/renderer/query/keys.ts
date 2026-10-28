@@ -16,4 +16,5 @@ export const qk = {
   recomps: ['recomps'] as const,
   recompsForGame: (gameId: number) => ['recomps', 'game', gameId] as const,
   recompProgress: (id: string) => ['recompProgress', id] as const,
+  recompBuildStatus: (id: string) => ['recompBuildStatus', id] as const,
 };

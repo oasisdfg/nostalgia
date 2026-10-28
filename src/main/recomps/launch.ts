@@ -11,6 +11,7 @@ import { getManifest } from './registry';
 import { deliverFile, fileForPort } from './linker';
 import { isInstallingPort } from './installer';
 import { applyPortConfig } from './config';
+import { buildWorkDir, findPython } from './builder';
 
 /**
  * Starts an installed port for its linked game. Mirrors launcher.launch() minus the
@@ -25,7 +26,9 @@ export async function launchRecomp(recompId: string): Promise<{ sessionId: numbe
   if (!row || row.state !== 'installed' || !row.exe_path || !row.install_dir) {
     throw new Error(`${manifest.name} isn't installed.`);
   }
-  if (!existsSync(row.exe_path)) throw new Error(`${manifest.name}'s files are missing. Reinstall it from Native Ports.`);
+  if (!existsSync(manifest.build ? row.install_dir : row.exe_path)) {
+    throw new Error(`${manifest.name}'s files are missing. Reinstall it from Native Ports.`);
+  }
   const gameId = row.linked_game_id;
   if (gameId == null) throw new Error(`Link your copy of ${manifest.originalTitle} first.`);
   const installDir = row.install_dir;
@@ -36,20 +39,30 @@ export async function launchRecomp(recompId: string): Promise<{ sessionId: numbe
   await applyPortConfig(manifest, installDir).catch(() => undefined);
   const gameFileId = fileForPort(recompId, gameId);
   // Only fetch the file when the template actually passes it ({romPath} & co.).
-  const needsRom = manifest.args.some((a) => /\{rom(Path|Dir|Name)\}/.test(a));
+  // A built port starts through its own python launcher script (build.run).
+  const template = manifest.build ? manifest.build.run : manifest.args;
+  const needsRom = template.some((a) => /\{rom(Path|Dir|Name)\}/.test(a));
   let romPath = '';
   if (needsRom) {
     if (gameFileId == null) throw new Error('The linked game has no file to give the port.');
     romPath = await ensureCached(gameFileId);
   }
-  const argv = resolveArgs(manifest.args, {
+  let exe = row.exe_path;
+  let argv = resolveArgs(template, {
     romPath,
     systemSlug: manifest.gameFile.systemSlug,
     emulatorDir: installDir,
     installDir,
-  });
+  }).map((a) => a.split('{workDir}').join(buildWorkDir(recompId)));
+  if (manifest.build) {
+    // Resolved by main from PATH at each launch (Python may have been updated or moved).
+    const python = findPython();
+    if (!python) throw new Error(`${manifest.name} needs Python 3 to start. ${manifest.build.requirements}`);
+    exe = python.exe;
+    argv = [...python.prefix, ...argv];
+  }
 
-  const child = spawn(row.exe_path, argv, { cwd: installDir, windowsHide: false, stdio: 'ignore' });
+  const child = spawn(exe, argv, { cwd: installDir, windowsHide: false, stdio: 'ignore' });
   try {
     await once(child, 'spawn');
   } catch {

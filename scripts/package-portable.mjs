@@ -27,4 +27,8 @@ mkdirSync(join(app, 'resources'), { recursive: true });
 cpSync(join(root, 'resources', 'icon.ico'), join(app, 'resources', 'icon.ico'));
 cpSync(join(root, 'resources', 'icon.png'), join(app, 'resources', 'icon.png'));
 
+// Spawned helpers live in <resources>/ (process.resourcesPath), outside the app folder.
+const sevenZip = join(root, 'resources', '7zip');
+if (existsSync(sevenZip)) cpSync(sevenZip, join(dist, 'resources', '7zip'), { recursive: true });
+
 console.log(`Portable build ready: ${join(dist, 'Nostalgia.exe')}`);

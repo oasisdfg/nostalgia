@@ -1,14 +1,13 @@
 import { Play, Download, X, RefreshCw, FolderOpen, Undo2 } from 'lucide-react';
 import { Button } from './Button';
+import { PortProgress } from './PortProgress';
 import {
-  useRecompProgress,
   useInstallRecomp,
   useCancelRecomp,
   useRollbackRecomp,
   useLaunchRecomp,
   useRevealRecompGameFile,
   isBusy,
-  busyLabel,
 } from '@renderer/query/useRecomps';
 import type { RecompDTO } from '@shared/contracts/recomps';
 
@@ -31,7 +30,6 @@ export function PortPlayButton({
   onPlay: () => void;
 }) {
   const m = port.manifest;
-  const progress = useRecompProgress(m.id);
   const install = useInstallRecomp();
   const cancel = useCancelRecomp();
   const launch = useLaunchRecomp();
@@ -41,21 +39,7 @@ export function PortPlayButton({
   if (isBusy(port)) {
     return (
       <div className="flex items-center gap-3 rounded-md bg-surface-2 px-3.5 py-2.5">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-xs text-fg-muted">
-            {m.name}: {busyLabel(port, progress)}
-          </p>
-          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-bg/70">
-            {port.state === 'verifying' ? (
-              <div className="h-full w-full animate-pulse rounded-full bg-accent/40" />
-            ) : (
-              <div
-                className="h-full rounded-full bg-accent transition-all"
-                style={{ width: `${Math.round((progress?.fraction ?? 0) * 100)}%` }}
-              />
-            )}
-          </div>
-        </div>
+        <PortProgress port={port} prefix={m.name} />
         <Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} onClick={() => cancel.mutate(m.id)}>
           Cancel
         </Button>
@@ -73,7 +57,7 @@ export function PortPlayButton({
         disabled={install.isPending}
         onClick={() => install.mutate(m.id)}
       >
-        Install {m.name}
+        {m.build ? 'Build' : 'Install'} {m.name}
       </Button>
     );
   }

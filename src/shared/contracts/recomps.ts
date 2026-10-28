@@ -11,8 +11,12 @@ export type RecompStatus = 'playable' | 'beta';
 export interface RecompGameFileReq {
   /** system slug of the ORIGINAL game, must match a seeded systems.slug (n64, ps2, xbox360, ...) */
   systemSlug: string;
-  /** any one matching hash accepts the file; lowercase hex */
-  accepted: { label: string; sha1?: string; md5?: string; crc32?: string }[];
+  /**
+   * any one match accepts the file; hashes lowercase hex. `sha256` and `size` serve disc
+   * images too big to hash on the fly: an exact size match links the game (unverified), and
+   * the port's own installer checks the hash.
+   */
+  accepted: { label: string; sha1?: string; md5?: string; crc32?: string; sha256?: string; size?: number }[];
   /**
    * How the file reaches the port:
    *  - 'argv'      pass it through launch.args ({romPath} token, element-wise like emulators)
@@ -45,6 +49,26 @@ export interface RecompConfigMap {
 /** The user's picks for one port: setting → choice id. Absent = leave the port's own value. */
 export type RecompUserConfig = Partial<Record<PortSettingKey, string>>;
 
+/**
+ * A port built from source on the user's PC (no prebuilt release). Bundled registry ONLY:
+ * the remote registry can never add or change one, since it names commands Nostalgia runs.
+ * Sources are a `git clone` of `repo`; every command is python with these argv arrays, run
+ * from the checkout. Element-wise tokens: {romPath} = the linked game file; {workDir} = a
+ * short build folder Nostalgia owns (<system drive>
+ostalgia-<id>, removed on uninstall -
+ * builds can hold ~50k deep files, so it stays clear of the 260-character path limit).
+ */
+export interface RecompBuild {
+  /** tools that must be on PATH before building */
+  requires: ('git' | 'python')[];
+  /** python script + args that builds the port, e.g. ["tools/install.py", "--iso", "{romPath}"] */
+  install: string[];
+  /** python script + args that starts the built game */
+  run: string[];
+  /** shown before building: what the user's PC needs */
+  requirements: string;
+}
+
 export interface RecompManifest {
   id: string; // stable slug, e.g. "zelda64recomp"
   name: string; // "Zelda 64: Recompiled"
@@ -54,10 +78,11 @@ export interface RecompManifest {
   summary: string;
   repo: string; // "Zelda64Recomp/Zelda64Recomp" (GitHub owner/name)
   homepage: string; // https URL shown as "Project page"; added to the openExternal allow-list
-  /** glob matched against release asset names; Windows x64 only (Nostalgia is Windows-only) */
-  assetMatch: string; // "*Windows*.zip"
-  /** exe path relative to the extracted install root, e.g. "Zelda64Recompiled.exe" */
-  exe: string;
+  /** glob matched against release asset names; Windows x64 only (Nostalgia is Windows-only).
+   *  Absent for a `build` port. */
+  assetMatch?: string; // "*Windows*.zip"
+  /** exe path relative to the extracted install root, e.g. "Zelda64Recompiled.exe" (release ports) */
+  exe?: string;
   /** argv template; same tokens as emulators plus {installDir} */
   args: string[];
   gameFile: RecompGameFileReq;
@@ -65,9 +90,18 @@ export interface RecompManifest {
   saveDirs: string[];
   /** unified settings → this port's config file (optional) */
   config?: RecompConfigMap;
+  /** built from source instead of downloaded (bundled registry only) */
+  build?: RecompBuild;
 }
 
-export type RecompInstallState = 'not_installed' | 'downloading' | 'verifying' | 'extracting' | 'installed' | 'failed';
+export type RecompInstallState =
+  | 'not_installed'
+  | 'downloading'
+  | 'verifying'
+  | 'extracting'
+  | 'building'
+  | 'installed'
+  | 'failed';
 
 export interface RecompDTO {
   manifest: RecompManifest;
@@ -107,8 +141,8 @@ export const recompManifestSchema = z.object({
   summary: z.string(),
   repo: z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/),
   homepage: z.string().url().startsWith('https://'),
-  assetMatch: z.string().min(1),
-  exe: relPath,
+  assetMatch: z.string().min(1).optional(),
+  exe: relPath.optional(),
   args: z.array(z.string()),
   gameFile: z
     .object({
@@ -116,8 +150,15 @@ export const recompManifestSchema = z.object({
       accepted: z
         .array(
           z
-            .object({ label: z.string(), sha1: hex(40).optional(), md5: hex(32).optional(), crc32: hex(8).optional() })
-            .refine((a) => a.sha1 || a.md5 || a.crc32, 'needs at least one hash'),
+            .object({
+              label: z.string(),
+              sha1: hex(40).optional(),
+              md5: hex(32).optional(),
+              crc32: hex(8).optional(),
+              sha256: hex(64).optional(),
+              size: z.number().int().positive().optional(),
+            })
+            .refine((a) => a.sha1 || a.md5 || a.crc32 || a.sha256 || a.size, 'needs a hash or a size'),
         )
         .min(1),
       delivery: z.enum(['argv', 'copy', 'in-app']),
@@ -138,6 +179,15 @@ export const recompManifestSchema = z.object({
         .partial(),
     })
     .optional(),
-});
+  build: z
+    .object({
+      requires: z.array(z.enum(['git', 'python'])),
+      install: z.array(z.string()).min(1),
+      run: z.array(z.string()).min(1),
+      requirements: z.string(),
+    })
+    .optional(),
+})
+  .refine((m) => m.build || (m.assetMatch && m.exe), 'a release port needs assetMatch and exe');
 
 export const recompRegistrySchema = z.array(recompManifestSchema);

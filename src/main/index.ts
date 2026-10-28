@@ -21,6 +21,7 @@ import { shutdownOnce } from './lifecycle/shutdown';
 import { startUpdater } from './updates/updater';
 import { autoLink } from './recomps/linker';
 import { checkPortsAtStartup } from './recomps/github';
+import { loadCachedRegistry, refreshRegistry } from './recomps/remoteRegistry';
 import { reconcileInstalls } from './recomps/installer';
 import { listInstalls } from './db/repositories/recompsRepo';
 
@@ -152,6 +153,8 @@ app
     if (!smoke) seedDefaultSettings(); // smoke configures its own throwaway dirs
     // Re-point absolute path settings carried over from a legacy-dir migration (above).
     if (legacyDataDir) rewriteLegacyPathSettings(legacyDataDir, app.getPath('userData'));
+    // Native Ports: apply the last fetched remote port registry before anything reads it.
+    if (!smoke) await loadCachedRegistry();
     boot(
       'db opened (journal_mode =',
       db.pragma('journal_mode', { simple: true }),
@@ -210,6 +213,7 @@ app
         // refresh release info (at most every 6 h per port, unless recomps.autoCheck is off).
         await reconcileInstalls(listInstalls());
         await autoLink().catch((e) => boot('port auto-link failed', e));
+        await refreshRegistry().catch(() => undefined);
         await checkPortsAtStartup().catch(() => undefined);
       })();
     }

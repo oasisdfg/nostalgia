@@ -522,6 +522,8 @@ export interface IpcInvokeMap {
   'recomps:revealInstall': { request: { id: string }; response: { ok: true } };
   /** Opens the managed Native Ports folder (recomps.dir) - main resolves the path. */
   'recomps:revealDir': { request: void; response: { ok: true } };
+  /** Build-from-source ports: opens the full build output (a file, not an in-app log panel). */
+  'recomps:revealBuildLog': { request: { id: string }; response: { ok: boolean } };
 }
 
 // ---------------------------------------------------------------------------
@@ -575,6 +577,8 @@ export interface IpcEventMap {
   'updates:progress': { fraction: number; bytesPerSecond: number };
   'recomps:progress': { id: string; fraction: number; bytesReceived: number; bytesTotal: number | null };
   'recomps:stateChanged': { id: string; state: RecompInstallState; error?: string | null };
+  /** Build-from-source progress: the current step and its latest detail (e.g. "42%"). */
+  'recomps:buildStatus': { id: string; step: string; detail: string };
 }
 
 // ---------------------------------------------------------------------------
@@ -679,6 +683,7 @@ export const IPC_INVOKE_CHANNELS = [
   'recomps:revealGameFile',
   'recomps:revealInstall',
   'recomps:revealDir',
+  'recomps:revealBuildLog',
 ] as const;
 
 export const IPC_EVENT_CHANNELS = [
@@ -694,6 +699,7 @@ export const IPC_EVENT_CHANNELS = [
   'updates:progress',
   'recomps:progress',
   'recomps:stateChanged',
+  'recomps:buildStatus',
 ] as const;
 
 // Bidirectional equality check between the runtime arrays and the map keys.

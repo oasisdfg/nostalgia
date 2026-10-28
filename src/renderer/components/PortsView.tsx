@@ -13,6 +13,7 @@ import {
   Check,
   Undo2,
   SlidersHorizontal,
+  FileText,
 } from 'lucide-react';
 import { FocusSection, Focusable } from './Focusable';
 import { Button } from './Button';
@@ -20,6 +21,7 @@ import { Badge } from './Badge';
 import { Spinner } from './Spinner';
 import { EmptyState } from './EmptyState';
 import { ConsoleLogo } from './SystemIcon';
+import { PortProgress } from './PortProgress';
 import { PortSettings, portSettingOptions } from './PortSettings';
 import { invoke } from '@renderer/bridge/ipc';
 import { well } from '@renderer/theme/classes';
@@ -27,7 +29,6 @@ import { useSystems } from '@renderer/query/useSystems';
 import { useGames } from '@renderer/query/useGames';
 import {
   useRecomps,
-  useRecompProgress,
   useInstallRecomp,
   useCancelRecomp,
   useRollbackRecomp,
@@ -38,7 +39,8 @@ import {
   useRevealRecompInstall,
   useCheckRecompUpdates,
   isBusy,
-  busyLabel,
+  installLabel,
+  useRevealRecompBuildLog,
 } from '@renderer/query/useRecomps';
 import type { RecompDTO } from '@shared/contracts/recomps';
 
@@ -92,7 +94,6 @@ function PortCard({ port }: { port: RecompDTO }) {
   const system = systems.find((s) => s.slug === m.gameFile.systemSlug);
   const { data: games } = useGames({ systemId: system?.id ?? -1, sort: 'title', order: 'asc' });
   const linked = games?.items.find((g) => g.id === port.linkedGameId) ?? null;
-  const progress = useRecompProgress(m.id);
   const install = useInstallRecomp();
   const cancel = useCancelRecomp();
   const uninstall = useUninstallRecomp();
@@ -100,6 +101,7 @@ function PortCard({ port }: { port: RecompDTO }) {
   const launch = useLaunchRecomp();
   const reveal = useRevealRecompInstall();
   const rollback = useRollbackRecomp();
+  const buildLog = useRevealRecompBuildLog();
   const [picking, setPicking] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const hasSettings = portSettingOptions(m).length > 0;
@@ -109,19 +111,7 @@ function PortCard({ port }: { port: RecompDTO }) {
 
   const primary = busy ? (
     <div className="flex min-w-0 flex-1 items-center gap-3">
-      <div className="min-w-0 flex-1">
-        <p className="text-2xs text-fg-muted">{busyLabel(port, progress)}</p>
-        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2">
-          {port.state === 'verifying' ? (
-            <div className="h-full w-full animate-pulse rounded-full bg-accent/40" />
-          ) : (
-            <div
-              className="h-full rounded-full bg-accent transition-all"
-              style={{ width: `${Math.round((progress?.fraction ?? 0) * 100)}%` }}
-            />
-          )}
-        </div>
-      </div>
+      <PortProgress port={port} />
       <Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} onClick={() => cancel.mutate(m.id)}>
         Cancel
       </Button>
@@ -138,7 +128,7 @@ function PortCard({ port }: { port: RecompDTO }) {
     </Button>
   ) : (
     <Button variant="primary" icon={<Download className="h-4 w-4" />} onClick={() => install.mutate(m.id)}>
-      {port.state === 'failed' ? 'Try again' : 'Install'}
+      {installLabel(port)}
     </Button>
   );
 
@@ -160,6 +150,7 @@ function PortCard({ port }: { port: RecompDTO }) {
       </div>
 
       <p className="text-sm text-fg-muted">{m.summary}</p>
+      {m.build && !installed && <p className="text-2xs text-fg-faint">Needs {m.build.requirements}</p>}
 
       {/* The game it runs from: linked (and whether the dump is a known-good one), or a prompt. */}
       <div className={`${well} px-3 py-2 text-2xs`}>
@@ -197,7 +188,16 @@ function PortCard({ port }: { port: RecompDTO }) {
         )}
       </div>
 
-      {port.lastError && !busy && <p className="text-2xs text-danger">{port.lastError}</p>}
+      {port.lastError && !busy && (
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-2xs text-danger">{port.lastError}</p>
+          {m.build && (
+            <Button variant="ghost" size="sm" icon={<FileText className="h-3.5 w-3.5" />} onClick={() => buildLog.mutate(m.id)}>
+              Show build log
+            </Button>
+          )}
+        </div>
+      )}
 
       {showSettings && (
         <div className="space-y-2">
@@ -210,7 +210,7 @@ function PortCard({ port }: { port: RecompDTO }) {
         {primary}
         {installed && port.updateAvailable && !busy && (
           <Button variant="secondary" icon={<RefreshCw className="h-4 w-4" />} onClick={() => install.mutate(m.id)}>
-            Update to {port.latestTag}
+            {m.build ? 'Rebuild with the latest code' : `Update to ${port.latestTag}`}
           </Button>
         )}
         {installed && port.previousTag && !busy && (

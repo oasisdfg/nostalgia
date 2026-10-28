@@ -47,4 +47,4 @@ jobs:
           # separate public repo (oasisdfg/nostalgia-releases), swap this for a
           # fine-grained PAT with contents:write on that repo only: secrets.RELEASES_TOKEN.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/fetch-native.mjs && node scripts/fetch-aria2.mjs && npx electron-vite build && npx electron-builder --win --publish always
+        run: node scripts/fetch-native.mjs && node scripts/fetch-aria2.mjs && node scripts/fetch-7zip.mjs && npx electron-vite build && npx electron-builder --win --publish always

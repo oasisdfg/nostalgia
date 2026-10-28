@@ -83,6 +83,7 @@ function toResolved(body: GhRelease, etag: string | null): ResolvedRelease {
 
 /** The release's asset for a manifest (null when none matches assetMatch). */
 export function assetFor(release: ResolvedRelease, manifest: RecompManifest): ReleaseAsset | null {
+  if (!manifest.assetMatch) return null; // a build-from-source port has no release asset
   const name = pickAsset(
     release.assets.map((a) => a.name),
     manifest.assetMatch,
@@ -90,11 +91,35 @@ export function assetFor(release: ResolvedRelease, manifest: RecompManifest): Re
   return release.assets.find((a) => a.name === name) ?? null;
 }
 
+/**
+ * A build-from-source port's "version" is the newest commit on its default branch (short
+ * sha). Same conditional-request rules as releases. Resolves null on 304.
+ */
+export async function fetchLatestCommit(repo: string, etag?: string | null): Promise<{ tag: string; etag: string | null } | null> {
+  const headers: Record<string, string> = { Accept: 'application/vnd.github+json', 'User-Agent': 'Nostalgia' };
+  if (etag) headers['If-None-Match'] = etag;
+  let res: Response;
+  try {
+    res = await net.fetch(`https://api.github.com/repos/${repo}/commits?per_page=1`, { headers });
+  } catch {
+    throw new GithubError("Couldn't reach GitHub.");
+  }
+  if (res.status === 304) return null;
+  if (res.status === 403 || res.status === 429) throw new GithubError('GitHub is limiting requests. Try again later.');
+  if (!res.ok) throw new GithubError(`GitHub returned an error (${res.status}).`);
+  const body = (await res.json()) as { sha: string }[];
+  if (!body[0]?.sha) throw new GithubError('This port has no source code yet.');
+  return { tag: body[0].sha.slice(0, 7), etag: res.headers.get('etag') };
+}
+
 /** Refreshes one port's cached latest_tag (conditional request; keeps the cache on failure). */
 export async function checkPort(manifest: RecompManifest): Promise<void> {
   const row = getInstall(manifest.id);
   try {
-    const release = await fetchLatestRelease(manifest.repo, row?.latest_tag ? row.etag : null);
+    const etag = row?.latest_tag ? row.etag : null;
+    const release = manifest.build
+      ? await fetchLatestCommit(manifest.repo, etag)
+      : await fetchLatestRelease(manifest.repo, etag);
     if (release) {
       upsertInstall(manifest.id, { latest_tag: release.tag, etag: release.etag, latest_checked_at: Date.now() });
     } else {

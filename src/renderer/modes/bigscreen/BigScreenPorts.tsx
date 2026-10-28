@@ -6,19 +6,19 @@ import { Badge } from '@renderer/components/Badge';
 import { Spinner } from '@renderer/components/Spinner';
 import { ConsoleLogo } from '@renderer/components/SystemIcon';
 import { PortSettingsCycle } from '@renderer/components/PortSettings';
+import { PortProgress } from '@renderer/components/PortProgress';
 import { setFocus } from '@renderer/input/spatialNav';
 import { useSystems } from '@renderer/query/useSystems';
 import { useGames } from '@renderer/query/useGames';
 import {
   useRecomps,
-  useRecompProgress,
   useInstallRecomp,
   useCancelRecomp,
   useRollbackRecomp,
   useLaunchRecomp,
   useLinkRecomp,
   isBusy,
-  busyLabel,
+  installLabel,
 } from '@renderer/query/useRecomps';
 import type { RecompDTO } from '@shared/contracts/recomps';
 
@@ -58,7 +58,6 @@ function PortRow({ port }: { port: RecompDTO }) {
   const system = systems.find((s) => s.slug === m.gameFile.systemSlug);
   const { data: games } = useGames({ systemId: system?.id ?? -1, sort: 'title', order: 'asc' });
   const linked = games?.items.find((g) => g.id === port.linkedGameId) ?? null;
-  const progress = useRecompProgress(m.id);
   const install = useInstallRecomp();
   const cancel = useCancelRecomp();
   const rollback = useRollbackRecomp();
@@ -84,17 +83,8 @@ function PortRow({ port }: { port: RecompDTO }) {
         </div>
       </div>
 
-      {busy && (
-        <div>
-          <p className="text-base text-fg-muted">{busyLabel(port, progress)}</p>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
-            <div
-              className="h-full rounded-full bg-accent transition-all"
-              style={{ width: `${Math.round((progress?.fraction ?? 0) * 100)}%` }}
-            />
-          </div>
-        </div>
-      )}
+      {busy && <PortProgress port={port} size="lg" />}
+      {m.build && !installed && !busy && <p className="text-base text-fg-faint">Needs {m.build.requirements}</p>}
       {port.lastError && !busy && <p className="text-base text-danger">{port.lastError}</p>}
 
       <div className="flex flex-wrap gap-3">
@@ -116,7 +106,7 @@ function PortRow({ port }: { port: RecompDTO }) {
           ) : null
         ) : (
           <Button size="lg" variant="primary" icon={<Download className="h-5 w-5" />} onClick={() => install.mutate(m.id)}>
-            {port.state === 'failed' ? 'Try again' : 'Install'}
+            {installLabel(port)}
           </Button>
         )}
         {!linked && (
@@ -126,7 +116,7 @@ function PortRow({ port }: { port: RecompDTO }) {
         )}
         {installed && port.updateAvailable && !busy && (
           <Button size="lg" variant="secondary" icon={<RefreshCw className="h-5 w-5" />} onClick={() => install.mutate(m.id)}>
-            Update to {port.latestTag}
+            {m.build ? 'Rebuild with the latest code' : `Update to ${port.latestTag}`}
           </Button>
         )}
         {installed && port.previousTag && !busy && (

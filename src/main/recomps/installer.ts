@@ -10,9 +10,11 @@ import type { RecompInstallState, RecompManifest } from '@shared/contracts/recom
 import { broadcastEvent } from '../ipc/registry';
 import { getInstall, upsertInstall, type RecompInstallRow } from '../db/repositories/recompsRepo';
 import { extractGameZip } from '../storage/extract';
+import { extract7z } from '../storage/sevenZip';
 import { fetchLatestRelease, assetFor, isSafeTag, GithubError } from './github';
 import { getManifest } from './registry';
 import { portDir, joinInside, expandSaveDir, isInside } from './paths';
+import { runBuild, removeBuild, findPython, BuildError } from './builder';
 
 /**
  * Port install/update pipeline: download the release asset → verify SHA-256 (when the
@@ -50,15 +52,17 @@ function progress(id: string, bytesReceived: number, bytesTotal: number | null):
 
 /** Locates the exe inside a fresh install, allowing for one wrapping top-level folder. */
 async function resolveExe(tagDir: string, manifest: RecompManifest): Promise<{ installDir: string; exePath: string }> {
-  const direct = joinInside(tagDir, manifest.exe);
+  const exe = manifest.exe;
+  if (!exe) throw new InstallError("This port doesn't name its program file.");
+  const direct = joinInside(tagDir, exe);
   if (existsSync(direct)) return { installDir: tagDir, exePath: direct };
   const entries = await readdir(tagDir, { withFileTypes: true });
   if (entries.length === 1 && entries[0].isDirectory()) {
     const inner = join(tagDir, entries[0].name);
-    const nested = joinInside(inner, manifest.exe);
+    const nested = joinInside(inner, exe);
     if (existsSync(nested)) return { installDir: inner, exePath: nested };
   }
-  throw new InstallError(`The download didn't contain ${basename(manifest.exe)}.`);
+  throw new InstallError(`The download didn't contain ${basename(exe)}.`);
 }
 
 /** The version folder an install lives in (<portDir>/<tag>), for removal. */
@@ -142,8 +146,36 @@ export function startInstall(id: string): void {
   if (!manifest) throw new Error('Unknown port.');
   const controller = new AbortController();
   jobs.set(id, controller);
-  setState(id, 'downloading');
-  void runInstall(manifest, controller.signal).finally(() => jobs.delete(id));
+  setState(id, manifest.build ? 'building' : 'downloading');
+  const job = manifest.build ? runBuildInstall(manifest, controller.signal) : runInstall(manifest, controller.signal);
+  void job.finally(() => jobs.delete(id));
+}
+
+/** A build-from-source port: clone/pull + the project's own build script (see builder.ts). */
+async function runBuildInstall(manifest: RecompManifest, signal: AbortSignal): Promise<void> {
+  const id = manifest.id;
+  const before = getInstall(id);
+  const wasInstalled = before?.state === 'installed' && before.installed_tag != null;
+  try {
+    const { commit, dir } = await runBuild(manifest, signal);
+    const python = findPython();
+    upsertInstall(id, {
+      installed_tag: commit,
+      install_dir: dir,
+      // The port runs under python (main-resolved from PATH again at each launch).
+      exe_path: python?.exe ?? null,
+      latest_tag: commit, // just pulled to the newest commit
+    });
+    setState(id, 'installed');
+  } catch (e) {
+    if (signal.aborted) {
+      setState(id, wasInstalled ? 'installed' : 'not_installed');
+      return;
+    }
+    const message = e instanceof BuildError ? e.message : `${manifest.name} couldn't be built.`;
+    // A failed rebuild leaves the previous build playable; only report the error.
+    setState(id, wasInstalled ? 'installed' : 'failed', message);
+  }
 }
 
 async function runInstall(manifest: RecompManifest, signal: AbortSignal): Promise<void> {
@@ -166,9 +198,8 @@ async function runInstall(manifest: RecompManifest, signal: AbortSignal): Promis
     }
     const asset = assetFor(release, manifest);
     if (!asset) throw new InstallError("The latest release has no Windows download.");
-    if (!asset.name.toLowerCase().endsWith('.zip')) {
-      throw new InstallError("This port's download format isn't supported yet.");
-    }
+    const kind = asset.name.toLowerCase().endsWith('.zip') ? 'zip' : asset.name.toLowerCase().endsWith('.7z') ? '7z' : null;
+    if (!kind) throw new InstallError("This port's download format isn't supported yet.");
 
     await mkdir(dir, { recursive: true });
     partPath = join(dir, `.${release.tag}.part`);
@@ -191,17 +222,25 @@ async function runInstall(manifest: RecompManifest, signal: AbortSignal): Promis
       await backupSaves(manifest, before?.install_dir ?? null);
     }
     await rm(tagDir, { recursive: true, force: true });
-    zipPath = join(dir, `${release.tag}.zip`);
+    zipPath = join(dir, `${release.tag}.${kind}`);
     await rename(partPath, zipPath);
     partPath = null;
-    const extracted = await extractGameZip(zipPath, {
-      signal,
-      onProgress: (done, total) => progress(id, done, total),
-    });
-    // A single-file zip extracts flat beside the zip - move it into its version folder.
-    if (!extracted.extractDir) {
-      await mkdir(tagDir, { recursive: true });
-      await rename(extracted.launchPath, join(tagDir, basename(extracted.launchPath)));
+    if (kind === '7z') {
+      await extract7z(zipPath, tagDir, { signal, onProgress: (f) => progress(id, Math.round(f * 100), 100) }).catch(
+        () => {
+          throw new InstallError("The port's download couldn't be unpacked.");
+        },
+      );
+    } else {
+      const extracted = await extractGameZip(zipPath, {
+        signal,
+        onProgress: (done, total) => progress(id, done, total),
+      });
+      // A single-file zip extracts flat beside the zip - move it into its version folder.
+      if (!extracted.extractDir) {
+        await mkdir(tagDir, { recursive: true });
+        await rename(extracted.launchPath, join(tagDir, basename(extracted.launchPath)));
+      }
     }
     await rm(zipPath, { force: true });
     zipPath = null;
@@ -258,6 +297,7 @@ export async function rollback(id: string): Promise<void> {
   if (!row.previous_tag || !row.previous_dir || !existsSync(row.previous_dir)) {
     throw new Error('There is no previous version to roll back to.');
   }
+  if (!manifest.exe) throw new Error("A port built from source can't be rolled back.");
   await backupSaves(manifest, row.install_dir);
   if (row.install_dir) await carrySaves(manifest, row.install_dir, row.previous_dir);
   const exePath = joinInside(row.previous_dir, manifest.exe);
@@ -287,9 +327,13 @@ export async function uninstall(id: string): Promise<void> {
     while (jobs.has(id)) await new Promise((r) => setTimeout(r, 50));
   }
   if (row?.install_dir) await backupSaves(manifest, row.install_dir);
-  for (const tag of [row?.installed_tag ?? null, row?.previous_tag ?? null]) {
-    const d = tagDirOf(id, tag);
-    if (d) await rm(d, { recursive: true, force: true });
+  if (manifest.build) {
+    await removeBuild(id); // the checkout + Nostalgia's build folder
+  } else {
+    for (const tag of [row?.installed_tag ?? null, row?.previous_tag ?? null]) {
+      const d = tagDirOf(id, tag);
+      if (d) await rm(d, { recursive: true, force: true });
+    }
   }
   upsertInstall(id, {
     installed_tag: null,
@@ -305,7 +349,9 @@ export async function uninstall(id: string): Promise<void> {
 /** Reconciles rows left mid-install by a previous run (the job died with the process). */
 export async function reconcileInstalls(rows: RecompInstallRow[]): Promise<void> {
   for (const row of rows) {
-    if (row.state !== 'downloading' && row.state !== 'verifying' && row.state !== 'extracting') continue;
+    if (row.state !== 'downloading' && row.state !== 'verifying' && row.state !== 'extracting' && row.state !== 'building') {
+      continue;
+    }
     const ok = row.exe_path && (await stat(row.exe_path).catch(() => null));
     upsertInstall(row.recomp_id, { state: ok ? 'installed' : row.installed_tag ? 'failed' : 'not_installed' });
   }
