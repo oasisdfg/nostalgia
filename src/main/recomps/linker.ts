@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
-import { link, copyFile, mkdir, readFile, rm, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { cp, link, copyFile, mkdir, readFile, rm, stat } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import type { RecompManifest } from '@shared/contracts/recomps';
+import type { RecompGameReady, RecompManifest } from '@shared/contracts/recomps';
+import type { RecompInstallRow } from '../db/repositories/recompsRepo';
 import { getInstall, upsertInstall, listCandidateFiles } from '../db/repositories/recompsRepo';
 import { setHashes, getPrimaryFileForGame } from '../db/repositories/gameFilesRepo';
 import { getGame } from '../db/repositories/gamesRepo';
@@ -31,6 +33,8 @@ const memo = new Map<string, Hashes[]>();
 const verified = new Map<string, boolean>();
 /** recompId → the matching game_files.id, used for reveal / copy / {romPath}. */
 const matchedFile = new Map<string, number>();
+/** recompId → whether the user's PICKED file is a known-good dump. */
+const pickedVerified = new Map<string, boolean>();
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);
@@ -151,6 +155,7 @@ export function autoLink(): Promise<void> {
         const slug = m.gameFile.systemSlug;
         if (!bySlug.has(slug)) bySlug.set(slug, listCandidateFiles(slug));
         await evaluate(m, bySlug.get(slug)!);
+        await evaluatePicked(m, getInstall(m.id)).catch(() => undefined);
       }
     })().finally(() => {
       running = null;
@@ -175,13 +180,61 @@ export function unlink(recompId: string): void {
   matchedFile.delete(recompId);
 }
 
-export function isFileVerified(recompId: string): boolean {
-  return verified.get(recompId) ?? false;
+/**
+ * Checks files the user picked through the OS dialog. A file small enough to hash can be a
+ * known-good dump; a folder, an oversized image or an unknown dump is unverified (an exact
+ * size match still only counts as unverified - the port checks the rest).
+ */
+async function evaluatePicked(manifest: RecompManifest, row: RecompInstallRow | undefined): Promise<void> {
+  const path = row?.picked_path;
+  pickedVerified.delete(manifest.id);
+  if (!path) return;
+  const st = await stat(path).catch(() => null);
+  if (!st?.isFile()) return;
+  const forms = await diskHashes(path, manifest.gameFile.systemSlug);
+  pickedVerified.set(manifest.id, !!forms && forms.some((h) => accepts(manifest, h)));
+}
+
+/** Stores the user's picked files/folder (opaque, verbatim) and checks them. */
+export async function setPicked(recompId: string, path: string): Promise<void> {
+  const manifest = getManifest(recompId);
+  if (!manifest) throw new Error('Unknown port.');
+  const row = upsertInstall(recompId, { picked_path: path, file_delivered: 0 });
+  await evaluatePicked(manifest, row);
+}
+
+export function clearPicked(recompId: string): void {
+  upsertInstall(recompId, { picked_path: null, file_delivered: 0 });
+  pickedVerified.delete(recompId);
+}
+
+/** The user's copy for this port: a linked library game wins over picked files. */
+export function gameReady(recompId: string, row: RecompInstallRow | undefined): RecompGameReady {
+  if (row?.linked_game_id != null) return verified.get(recompId) ? 'verified' : 'unverified';
+  if (row?.picked_path && existsSync(row.picked_path)) return pickedVerified.get(recompId) ? 'verified' : 'unverified';
+  return 'missing';
 }
 
 /** The game file handed to the port: the hash-matched one, else the game's primary file. */
 export function fileForPort(recompId: string, gameId: number): number | null {
   return matchedFile.get(recompId) ?? getPrimaryFileForGame(gameId)?.id ?? null;
+}
+
+/**
+ * On-disk path of the user's copy, in order: the matched library file (fetched into the
+ * cache if needed), then the picked files/folder. Throws a human message when there's none.
+ */
+export async function resolveGamePath(recompId: string): Promise<string> {
+  const manifest = getManifest(recompId);
+  const row = getInstall(recompId);
+  if (!manifest) throw new Error('Unknown port.');
+  if (row?.linked_game_id != null) {
+    const fileId = fileForPort(recompId, row.linked_game_id);
+    if (fileId == null) throw new Error('The linked game has no file yet.');
+    return ensureCached(fileId);
+  }
+  if (row?.picked_path && existsSync(row.picked_path)) return row.picked_path;
+  throw new Error(`Link your copy of ${manifest.originalTitle} first.`);
 }
 
 /**
@@ -192,14 +245,15 @@ export function fileForPort(recompId: string, gameId: number): number | null {
 export async function deliverFile(recompId: string): Promise<void> {
   const manifest = getManifest(recompId);
   const row = getInstall(recompId);
-  if (!manifest || !row?.install_dir || row.linked_game_id == null) return;
+  if (!manifest || !row?.install_dir) return;
   if (manifest.gameFile.delivery !== 'copy' || !manifest.gameFile.placePath) return;
-  const fileId = fileForPort(recompId, row.linked_game_id);
-  if (fileId == null) throw new Error('The linked game has no file to give the port.');
-  const src = await ensureCached(fileId);
+  const src = await resolveGamePath(recompId);
   const dest = joinInside(row.install_dir, manifest.gameFile.placePath);
   const [s, d] = await Promise.all([stat(src), stat(dest).catch(() => null)]);
-  if (!d || d.size !== s.size) {
+  if (s.isDirectory()) {
+    // A picked folder (e.g. a PSP EBOOT + PSP_GAME tree): copy it in once.
+    if (!d) await cp(src, dest, { recursive: true });
+  } else if (!d || d.size !== s.size) {
     await mkdir(dirname(dest), { recursive: true });
     await rm(dest, { force: true }); // a stale/partial copy from an earlier attempt
     try {

@@ -2,7 +2,7 @@ import { net } from 'electron';
 import { createHash } from 'node:crypto';
 import { createReadStream, createWriteStream, existsSync } from 'node:fs';
 import { cp, mkdir, readdir, rename, rm, stat } from 'node:fs/promises';
-import { join, basename } from 'node:path';
+import { join, basename, dirname } from 'node:path';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
@@ -144,6 +144,9 @@ export function startInstall(id: string): void {
   if (jobs.has(id)) return;
   const manifest = getManifest(id);
   if (!manifest) throw new Error('Unknown port.');
+  if (manifest.assetKind === 'external' && !manifest.build) {
+    throw new Error(`${manifest.name} installs itself. Get it from the project page, then locate its program.`);
+  }
   const controller = new AbortController();
   jobs.set(id, controller);
   setState(id, manifest.build ? 'building' : 'downloading');
@@ -198,8 +201,11 @@ async function runInstall(manifest: RecompManifest, signal: AbortSignal): Promis
     }
     const asset = assetFor(release, manifest);
     if (!asset) throw new InstallError("The latest release has no Windows download.");
-    const kind = asset.name.toLowerCase().endsWith('.zip') ? 'zip' : asset.name.toLowerCase().endsWith('.7z') ? '7z' : null;
-    if (!kind) throw new InstallError("This port's download format isn't supported yet.");
+    // The manifest declares the kind; the asset's own extension has to agree.
+    const kind = manifest.assetKind;
+    const ext = asset.name.toLowerCase();
+    const extOk = kind === 'zip' ? ext.endsWith('.zip') : kind === '7z' ? ext.endsWith('.7z') : kind === 'exe' && ext.endsWith('.exe');
+    if (!extOk) throw new InstallError("This port's download format isn't supported yet.");
 
     await mkdir(dir, { recursive: true });
     partPath = join(dir, `.${release.tag}.part`);
@@ -225,7 +231,12 @@ async function runInstall(manifest: RecompManifest, signal: AbortSignal): Promis
     zipPath = join(dir, `${release.tag}.${kind}`);
     await rename(partPath, zipPath);
     partPath = null;
-    if (kind === '7z') {
+    if (kind === 'exe') {
+      // A single-file program: it IS the install, placed as <installDir>/<exe>.
+      const target = joinInside(tagDir, manifest.exe!);
+      await mkdir(dirname(target), { recursive: true });
+      await rename(zipPath, target);
+    } else if (kind === '7z') {
       await extract7z(zipPath, tagDir, { signal, onProgress: (f) => progress(id, Math.round(f * 100), 100) }).catch(
         () => {
           throw new InstallError("The port's download couldn't be unpacked.");
@@ -326,6 +337,12 @@ export async function uninstall(id: string): Promise<void> {
     cancelInstall(id);
     while (jobs.has(id)) await new Promise((r) => setTimeout(r, 50));
   }
+  if (manifest.assetKind === 'external' && !manifest.build) {
+    // Installed by the user with the port's own installer: forget where it is, never delete it.
+    upsertInstall(id, { installed_tag: null, install_dir: null, exe_path: null, external_exe_path: null, file_delivered: 0 });
+    setState(id, 'not_installed');
+    return;
+  }
   if (row?.install_dir) await backupSaves(manifest, row.install_dir);
   if (manifest.build) {
     await removeBuild(id); // the checkout + Nostalgia's build folder
@@ -355,4 +372,21 @@ export async function reconcileInstalls(rows: RecompInstallRow[]): Promise<void>
     const ok = row.exe_path && (await stat(row.exe_path).catch(() => null));
     upsertInstall(row.recomp_id, { state: ok ? 'installed' : row.installed_tag ? 'failed' : 'not_installed' });
   }
+}
+
+/**
+ * An 'external' port the user installed with its own installer: record the exe they located
+ * through the OS dialog (opaque, verbatim). Its version is taken as the latest release known
+ * now, so a later release shows as an update ("new version on the project page").
+ */
+export function setLocatedExe(id: string, exePath: string): void {
+  const row = getInstall(id);
+  upsertInstall(id, {
+    external_exe_path: exePath,
+    exe_path: exePath,
+    install_dir: dirname(exePath),
+    installed_tag: row?.latest_tag ?? 'located',
+    last_error: null,
+  });
+  setState(id, 'installed');
 }

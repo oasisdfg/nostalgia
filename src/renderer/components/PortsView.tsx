@@ -41,8 +41,12 @@ import {
   isBusy,
   installLabel,
   useRevealRecompBuildLog,
+  usePickRecompFiles,
+  useClearRecompPicked,
+  useLocateRecompExe,
 } from '@renderer/query/useRecomps';
 import type { RecompDTO } from '@shared/contracts/recomps';
+import { DISPLAY_ONLY_CONSOLES } from '@shared/contracts/catalog';
 
 /**
  * Native Ports: fan-made PC builds of console games that run from the user's own copy.
@@ -102,12 +106,18 @@ function PortCard({ port }: { port: RecompDTO }) {
   const reveal = useRevealRecompInstall();
   const rollback = useRollbackRecomp();
   const buildLog = useRevealRecompBuildLog();
+  const pick = usePickRecompFiles();
+  const clearPicked = useClearRecompPicked();
+  const locate = useLocateRecompExe();
+  const consoleName = system?.name ?? DISPLAY_ONLY_CONSOLES[m.gameFile.systemSlug] ?? m.gameFile.systemSlug;
   const [picking, setPicking] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const hasSettings = portSettingOptions(m).length > 0;
 
   const busy = isBusy(port);
   const installed = port.state === 'installed';
+  const external = m.assetKind === 'external' && !m.build;
+  const openProject = (): void => void invoke('app:openExternal', { url: m.homepage });
 
   const primary = busy ? (
     <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -120,12 +130,21 @@ function PortCard({ port }: { port: RecompDTO }) {
     <Button
       variant="primary"
       icon={<Play className="h-4 w-4" fill="currentColor" />}
-      disabled={port.linkedGameId == null || launch.isPending}
-      title={port.linkedGameId == null ? `Link your copy of ${m.originalTitle} first` : undefined}
+      disabled={!port.canPlay || launch.isPending}
+      title={port.gameReady === 'missing' ? `Link your copy of ${m.originalTitle} first` : undefined}
       onClick={() => launch.mutate(m.id)}
     >
       {launch.isPending ? 'Starting…' : 'Play'}
     </Button>
+  ) : external ? (
+    <>
+      <Button variant="primary" icon={<ExternalLink className="h-4 w-4" />} onClick={openProject}>
+        Get from project page
+      </Button>
+      <Button variant="secondary" icon={<FolderOpen className="h-4 w-4" />} onClick={() => locate.mutate(m.id)}>
+        Locate exe…
+      </Button>
+    </>
   ) : (
     <Button variant="primary" icon={<Download className="h-4 w-4" />} onClick={() => install.mutate(m.id)}>
       {installLabel(port)}
@@ -157,26 +176,45 @@ function PortCard({ port }: { port: RecompDTO }) {
         {linked ? (
           <div className="flex items-center justify-between gap-3">
             <span className="min-w-0 truncate text-fg">
-              {port.fileVerified && <Check className="mr-1 inline h-3.5 w-3.5 text-positive" />}
+              {port.gameReady === 'verified' && <Check className="mr-1 inline h-3.5 w-3.5 text-positive" />}
               Uses your copy of <span className="font-medium">{linked.title}</span>
+              {port.gameReady === 'unverified' && <span className="text-fg-muted"> · unverified dump</span>}
             </span>
             <Button variant="ghost" size="sm" icon={<Unlink className="h-3.5 w-3.5" />} onClick={() => unlink.mutate(m.id)}>
               Unlink
             </Button>
           </div>
-        ) : (
+        ) : port.pickedName ? (
           <div className="flex items-center justify-between gap-3">
-            <span className="text-fg-muted">
-              Needs your {system?.name ?? m.gameFile.systemSlug} copy of {m.originalTitle}
+            <span className="min-w-0 truncate text-fg">
+              {port.gameReady === 'verified' && <Check className="mr-1 inline h-3.5 w-3.5 text-positive" />}
+              <span className="font-medium">{port.pickedName}</span>
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              icon={<Link2 className="h-3.5 w-3.5" />}
-              onClick={() => setPicking((v) => !v)}
-            >
-              Link a game…
+            <Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} onClick={() => clearPicked.mutate(m.id)}>
+              Clear
             </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-fg-muted">
+              Needs your {consoleName} copy of {m.originalTitle}
+              {m.gameFile.pickHint ? ` (${m.gameFile.pickHint})` : ''}
+            </span>
+            <span className="flex gap-1">
+              {m.gameFile.source === 'library' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Link2 className="h-3.5 w-3.5" />}
+                  onClick={() => setPicking((v) => !v)}
+                >
+                  Link your copy
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" icon={<FolderOpen className="h-3.5 w-3.5" />} onClick={() => pick.mutate(m.id)}>
+                Choose files…
+              </Button>
+            </span>
           </div>
         )}
         {picking && !linked && (
@@ -209,8 +247,12 @@ function PortCard({ port }: { port: RecompDTO }) {
       <div className="flex flex-wrap items-center gap-2">
         {primary}
         {installed && port.updateAvailable && !busy && (
-          <Button variant="secondary" icon={<RefreshCw className="h-4 w-4" />} onClick={() => install.mutate(m.id)}>
-            {m.build ? 'Rebuild with the latest code' : `Update to ${port.latestTag}`}
+          <Button
+            variant="secondary"
+            icon={<RefreshCw className="h-4 w-4" />}
+            onClick={() => (external ? openProject() : install.mutate(m.id))}
+          >
+            {external ? 'New version on project page' : m.build ? 'Rebuild with the latest code' : `Update to ${port.latestTag}`}
           </Button>
         )}
         {installed && port.previousTag && !busy && (

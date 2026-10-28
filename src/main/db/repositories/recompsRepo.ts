@@ -17,6 +17,10 @@ export interface RecompInstallRow {
   file_delivered: number;
   last_error: string | null;
   updated_at: number;
+  /** opaque; the user's files/folder from the OS dialog (migration 0011) */
+  picked_path: string | null;
+  /** opaque; the located exe of an 'external' port (migration 0011) */
+  external_exe_path: string | null;
 }
 
 export type RecompInstallPatch = Partial<Omit<RecompInstallRow, 'recomp_id' | 'updated_at'>>;

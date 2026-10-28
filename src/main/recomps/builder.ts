@@ -5,8 +5,7 @@ import { delimiter, join, parse } from 'node:path';
 import type { RecompManifest } from '@shared/contracts/recomps';
 import { broadcastEvent } from '../ipc/registry';
 import { getInstall } from '../db/repositories/recompsRepo';
-import { ensureCached } from '../launch/launcher';
-import { fileForPort } from './linker';
+import { gameReady, resolveGamePath } from './linker';
 import { portDir } from './paths';
 
 /**
@@ -143,10 +142,7 @@ export async function runBuild(manifest: RecompManifest, signal: AbortSignal): P
   if ((build.requires.includes('git') && !git) || (build.requires.includes('python') && !python)) {
     throw new BuildError(`${manifest.name} is built on your PC and needs: ${build.requirements}`);
   }
-  const row = getInstall(id);
-  if (row?.linked_game_id == null) throw new BuildError(`Link your copy of ${manifest.originalTitle} first.`);
-  const fileId = fileForPort(id, row.linked_game_id);
-  if (fileId == null) throw new BuildError('The linked game has no file yet.');
+  if (gameReady(id, getInstall(id)) === 'missing') throw new BuildError(`Link your copy of ${manifest.originalTitle} first.`);
 
   await mkdir(portDir(id), { recursive: true });
   const log = createWriteStream(buildLogPath(id), { flags: 'w' });
@@ -167,7 +163,7 @@ export async function runBuild(manifest: RecompManifest, signal: AbortSignal): P
 
   try {
     setStep('Getting your game file…');
-    const romPath = await ensureCached(fileId);
+    const romPath = await resolveGamePath(id);
 
     const src = sourceDir(id);
     if (existsSync(join(src, '.git'))) {

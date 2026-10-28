@@ -45,3 +45,6 @@ BUILD_PLAN.md
 
 # Old run logs
 log/
+
+# Claude Code task prompts (kept local)
+NOSTALGIA_*_PROMPT.md

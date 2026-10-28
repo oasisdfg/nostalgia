@@ -1,19 +1,25 @@
 import { z } from 'zod';
-import { shell } from 'electron';
+import { shell, dialog, BrowserWindow, type OpenDialogOptions } from 'electron';
 import { registerInvoke } from '../registry';
 import { getManifest } from '../../recomps/registry';
 import { listDtos, dtoFor, dtosForGame } from '../../recomps/service';
-import { checkPorts } from '../../recomps/github';
+import { checkPort, checkPorts } from '../../recomps/github';
 import { refreshRegistry } from '../../recomps/remoteRegistry';
-import { startInstall, cancelInstall, rollback, uninstall } from '../../recomps/installer';
-import { autoLink, linkManually, unlink, fileForPort } from '../../recomps/linker';
+import { startInstall, cancelInstall, rollback, uninstall, setLocatedExe } from '../../recomps/installer';
+import { autoLink, linkManually, unlink, resolveGamePath, setPicked, clearPicked } from '../../recomps/linker';
 import { launchRecomp } from '../../recomps/launch';
-import { ensureCached } from '../../launch/launcher';
 import { getInstall } from '../../db/repositories/recompsRepo';
 import { recompsDir } from '../../recomps/paths';
 import { buildLogPath } from '../../recomps/builder';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
+
+/** OS dialog in main; returns the chosen path verbatim (opaque) or null on cancel. */
+async function openDialog(options: OpenDialogOptions): Promise<string | null> {
+  const parent = BrowserWindow.getFocusedWindow();
+  const result = parent ? await dialog.showOpenDialog(parent, options) : await dialog.showOpenDialog(options);
+  return result.canceled || result.filePaths.length === 0 ? null : result.filePaths[0];
+}
 
 // Every request names a port by its registry id (checked against the bundled registry)
 // or a game by games.id. No channel accepts a path or URL from the renderer.
@@ -76,12 +82,8 @@ export function registerRecompsHandlers(): void {
   registerInvoke('recomps:launch', (req) => launchRecomp(idSchema.parse(req).id));
   registerInvoke('recomps:revealGameFile', async (req) => {
     const { id } = idSchema.parse(req);
-    const row = getInstall(id);
-    if (row?.linked_game_id == null) throw new Error('Link a game to this port first.');
-    const fileId = fileForPort(id, row.linked_game_id);
-    if (fileId == null) throw new Error('The linked game has no file yet.');
-    // The port's picker needs the file on disk - fetch it into the cache if it isn't.
-    shell.showItemInFolder(await ensureCached(fileId));
+    // The port's picker needs the file on disk - a library file is fetched into the cache.
+    shell.showItemInFolder(await resolveGamePath(id));
     return { ok: true as const };
   });
   registerInvoke('recomps:revealInstall', async (req) => {
@@ -96,6 +98,42 @@ export function registerRecompsHandlers(): void {
     if (!existsSync(log)) return { ok: false };
     shell.showItemInFolder(log);
     return { ok: true };
+  });
+  // The user's own copy of a game Nostalgia doesn't manage (PS4 dump, XBLA package, Switch or
+  // PSP folder) - or a library port's fallback when there's no matching library game. The
+  // path comes only from this dialog; the renderer names the port, never a path.
+  registerInvoke('recomps:pickGameFiles', async (req) => {
+    const { id } = idSchema.parse(req);
+    const m = getManifest(id)!;
+    const folder = m.gameFile.pickKind === 'folder';
+    const path = await openDialog({
+      title: `Choose your copy of ${m.originalTitle}`,
+      properties: [folder ? 'openDirectory' : 'openFile'],
+    });
+    if (path) await setPicked(id, path);
+    return dtoFor(id);
+  });
+  registerInvoke('recomps:clearPicked', (req) => {
+    const { id } = idSchema.parse(req);
+    clearPicked(id);
+    return dtoFor(id);
+  });
+  // 'external' ports: the user installed the port with its own installer; they point us at
+  // the exe once (main-resolved exe rule: an OS dialog in main, never a renderer path).
+  registerInvoke('recomps:locateExe', async (req) => {
+    const { id } = idSchema.parse(req);
+    const m = getManifest(id)!;
+    if (m.assetKind !== 'external') throw new Error('This port is installed by Nostalgia.');
+    const path = await openDialog({
+      title: `Locate ${m.name}`,
+      properties: ['openFile'],
+      filters: [{ name: 'Program', extensions: ['exe'] }],
+    });
+    if (path) {
+      await checkPort(m); // know the current version, so a later release reads as an update
+      setLocatedExe(id, path);
+    }
+    return dtoFor(id);
   });
   registerInvoke('recomps:revealDir', async () => {
     const dir = recompsDir();

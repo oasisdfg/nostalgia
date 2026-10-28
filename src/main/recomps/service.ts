@@ -1,12 +1,15 @@
 import type { RecompDTO, RecompManifest } from '@shared/contracts/recomps';
 import { getInstall, listInstalls, listInstallsForGame, type RecompInstallRow } from '../db/repositories/recompsRepo';
 import { listManifests, getManifest } from './registry';
-import { isFileVerified } from './linker';
+import { basename } from 'node:path';
+import { gameReady } from './linker';
+import { isInstallingPort } from './installer';
 
 /** Builds the renderer view of a port. No paths, URLs or ids beyond games.id cross IPC. */
 export function toDto(manifest: RecompManifest, row: RecompInstallRow | undefined): RecompDTO {
   const installed = row?.installed_tag ?? null;
   const latest = row?.latest_tag ?? null;
+  const ready = gameReady(manifest.id, row);
   return {
     manifest,
     state: row?.state ?? 'not_installed',
@@ -15,8 +18,10 @@ export function toDto(manifest: RecompManifest, row: RecompInstallRow | undefine
     latestTag: latest,
     updateAvailable: row?.state === 'installed' && installed != null && latest != null && latest !== installed,
     linkedGameId: row?.linked_game_id ?? null,
-    fileVerified: row?.linked_game_id != null && isFileVerified(manifest.id),
+    gameReady: ready,
+    pickedName: row?.picked_path ? basename(row.picked_path) : null,
     fileDelivered: (row?.file_delivered ?? 0) === 1,
+    canPlay: row?.state === 'installed' && ready !== 'missing' && !isInstallingPort(manifest.id),
     lastError: row?.last_error ?? null,
   };
 }

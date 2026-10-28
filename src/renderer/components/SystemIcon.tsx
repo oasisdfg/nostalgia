@@ -53,6 +53,7 @@ export const SYSTEM_ICONS: Record<string, IconDef> = {
   ps1: PLAYSTATION,
   ps2: PLAYSTATION,
   ps3: PLAYSTATION,
+  ps4: PLAYSTATION, // display only (Native Ports); no ps4 system is seeded
   psp: PLAYSTATION,
   xbox360: { glyph: 'controller' },
   xbox: { glyph: 'controller' },
@@ -118,6 +119,7 @@ export const CONSOLE_LOGO_FILE: Record<string, string> = {
   ps1: 'ps1',
   ps2: 'ps2',
   ps3: 'ps3', // no ps3 logo file yet → PS glyph fallback
+  ps4: 'ps4', // no ps4 logo file yet → PS glyph fallback (display only)
   psp: 'psplogo',
   xbox: 'originalxboxlogo', // original Xbox console
   xbox360: 'xbox360logo',

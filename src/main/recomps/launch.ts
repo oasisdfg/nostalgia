@@ -3,12 +3,11 @@ import { once } from 'node:events';
 import { existsSync } from 'node:fs';
 import { broadcastEvent } from '../ipc/registry';
 import { resolveArgs } from '../launch/tokens';
-import { ensureCached } from '../launch/launcher';
 import * as playSessions from '../db/repositories/playSessionsRepo';
 import { getInstall, openRecompSession, upsertInstall } from '../db/repositories/recompsRepo';
 import { discoverSavesForGame } from '../saves/discovery';
 import { getManifest } from './registry';
-import { deliverFile, fileForPort } from './linker';
+import { deliverFile, fileForPort, gameReady, resolveGamePath } from './linker';
 import { isInstallingPort } from './installer';
 import { applyPortConfig } from './config';
 import { buildWorkDir, findPython } from './builder';
@@ -29,24 +28,23 @@ export async function launchRecomp(recompId: string): Promise<{ sessionId: numbe
   if (!existsSync(manifest.build ? row.install_dir : row.exe_path)) {
     throw new Error(`${manifest.name}'s files are missing. Reinstall it from Native Ports.`);
   }
+  if (gameReady(recompId, row) === 'missing') throw new Error(`Link your copy of ${manifest.originalTitle} first.`);
+  // A library game gets a play session; files the user picked (a PS4 dump, say) have no
+  // games row to record against, so those runs aren't tracked.
   const gameId = row.linked_game_id;
-  if (gameId == null) throw new Error(`Link your copy of ${manifest.originalTitle} first.`);
   const installDir = row.install_dir;
 
   await deliverFile(recompId);
   // The user's unified settings (fullscreen / resolution / frame cap) into the port's own
   // config. Best-effort: a config problem must never stop the game starting.
   await applyPortConfig(manifest, installDir).catch(() => undefined);
-  const gameFileId = fileForPort(recompId, gameId);
+  const gameFileId = gameId != null ? fileForPort(recompId, gameId) : null;
   // Only fetch the file when the template actually passes it ({romPath} & co.).
   // A built port starts through its own python launcher script (build.run).
   const template = manifest.build ? manifest.build.run : manifest.args;
   const needsRom = template.some((a) => /\{rom(Path|Dir|Name)\}/.test(a));
   let romPath = '';
-  if (needsRom) {
-    if (gameFileId == null) throw new Error('The linked game has no file to give the port.');
-    romPath = await ensureCached(gameFileId);
-  }
+  if (needsRom) romPath = await resolveGamePath(recompId);
   let exe = row.exe_path;
   let argv = resolveArgs(template, {
     romPath,
@@ -69,9 +67,13 @@ export async function launchRecomp(recompId: string): Promise<{ sessionId: numbe
     throw new Error(`Couldn't start ${manifest.name}.`);
   }
 
-  const sessionId = openRecompSession({ gameId, gameFileId, recompId });
   // The port's own file picker has now been offered once ('in-app' delivery).
   if (manifest.gameFile.delivery === 'in-app' && !row.file_delivered) upsertInstall(recompId, { file_delivered: 1 });
+  if (gameId == null) {
+    child.on('error', (err) => console.error('[recomps] port process error', err));
+    return { sessionId: -1, pid: child.pid ?? -1 };
+  }
+  const sessionId = openRecompSession({ gameId, gameFileId, recompId });
 
   child.on('exit', (code) => {
     playSessions.close(sessionId, code);

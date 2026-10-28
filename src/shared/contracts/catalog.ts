@@ -115,6 +115,7 @@ export const PLATFORM_THEMES: Record<string, PlatformTheme> = {
   ps1: { accent: '78 138 232' }, // deep blue
   ps2: { accent: '64 118 224' }, // deep blue
   ps3: { accent: '170 182 198' }, // black/silver -> silver
+  ps4: { accent: '58 112 214' }, // blue (display only - Native Ports; no ps4 system)
   psp: { accent: '128 146 166' }, // gunmetal
   xbox360: { accent: '74 198 112' }, // green
   xbox: { accent: '74 198 112' }, // green
@@ -125,6 +126,14 @@ export const PLATFORM_THEMES: Record<string, PlatformTheme> = {
   ds: { accent: '150 182 216' }, // silver/blue
   n64: { accent: '214 96 78' }, // red
   '3ds': { accent: '72 186 205' }, // Aqua Blue
+};
+
+/**
+ * Display names for consoles Native Ports can name WITHOUT a Nostalgia system (a port whose
+ * game comes from files the user picks). Library systems use their own `systems.name`.
+ */
+export const DISPLAY_ONLY_CONSOLES: Record<string, string> = {
+  ps4: 'PlayStation 4',
 };
 
 /** Our system slug -> IGDB platform id. Systems not listed have no catalog. */

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Play, Download, RefreshCw, Undo2, X, Link2 } from 'lucide-react';
+import { Play, Download, RefreshCw, Undo2, X, Link2, ExternalLink, FolderOpen } from 'lucide-react';
+import { invoke } from '@renderer/bridge/ipc';
 import { FocusSection } from '@renderer/components/Focusable';
 import { Button } from '@renderer/components/Button';
 import { Badge } from '@renderer/components/Badge';
@@ -17,6 +18,8 @@ import {
   useRollbackRecomp,
   useLaunchRecomp,
   useLinkRecomp,
+  usePickRecompFiles,
+  useLocateRecompExe,
   isBusy,
   installLabel,
 } from '@renderer/query/useRecomps';
@@ -63,6 +66,9 @@ function PortRow({ port }: { port: RecompDTO }) {
   const rollback = useRollbackRecomp();
   const launch = useLaunchRecomp();
   const link = useLinkRecomp();
+  const pick = usePickRecompFiles();
+  const locate = useLocateRecompExe();
+  const external = m.assetKind === 'external' && !m.build;
   const [picking, setPicking] = useState(false);
   const busy = isBusy(port);
   const installed = port.state === 'installed';
@@ -93,7 +99,7 @@ function PortRow({ port }: { port: RecompDTO }) {
             Cancel
           </Button>
         ) : installed ? (
-          linked ? (
+          port.canPlay ? (
             <Button
               size="lg"
               variant="primary"
@@ -104,14 +110,33 @@ function PortRow({ port }: { port: RecompDTO }) {
               {launch.isPending ? 'Starting…' : 'Play'}
             </Button>
           ) : null
+        ) : external ? (
+          <>
+            <Button
+              size="lg"
+              variant="primary"
+              icon={<ExternalLink className="h-5 w-5" />}
+              onClick={() => void invoke('app:openExternal', { url: m.homepage })}
+            >
+              Get from project page
+            </Button>
+            <Button size="lg" variant="secondary" icon={<FolderOpen className="h-5 w-5" />} onClick={() => locate.mutate(m.id)}>
+              Locate exe…
+            </Button>
+          </>
         ) : (
           <Button size="lg" variant="primary" icon={<Download className="h-5 w-5" />} onClick={() => install.mutate(m.id)}>
             {installLabel(port)}
           </Button>
         )}
-        {!linked && (
+        {port.gameReady === 'missing' && m.gameFile.source === 'library' && (
           <Button size="lg" variant="secondary" icon={<Link2 className="h-5 w-5" />} onClick={() => setPicking((v) => !v)}>
-            Link a game
+            Link your copy
+          </Button>
+        )}
+        {port.gameReady === 'missing' && (
+          <Button size="lg" variant="secondary" icon={<FolderOpen className="h-5 w-5" />} onClick={() => pick.mutate(m.id)}>
+            Choose files…
           </Button>
         )}
         {installed && port.updateAvailable && !busy && (

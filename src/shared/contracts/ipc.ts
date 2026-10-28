@@ -524,6 +524,11 @@ export interface IpcInvokeMap {
   'recomps:revealDir': { request: void; response: { ok: true } };
   /** Build-from-source ports: opens the full build output (a file, not an in-app log panel). */
   'recomps:revealBuildLog': { request: { id: string }; response: { ok: boolean } };
+  /** Choose the user's game files/folder for a port through an OS dialog in main. */
+  'recomps:pickGameFiles': { request: { id: string }; response: RecompDTO };
+  'recomps:clearPicked': { request: { id: string }; response: RecompDTO };
+  /** 'external' ports: locate the exe the port's own installer put on disk (OS dialog in main). */
+  'recomps:locateExe': { request: { id: string }; response: RecompDTO };
 }
 
 // ---------------------------------------------------------------------------
@@ -684,6 +689,9 @@ export const IPC_INVOKE_CHANNELS = [
   'recomps:revealInstall',
   'recomps:revealDir',
   'recomps:revealBuildLog',
+  'recomps:pickGameFiles',
+  'recomps:clearPicked',
+  'recomps:locateExe',
 ] as const;
 
 export const IPC_EVENT_CHANNELS = [

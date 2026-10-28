@@ -64,7 +64,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "2ship2harkinian",
@@ -125,7 +126,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "shipwright",
@@ -256,7 +258,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "ghostship",
@@ -317,7 +320,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "starship",
@@ -378,7 +382,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "spaghettikart",
@@ -435,7 +440,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "paperboat",
@@ -492,7 +498,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "banjorecomp",
@@ -559,7 +566,8 @@
           }
         }
       }
-    }
+    },
+    "addedAt": "2026-10-27"
   },
   {
     "id": "burnoutdominator",
@@ -600,6 +608,7 @@
         "run"
       ],
       "requirements": "Python 3, Git, and Visual Studio 2022 or newer with “Desktop development with C++”, plus about 20 GB free. The first build takes 30 to 90 minutes."
-    }
+    },
+    "addedAt": "2026-10-28"
   }
 ]

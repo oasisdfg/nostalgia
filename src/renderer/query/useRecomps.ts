@@ -108,6 +108,9 @@ export const useRevealRecompGameFile = () =>
 export const useRevealRecompInstall = () => usePortMutation((id: string) => invoke('recomps:revealInstall', { id }));
 export const useRevealRecompBuildLog = () =>
   usePortMutation((id: string) => invoke('recomps:revealBuildLog', { id }));
+export const usePickRecompFiles = () => usePortMutation((id: string) => invoke('recomps:pickGameFiles', { id }));
+export const useClearRecompPicked = () => usePortMutation((id: string) => invoke('recomps:clearPicked', { id }));
+export const useLocateRecompExe = () => usePortMutation((id: string) => invoke('recomps:locateExe', { id }));
 export const useCheckRecompUpdates = () =>
   usePortMutation((id?: string) => invoke('recomps:checkUpdates', id ? { id } : undefined));
 

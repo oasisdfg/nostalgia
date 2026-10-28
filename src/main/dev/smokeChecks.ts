@@ -813,6 +813,12 @@ export async function runRecompsSmoke(): Promise<void> {
     { ...zeldaM, id: 'burnoutdominator' }, // names a bundled build port
     { ...zeldaM, id: 'sneaky-build', build: { requires: [], install: ['x.py'], run: ['y.py'], requirements: '' } },
     { id: 'Bad Id!' },
+    // v2: the remote list may not ship bare exes, external installers or picked files,
+    // nor switch a bundled port's kind.
+    { ...zeldaM, id: 'sneaky-exe', assetKind: 'exe' },
+    { ...zeldaM, id: 'sneaky-external', assetKind: 'external' },
+    { ...zeldaM, id: 'sneaky-pick', gameFile: { ...zeldaM.gameFile, source: 'pick' } },
+    { ...zeldaM, id: 'shipwright', assetKind: '7z' },
   ]);
   if (accepted.map((m) => m.id).join(',') !== 'zelda64recomp,new-port') {
     throw new Error(`recomps: sanitizeRemote accepted ${accepted.map((m) => m.id).join(',')}`);
@@ -830,6 +836,50 @@ export async function runRecompsSmoke(): Promise<void> {
     const entries = JSON.parse(fileText) as unknown[];
     if (sanitizeRemote(entries).length !== entries.length) throw new Error('recomps: registry/recomps.json has invalid entries');
   }
+
+  // v2 - a port with no published hash parses (accepted defaults to []), and the source and
+  // asset kind default to a library game and a zip.
+  const { recompManifestSchema } = await import('@shared/contracts/recomps');
+  const { gameFile: zgf, ...zRest } = zeldaM;
+  const bare = recompManifestSchema.parse({
+    ...zRest,
+    id: 'no-hash',
+    assetKind: undefined,
+    gameFile: { systemSlug: zgf.systemSlug, delivery: 'in-app' },
+  });
+  if (bare.gameFile.accepted.length !== 0 || bare.gameFile.source !== 'library' || bare.assetKind !== 'zip') {
+    throw new Error('recomps: v2 schema defaults wrong');
+  }
+
+  // v2 - picked files: an unknown dump is unverified, shown by name only, used as the game
+  // path, and clearing it leaves the port missing its game.
+  const { setPicked, clearPicked, gameReady, resolveGamePath } = await import('../recomps/linker');
+  const { dtoFor } = await import('../recomps/service');
+  const { setLocatedExe } = await import('../recomps/installer');
+  const pdir = join(base, 'pick');
+  await mkdir(pdir, { recursive: true });
+  const pickedFile = join(pdir, 'My Dump.z64');
+  await writeFile(pickedFile, Buffer.alloc(1024));
+  await setPicked('zelda64recomp', pickedFile);
+  let dto = dtoFor('zelda64recomp');
+  if (dto.gameReady !== 'unverified' || dto.pickedName !== 'My Dump.z64') {
+    throw new Error(`recomps: picked file reads as ${dto.gameReady}/${dto.pickedName}`);
+  }
+  if ((await resolveGamePath('zelda64recomp')) !== pickedFile) throw new Error('recomps: picked path not used');
+  if (dto.canPlay) throw new Error('recomps: canPlay true while not installed');
+
+  // v2 - a located exe ('external' flow) makes the port installed; with the picked copy it
+  // can play, and without a copy it can't.
+  const fakeExe = join(pdir, 'Port.exe');
+  await writeFile(fakeExe, 'x');
+  setLocatedExe('zelda64recomp', fakeExe);
+  dto = dtoFor('zelda64recomp');
+  if (dto.state !== 'installed' || !dto.canPlay) throw new Error(`recomps: located port state ${dto.state}/${dto.canPlay}`);
+  clearPicked('zelda64recomp');
+  if (gameReady('zelda64recomp', getInstall('zelda64recomp')) !== 'missing' || dtoFor('zelda64recomp').canPlay) {
+    throw new Error('recomps: clearPicked did not reset the game');
+  }
+  await uninstall('zelda64recomp');
 
   // R3 - migration 0010: the 'building' state is accepted.
   db.prepare("UPDATE recomp_installs SET state = 'building' WHERE recomp_id = 'zelda64recomp'").run();

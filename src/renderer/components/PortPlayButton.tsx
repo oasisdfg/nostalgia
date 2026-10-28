@@ -1,4 +1,5 @@
-import { Play, Download, X, RefreshCw, FolderOpen, Undo2 } from 'lucide-react';
+import { Play, Download, X, RefreshCw, FolderOpen, Undo2, ExternalLink } from 'lucide-react';
+import { invoke } from '@renderer/bridge/ipc';
 import { Button } from './Button';
 import { PortProgress } from './PortProgress';
 import {
@@ -7,6 +8,7 @@ import {
   useRollbackRecomp,
   useLaunchRecomp,
   useRevealRecompGameFile,
+  useLocateRecompExe,
   isBusy,
 } from '@renderer/query/useRecomps';
 import type { RecompDTO } from '@shared/contracts/recomps';
@@ -35,6 +37,7 @@ export function PortPlayButton({
   const launch = useLaunchRecomp();
   const reveal = useRevealRecompGameFile();
   const rollback = useRollbackRecomp();
+  const locate = useLocateRecompExe();
 
   if (isBusy(port)) {
     return (
@@ -42,6 +45,25 @@ export function PortPlayButton({
         <PortProgress port={port} prefix={m.name} />
         <Button variant="ghost" size="sm" icon={<X className="h-3.5 w-3.5" />} onClick={() => cancel.mutate(m.id)}>
           Cancel
+        </Button>
+      </div>
+    );
+  }
+
+  const external = m.assetKind === 'external' && !m.build;
+  const openProject = (): void => void invoke('app:openExternal', { url: m.homepage });
+
+  if (port.state !== 'installed' && external) {
+    // The port installs itself: send the user to it, then they locate its exe once.
+    return (
+      <div className="flex gap-2">
+        <div className="min-w-0 flex-1">
+          <Button variant={primary ? 'primary' : 'secondary'} size="lg" fullWidth icon={<ExternalLink className="h-5 w-5" />} onClick={openProject}>
+            Get {m.name}
+          </Button>
+        </div>
+        <Button variant="secondary" size="lg" icon={<FolderOpen className="h-5 w-5" />} onClick={() => locate.mutate(m.id)}>
+          Locate exe…
         </Button>
       </div>
     );
@@ -71,7 +93,7 @@ export function PortPlayButton({
             size="lg"
             fullWidth
             icon={<Play className="h-5 w-5" fill="currentColor" />}
-            disabled={launch.isPending}
+            disabled={!port.canPlay || launch.isPending}
             onClick={() => {
               onPlay();
               launch.mutate(m.id);
@@ -85,8 +107,8 @@ export function PortPlayButton({
             variant="secondary"
             size="lg"
             icon={<RefreshCw className="h-5 w-5" />}
-            title={`Update ${m.name} to ${port.latestTag}`}
-            onClick={() => install.mutate(m.id)}
+            title={external ? `New version of ${m.name} on its project page` : `Update ${m.name} to ${port.latestTag}`}
+            onClick={() => (external ? openProject() : install.mutate(m.id))}
           >
             Update
           </Button>
