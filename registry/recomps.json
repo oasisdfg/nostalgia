@@ -48,12 +48,6 @@
           }
         },
         "frameCap": {
-          "original": {
-            "rr_option": "Original"
-          },
-          "display": {
-            "rr_option": "Display"
-          },
           "60": {
             "rr_option": "Manual",
             "rr_manual_value": 60
@@ -61,11 +55,18 @@
           "120": {
             "rr_option": "Manual",
             "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
           }
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 1030
   },
   {
     "id": "2ship2harkinian",
@@ -127,7 +128,8 @@
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 1030
   },
   {
     "id": "shipwright",
@@ -259,7 +261,8 @@
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 1029
   },
   {
     "id": "ghostship",
@@ -321,7 +324,8 @@
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 1074
   },
   {
     "id": "starship",
@@ -383,7 +387,8 @@
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 2591
   },
   {
     "id": "spaghettikart",
@@ -441,7 +446,8 @@
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 2342
   },
   {
     "id": "paperboat",
@@ -499,7 +505,8 @@
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 3340
   },
   {
     "id": "banjorecomp",
@@ -550,12 +557,6 @@
           }
         },
         "frameCap": {
-          "original": {
-            "rr_option": "Original"
-          },
-          "display": {
-            "rr_option": "Display"
-          },
           "60": {
             "rr_option": "Manual",
             "rr_manual_value": 60
@@ -563,10 +564,2376 @@
           "120": {
             "rr_option": "Manual",
             "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
           }
         }
       }
     },
-    "addedAt": "2026-10-27"
+    "addedAt": "2026-10-27",
+    "igdbId": 2148
+  },
+  {
+    "id": "cbfd-recompiled",
+    "name": "Conker Recompiled",
+    "originalTitle": "Conker's Bad Fur Day",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Loads your US ROM once in its launcher, then remembers it.",
+    "repo": "sciaschi/CBFD-Recompiled",
+    "homepage": "https://github.com/sciaschi/CBFD-Recompiled",
+    "assetMatch": "ConkerRecompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "ConkerRecomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "USA",
+          "sha1": "4cbadd3c4e0729dec46af64ad018050eada4f47a"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1286
+  },
+  {
+    "id": "conkerbfdreloaded",
+    "name": "Conker's BFD Reloaded",
+    "originalTitle": "Conker's Bad Fur Day",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Classic mode true to the N64, or Modern mode with widescreen and smooth frame rates.",
+    "repo": "DahSidiAbdallah/ConkerBFDReloaded",
+    "homepage": "https://github.com/DahSidiAbdallah/ConkerBFDReloaded",
+    "assetMatch": "ConkerBFDReloaded-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "ConkerBFDReloaded.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "USA",
+          "sha1": "4cbadd3c4e0729dec46af64ad018050eada4f47a"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/ConkerBFDReloaded/saves"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 1286
+  },
+  {
+    "id": "dkr-r",
+    "name": "DKR-R",
+    "originalTitle": "Diddy Kong Racing",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Custom cars, a mod store and online play.",
+    "repo": "ThatGuyMcd/DKR-R",
+    "homepage": "https://github.com/ThatGuyMcd/DKR-R",
+    "assetMatch": "DKR-R-*-Windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "DKR-R.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2723
+  },
+  {
+    "id": "donkey-kong-64-recompiled",
+    "name": "DK64 Recompiled",
+    "originalTitle": "Donkey Kong 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your US cartridge dump.",
+    "repo": "Rainchus/Donkey-Kong-64-Recompiled",
+    "homepage": "https://github.com/Rainchus/Donkey-Kong-64-Recompiled",
+    "assetMatch": "DK64Recompiled-Windows-*.zip",
+    "assetKind": "zip",
+    "exe": "DK64Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/DK64Recompiled/saves"
+    ],
+    "config": {
+      "file": "{localAppData}/DK64Recompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          }
+        }
+      }
+    },
+    "addedAt": "2026-10-31",
+    "igdbId": 1096
+  },
+  {
+    "id": "goldeneye-pc-port",
+    "name": "GoldenEye PC Port",
+    "originalTitle": "GoldenEye 007",
+    "method": "decomp",
+    "status": "playable",
+    "summary": "Widescreen and mouse aim; all 20 solo missions play through.",
+    "repo": "jkdansereau/goldeneye-pc-port",
+    "homepage": "https://github.com/jkdansereau/goldeneye-pc-port",
+    "assetMatch": "goldeneye-pc-port-*-win64.zip",
+    "assetKind": "zip",
+    "exe": "ge007.x86_64.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "copy",
+      "placePath": "data/ge007.ntsc-final.z64"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1638
+  },
+  {
+    "id": "harvestmoon64recomp",
+    "name": "Harvest Moon 64 Recompiled",
+    "originalTitle": "Harvest Moon 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your North American cartridge dump.",
+    "repo": "HarvestMoon64Recomp/HarvestMoon64Recomp",
+    "homepage": "https://github.com/HarvestMoon64Recomp/HarvestMoon64Recomp",
+    "assetMatch": "HarvestMoon64Recompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "HarvestMoon64Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/HarvestMoon64Recompiled/saves"
+    ],
+    "config": {
+      "file": "{localAppData}/HarvestMoon64Recompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          }
+        }
+      }
+    },
+    "addedAt": "2026-10-31",
+    "igdbId": 3378
+  },
+  {
+    "id": "mariokart64recomp",
+    "name": "Mario Kart 64 Recompiled",
+    "originalTitle": "Mario Kart 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your US cartridge dump.",
+    "repo": "sonicdcer/MarioKart64Recomp",
+    "homepage": "https://github.com/sonicdcer/MarioKart64Recomp",
+    "assetMatch": "MarioKart64Recompiled-*-Windows-*.zip",
+    "assetKind": "zip",
+    "exe": "MarioKart64Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/MarioKart64Recompiled/saves"
+    ],
+    "config": {
+      "file": "{localAppData}/MarioKart64Recompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          }
+        }
+      }
+    },
+    "addedAt": "2026-10-31",
+    "igdbId": 2342
+  },
+  {
+    "id": "birdman64",
+    "name": "Birdman64",
+    "originalTitle": "Pilotwings 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Widescreen, 144+ fps and gamepad support.",
+    "repo": "NoahVl/Birdman64",
+    "homepage": "https://github.com/NoahVl/Birdman64",
+    "assetMatch": "Birdman64-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "Birdman64.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{appData}/Birdman64"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 3573
+  },
+  {
+    "id": "snap64recomp",
+    "name": "Snap64 Recomp",
+    "originalTitle": "Pokémon Snap",
+    "method": "recomp",
+    "status": "playable",
+    "summary": "Plays like the cartridge, with opt-in enhancements; played through on PC.",
+    "repo": "JackandBeans/Snap64Recomp",
+    "homepage": "https://github.com/JackandBeans/Snap64Recomp",
+    "assetMatch": "Snap64Recomp-*-win64.zip",
+    "assetKind": "zip",
+    "exe": "Snap64Recomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "USA",
+          "sha1": "edc7c49cc568c045fe48be0d18011c30f393cbaf"
+        }
+      ],
+      "source": "library",
+      "delivery": "copy",
+      "placePath": "pokemonsnap.z64"
+    },
+    "saveDirs": [
+      "{installDir}/saves"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 2324
+  },
+  {
+    "id": "roadrash64recompiled",
+    "name": "Road Rash 64 Recompiled",
+    "originalTitle": "Road Rash 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "60 fps, widescreen, custom music and experimental multiplayer.",
+    "repo": "linkssy2/RoadRash64Recompiled",
+    "homepage": "https://github.com/linkssy2/RoadRash64Recompiled",
+    "assetMatch": "RoadRash64Recompiled-*-Win64.zip",
+    "assetKind": "zip",
+    "exe": "RoadRash64Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3589
+  },
+  {
+    "id": "rush2recompiled",
+    "name": "Rush 2 Recompiled",
+    "originalTitle": "Rush 2: Extreme Racing USA",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Widescreen, high frame rates and sharp text.",
+    "repo": "bryantmh/rush2recompiled",
+    "homepage": "https://github.com/bryantmh/rush2recompiled",
+    "assetMatch": "Rush2Recompiled-*.zip",
+    "assetKind": "zip",
+    "exe": "Rush2Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "USA",
+          "sha1": "01b0a31b1accc18061e8c85f6c5edf0dbd79f097"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3593
+  },
+  {
+    "id": "snowboardkids2-recomp",
+    "name": "Snowboard Kids 2 Recompiled",
+    "originalTitle": "Snowboard Kids 2",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your US cartridge dump.",
+    "repo": "cdlewis/snowboardkids2-recomp",
+    "homepage": "https://github.com/cdlewis/snowboardkids2-recomp",
+    "assetMatch": "SnowboardKids2Recompiled-Windows.zip",
+    "assetKind": "zip",
+    "exe": "SnowboardKids2Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/SnowboardKids2Recompiled/saves"
+    ],
+    "config": {
+      "file": "{localAppData}/SnowboardKids2Recompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          }
+        }
+      }
+    },
+    "addedAt": "2026-10-31",
+    "igdbId": 3343
+  },
+  {
+    "id": "starfox64recomp",
+    "name": "Starfox 64 Recompiled",
+    "originalTitle": "Star Fox 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your US 1.1 cartridge dump.",
+    "repo": "sonicdcer/Starfox64Recomp",
+    "homepage": "https://github.com/sonicdcer/Starfox64Recomp",
+    "assetMatch": "Starfox64Recompiled-*-Windows-*.zip",
+    "assetKind": "zip",
+    "exe": "Starfox64Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "US 1.1",
+          "sha1": "09f0d105f476b00efa5303a3ebc42e60a7753b7a"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/Starfox64Recompiled/saves"
+    ],
+    "config": {
+      "file": "{localAppData}/Starfox64Recompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          }
+        }
+      }
+    },
+    "addedAt": "2026-10-31",
+    "igdbId": 2591
+  },
+  {
+    "id": "sm64coopdx",
+    "name": "sm64coopdx",
+    "originalTitle": "Super Mario 64",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Online multiplayer with mods.",
+    "repo": "coop-deluxe/sm64coopdx",
+    "homepage": "https://github.com/coop-deluxe/sm64coopdx",
+    "assetMatch": "sm64coopdx_Windows.zip",
+    "assetKind": "zip",
+    "exe": "sm64coopdx.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "US",
+          "sha1": "9bef1128717f958171a4afac3ed78ee2bb4e86ce"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1074
+  },
+  {
+    "id": "wave-race-64-recomp",
+    "name": "Wave Race 64 Recomp",
+    "originalTitle": "Wave Race 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your USA Rev A dump.",
+    "repo": "danielgomesvieira2000/wave-race-64-recomp",
+    "homepage": "https://github.com/danielgomesvieira2000/wave-race-64-recomp",
+    "assetMatch": "WaveRace64Recomp-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "WaveRace64Recomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "USA Rev A",
+          "sha1": "508dfc2d4caa42b6f6de5263d0aed5e44ac7966a"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 47740
+  },
+  {
+    "id": "ogre-battle-64-recomp",
+    "name": "Ogre Battle 64 Recomp",
+    "originalTitle": "Ogre Battle 64: Person of Lordly Caliber",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your USA Rev A dump.",
+    "repo": "lfarroco/ogre-battle-64-recomp",
+    "homepage": "https://github.com/lfarroco/ogre-battle-64-recomp",
+    "assetMatch": "ogre-battle-64-recomp-windows-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "ogrebattle64.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3568
+  },
+  {
+    "id": "wcwvsnwoworldtourrecomp",
+    "name": "WCW Recompiled",
+    "originalTitle": "WCW vs. nWo: World Tour",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your own cartridge dump.",
+    "repo": "jessetbh/WCWvsNWOWorldTourRecomp",
+    "homepage": "https://github.com/jessetbh/WCWvsNWOWorldTourRecomp",
+    "assetMatch": "WCWRecompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "WCWRecompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/WCWRecompiled/saves"
+    ],
+    "config": {
+      "file": "{localAppData}/WCWRecompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          }
+        }
+      }
+    },
+    "addedAt": "2026-10-31",
+    "igdbId": 3635
+  },
+  {
+    "id": "wcwnworevengerecomp",
+    "name": "Revenge Recompiled",
+    "originalTitle": "WCW/nWo Revenge",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your own cartridge dump.",
+    "repo": "jessetbh/WCWnWoRevengeRecomp",
+    "homepage": "https://github.com/jessetbh/WCWnWoRevengeRecomp",
+    "assetMatch": "RevengeRecompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "RevengeRecompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3636
+  },
+  {
+    "id": "wwfnomercyrecomp",
+    "name": "No Mercy Recompiled",
+    "originalTitle": "WWF No Mercy",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your own cartridge dump.",
+    "repo": "jessetbh/WWFNoMercyRecomp",
+    "homepage": "https://github.com/jessetbh/WWFNoMercyRecomp",
+    "assetMatch": "NoMercyRecompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "NoMercyRecompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3644
+  },
+  {
+    "id": "wwfwrestlemania2000recomp",
+    "name": "WrestleMania 2000 Recompiled",
+    "originalTitle": "WWF WrestleMania 2000",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your own cartridge dump.",
+    "repo": "jessetbh/WWFWrestleMania2000Recomp",
+    "homepage": "https://github.com/jessetbh/WWFWrestleMania2000Recomp",
+    "assetMatch": "Wm2kRecompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "Wm2kRecompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3646
+  },
+  {
+    "id": "vpw64recomp",
+    "name": "VPW64 Recompiled",
+    "originalTitle": "Virtual Pro Wrestling 64",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your own cartridge dump.",
+    "repo": "jessetbh/VPW64Recomp",
+    "homepage": "https://github.com/jessetbh/VPW64Recomp",
+    "assetMatch": "Vpw64Recompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "Vpw64Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3626
+  },
+  {
+    "id": "vpw2recomp",
+    "name": "VPW2 Recompiled",
+    "originalTitle": "Virtual Pro Wrestling 2: Oudou Keishou",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your own cartridge dump.",
+    "repo": "jessetbh/VPW2Recomp",
+    "homepage": "https://github.com/jessetbh/VPW2Recomp",
+    "assetMatch": "Vpw2Recompiled-*-Windows.zip",
+    "assetKind": "zip",
+    "exe": "Vpw2Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3625
+  },
+  {
+    "id": "goemon64recomp",
+    "name": "Goemon 64 Recompiled",
+    "originalTitle": "Mystical Ninja Starring Goemon",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Runs natively from your North American dump.",
+    "repo": "klorfmorf/Goemon64Recomp",
+    "homepage": "https://github.com/klorfmorf/Goemon64Recomp",
+    "assetMatch": "Goemon64Recompiled-Windows-*.zip",
+    "assetKind": "zip",
+    "exe": "Goemon64Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/Goemon64Recompiled/saves"
+    ],
+    "config": {
+      "file": "{localAppData}/Goemon64Recompiled/graphics.json",
+      "format": "json",
+      "options": {
+        "fullscreen": {
+          "on": {
+            "wm_option": "Fullscreen"
+          },
+          "off": {
+            "wm_option": "Windowed"
+          }
+        },
+        "resolution": {
+          "original": {
+            "res_option": "Original"
+          },
+          "original2x": {
+            "res_option": "Original2x"
+          },
+          "window": {
+            "res_option": "Auto"
+          }
+        },
+        "frameCap": {
+          "60": {
+            "rr_option": "Manual",
+            "rr_manual_value": 60
+          },
+          "120": {
+            "rr_option": "Manual",
+            "rr_manual_value": 120
+          },
+          "original": {
+            "rr_option": "Original"
+          },
+          "display": {
+            "rr_option": "Display"
+          }
+        }
+      }
+    },
+    "addedAt": "2026-10-31",
+    "igdbId": 3545
+  },
+  {
+    "id": "sote-recomp",
+    "name": "Shadows of the Empire Recomp",
+    "originalTitle": "Star Wars: Shadows of the Empire",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Modern aiming, control rebinding and optional enhancements.",
+    "repo": "GTTeancum/SotE-Recomp",
+    "homepage": "https://github.com/GTTeancum/SotE-Recomp",
+    "assetMatch": "SotE-Recomp-*.zip",
+    "assetKind": "zip",
+    "exe": "Shadows of the Empire.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 164
+  },
+  {
+    "id": "snprecomp",
+    "name": "Sin and Punishment Recompiled",
+    "originalTitle": "Sin and Punishment",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Plays the Japanese release or an English translation.",
+    "repo": "wootbeer/snprecomp",
+    "homepage": "https://github.com/wootbeer/snprecomp",
+    "assetMatch": "SnPRecompiled-*-windows.zip",
+    "assetKind": "zip",
+    "exe": "SnPRecompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "Japan",
+          "sha1": "581297b9d5c3a4c33169ae0aae218c742cd9cbcf"
+        },
+        {
+          "label": "English translation",
+          "sha1": "5945ff3935d9d9531bbb5cfcabed7c198e2b2f41"
+        },
+        {
+          "label": "English v1.0 (Zoinkity)",
+          "sha1": "e3906c919236dac6eba020b4b8c1df91fd725c5d"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1467
+  },
+  {
+    "id": "perfect-dark",
+    "name": "Perfect Dark PC Port",
+    "originalTitle": "Perfect Dark",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Mouse aim and modern resolutions.",
+    "repo": "perfect-dark-pc-port/perfect_dark",
+    "homepage": "https://github.com/perfect-dark-pc-port/perfect_dark",
+    "assetMatch": "pd-x86_64-windows.zip",
+    "assetKind": "zip",
+    "exe": "pd.x86_64.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [
+        {
+          "label": "NTSC final",
+          "md5": "e03b088b6ac9e0080440efed07c1e40f"
+        }
+      ],
+      "source": "library",
+      "delivery": "copy",
+      "placePath": "data/pd.ntsc-final.z64"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1463
+  },
+  {
+    "id": "banjo-tooie-scurvy-dog-port",
+    "name": "Banjo-Tooie Scurvy Dog Port",
+    "originalTitle": "Banjo-Tooie",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "An early alpha of a native Banjo-Tooie.",
+    "repo": "some-scurvy-dog/banjo-tooie-scurvy-dog-port",
+    "homepage": "https://github.com/some-scurvy-dog/banjo-tooie-scurvy-dog-port",
+    "assetMatch": "BanjoTooieScurvyDogPort-*-Windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "BanjoTooieScurvyDogPort.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "n64",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3418
+  },
+  {
+    "id": "redriver2",
+    "name": "REDRIVER2",
+    "originalTitle": "Driver 2",
+    "method": "decomp",
+    "status": "playable",
+    "summary": "Fixes the original bugs and finishes unfinished parts; fully playable.",
+    "repo": "OpenDriver2/REDRIVER2",
+    "homepage": "https://github.com/OpenDriver2/REDRIVER2",
+    "assetMatch": "REDRIVER2_Win32_Release.zip",
+    "assetKind": "zip",
+    "exe": "REDRIVER2.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app",
+      "pickHint": "Copy the DRIVER2 folder from your disc into the port folder."
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 6391
+  },
+  {
+    "id": "apeescaperecomp",
+    "name": "Ape Escape Recomp",
+    "originalTitle": "Ape Escape",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the USA disc; needs a PS1 BIOS file.",
+    "repo": "mstan/ApeEscapeRecomp",
+    "homepage": "https://github.com/mstan/ApeEscapeRecomp",
+    "assetMatch": "ApeEscapeRecomp-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "ApeEscapeRecomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3762
+  },
+  {
+    "id": "megamanx4recomp",
+    "name": "Mega Man X4 Recomp",
+    "originalTitle": "Mega Man X4",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Optional subtitled Japanese movies; BIOS included.",
+    "repo": "mstan/MegaManX4Recomp",
+    "homepage": "https://github.com/mstan/MegaManX4Recomp",
+    "assetMatch": "MegaManX4Recomp-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "MegaManX4Recomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1744
+  },
+  {
+    "id": "medievilrecomp",
+    "name": "MediEvil Recomp",
+    "originalTitle": "MediEvil",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the North American disc.",
+    "repo": "BlackLabelHQ/MediEvilRecomp",
+    "homepage": "https://github.com/BlackLabelHQ/MediEvilRecomp",
+    "assetMatch": "MediEvilRecomp-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "medievil.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 4000
+  },
+  {
+    "id": "hercules-recompiled",
+    "name": "Hercules Recompiled",
+    "originalTitle": "Disney's Hercules",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "HD sprites and widescreen; plays all five PAL releases.",
+    "repo": "obaidr1/hercules-recompiled",
+    "homepage": "https://github.com/obaidr1/hercules-recompiled",
+    "assetMatch": "hercules-recompiled-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "Hercules_Recompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 9814
+  },
+  {
+    "id": "yu-gi-oh-forbidden-memories-recompiled",
+    "name": "YFM Re-Decomp",
+    "originalTitle": "Yu-Gi-Oh! Forbidden Memories",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Adds the European releases' languages to the USA game.",
+    "repo": "Unchiga/Yu-Gi-Oh-Forbidden-Memories-Recompiled",
+    "homepage": "https://github.com/Unchiga/Yu-Gi-Oh-Forbidden-Memories-Recompiled",
+    "assetMatch": "yfm-redecomp-*-windows.zip",
+    "assetKind": "zip",
+    "exe": "memories-pc.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{documents}/My Games/YFM Re-Decomp/saves"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 4108
+  },
+  {
+    "id": "rage-racer-pc",
+    "name": "Rage Racer PC",
+    "originalTitle": "Rage Racer",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the European disc.",
+    "repo": "khasinski/rage-racer-pc",
+    "homepage": "https://github.com/khasinski/rage-racer-pc",
+    "assetMatch": "Rage-Racer-?.*-windows-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "Rage-Racer.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 18698
+  },
+  {
+    "id": "dw2-pc",
+    "name": "DW2-PC",
+    "originalTitle": "Digimon World 2",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Memory cards are plain files that other emulators can read.",
+    "repo": "Wyrelade/DW2-PC",
+    "homepage": "https://github.com/Wyrelade/DW2-PC",
+    "assetMatch": "DW2-PC-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "dw2.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps1",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{appData}/DW2-Online"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 36508
+  },
+  {
+    "id": "fukami",
+    "name": "Fukami",
+    "originalTitle": "Ridge Racer V",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the USA disc.",
+    "repo": "danisandoval/fukami",
+    "homepage": "https://github.com/danisandoval/fukami",
+    "assetMatch": "Fukami-*-windows-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "Fukami.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 10386
+  },
+  {
+    "id": "rampagere",
+    "name": "RampageRE",
+    "originalTitle": "Rampage: Total Destruction",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Plays from start to end on the European or USA disc.",
+    "repo": "jjmhalew/RampageRE",
+    "homepage": "https://github.com/jjmhalew/RampageRE",
+    "assetMatch": "RampageRE-windows-*.zip",
+    "assetKind": "zip",
+    "exe": "RampageRE.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2634
+  },
+  {
+    "id": "def-jam-vendetta-recomp",
+    "name": "Def Jam Vendetta Recompiled",
+    "originalTitle": "Def Jam Vendetta",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Builds itself from your USA disc on first run.",
+    "repo": "jcsix694/def-jam-vendetta-recomp",
+    "homepage": "https://github.com/jcsix694/def-jam-vendetta-recomp",
+    "assetMatch": "Def-Jam-Vendetta-Recompiled-Windows.zip",
+    "assetKind": "zip",
+    "exe": "Def Jam Vendetta Recompiled Settings.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{installDir}/files/game/mc0"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 3874
+  },
+  {
+    "id": "timesplitters",
+    "name": "TimeSplitters Recomp",
+    "originalTitle": "TimeSplitters",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the USA disc.",
+    "repo": "GTTeancum/Timesplitters",
+    "homepage": "https://github.com/GTTeancum/Timesplitters",
+    "assetMatch": "TimeSplitters-Recomp-*-windows.zip",
+    "assetKind": "zip",
+    "exe": "timesplitters.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2142
+  },
+  {
+    "id": "urban-reign-recomp",
+    "name": "Urban Reign PC",
+    "originalTitle": "Urban Reign",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "60 fps, high resolution, HD textures and up to 8 players.",
+    "repo": "thiagordsfx/urban-reign-recomp",
+    "homepage": "https://github.com/thiagordsfx/urban-reign-recomp",
+    "assetMatch": "UrbanReignPC-*.zip",
+    "assetKind": "zip",
+    "exe": "Urban Reign.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 19776
+  },
+  {
+    "id": "roadtripadventure-recomp",
+    "name": "Road Trip Recomp",
+    "originalTitle": "Road Trip",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Texture packs and AMD FSR 3.",
+    "repo": "silentsudin/RoadTripAdventure-recomp",
+    "homepage": "https://github.com/silentsudin/RoadTripAdventure-recomp",
+    "assetMatch": "RoadTripRecomp-*-Windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "RoadTrip.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/RoadTripRecomp"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 44694
+  },
+  {
+    "id": "killzonerecomp",
+    "name": "Killzone PC",
+    "originalTitle": "Killzone",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Mouse and keyboard, 120+ fps and upscaling.",
+    "repo": "drakolordx7/KillzoneRecomp",
+    "homepage": "https://github.com/drakolordx7/KillzoneRecomp",
+    "assetMatch": "Killzone-PC-*.zip",
+    "assetKind": "zip",
+    "exe": "killzone.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "ps2",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1865
+  },
+  {
+    "id": "black-xberecomp",
+    "name": "BLACK XBE Recomp",
+    "originalTitle": "Black",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Mouse aim, render scaling and texture replacement.",
+    "repo": "TGP482/BLACK-XBERecomp",
+    "homepage": "https://github.com/TGP482/BLACK-XBERecomp",
+    "assetMatch": "BLACK-XBERecomp.zip",
+    "assetKind": "zip",
+    "exe": "BLACK.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox",
+      "accepted": [],
+      "source": "library",
+      "delivery": "copy",
+      "placePath": "assets/game.iso"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 5749
+  },
+  {
+    "id": "scda-xberecomp",
+    "name": "Splinter Cell DA Recomp",
+    "originalTitle": "Tom Clancy's Splinter Cell: Double Agent",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "MSAA, SMAA and texture replacement.",
+    "repo": "TGP482/SCDA-XBERecomp",
+    "homepage": "https://github.com/TGP482/SCDA-XBERecomp",
+    "assetMatch": "SCDA-XBERecomp.zip",
+    "assetKind": "zip",
+    "exe": "SCDA.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox",
+      "accepted": [],
+      "source": "library",
+      "delivery": "copy",
+      "placePath": "assets/game.iso"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 182225
+  },
+  {
+    "id": "black-pc",
+    "name": "black-pc",
+    "originalTitle": "Black",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Fully playable from the NTSC-U or PAL disc.",
+    "repo": "Spark198rus/black-pc",
+    "homepage": "https://github.com/Spark198rus/black-pc",
+    "assetMatch": "black-pc-*-win32.zip",
+    "assetKind": "zip",
+    "exe": "black.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app",
+      "pickHint": "Extract your disc into a \"game\" folder next to the port folder."
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 5749
+  },
+  {
+    "id": "ssx-tricky-pc",
+    "name": "SSX Tricky PC",
+    "originalTitle": "SSX Tricky",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Races against the AI at 60 fps.",
+    "repo": "MatiasRiveraC/SSX-Tricky-PC",
+    "homepage": "https://github.com/MatiasRiveraC/SSX-Tricky-PC",
+    "assetMatch": "SSX-Tricky-PC-*-win64.7z",
+    "assetKind": "7z",
+    "exe": "SSX Tricky.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{installDir}/hdd"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 4176
+  },
+  {
+    "id": "opence",
+    "name": "OpenCE",
+    "originalTitle": "Halo: Combat Evolved",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Plays any version of the disc, with Custom Edition maps.",
+    "repo": "OpenCommunityEdition/OpenCE",
+    "homepage": "https://github.com/OpenCommunityEdition/OpenCE",
+    "assetMatch": "halo-windows-release.zip",
+    "assetKind": "zip",
+    "exe": "halo.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 740
+  },
+  {
+    "id": "armyoftworecompilation",
+    "name": "Army of Two Recompilation",
+    "originalTitle": "Army of Two",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Online co-op; the whole game is finishable.",
+    "repo": "OpenPortroid/ArmyOfTwoRecompilation",
+    "homepage": "https://github.com/OpenPortroid/ArmyOfTwoRecompilation",
+    "assetMatch": "ArmyOfTwo-v*.zip",
+    "assetKind": "zip",
+    "exe": "ArmyOfTwoLauncher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{documents}/armyoftworecomp_tu2"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 996
+  },
+  {
+    "id": "sdoj-recomp",
+    "name": "SDOJ Recomp",
+    "originalTitle": "DoDonPachi SaiDaiOuJou",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build with a Vulkan option.",
+    "repo": "eandis/SDOJ-Recomp",
+    "homepage": "https://github.com/eandis/SDOJ-Recomp",
+    "assetMatch": "sdoj.recomp.*.win-amd64.zip",
+    "assetKind": "zip",
+    "exe": "DoDonPachi SaiDaiOuJou.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app",
+      "pickHint": "Put the ISO and its title update next to the program."
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1673
+  },
+  {
+    "id": "dbz-budokai-3-hd-collection",
+    "name": "Budokai 3 HD Collection",
+    "originalTitle": "Dragon Ball Z: Budokai HD Collection",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "A launcher with a mod system.",
+    "repo": "novapowers0/DBZ-Budokai-3-HD-Collection",
+    "homepage": "https://github.com/novapowers0/DBZ-Budokai-3-HD-Collection",
+    "assetMatch": "DBZ-Budokai-3-HD-Collection-v*.zip",
+    "assetKind": "zip",
+    "exe": "dbz3.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 21701
+  },
+  {
+    "id": "skate3recomp",
+    "name": "Skate 3 Recomp",
+    "originalTitle": "Skate 3",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Installs from your ISO through its own setup.",
+    "repo": "mchughalex/skate3recomp",
+    "homepage": "https://github.com/mchughalex/skate3recomp",
+    "assetMatch": "Skate3Recomp-Windows.zip",
+    "assetKind": "zip",
+    "exe": "skate3.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2587
+  },
+  {
+    "id": "edgeoftimerecomp",
+    "name": "Edge of Time Recomp",
+    "originalTitle": "Spider-Man: Edge of Time",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the Xbox 360 game.",
+    "repo": "goliathret/EdgeOfTimeRecomp",
+    "homepage": "https://github.com/goliathret/EdgeOfTimeRecomp",
+    "assetMatch": "EdgeOfTimeRecomp-*-win-amd64.zip",
+    "assetKind": "zip",
+    "exe": "EdgeOfTimeRecomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 5179
+  },
+  {
+    "id": "tip-recomp",
+    "name": "reTiP",
+    "originalTitle": "Viva Piñata: Trouble in Paradise",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build; asks for your ISO on first run.",
+    "repo": "SolarCookies/TiP-Recomp",
+    "homepage": "https://github.com/SolarCookies/TiP-Recomp",
+    "assetMatch": "retip_*_windows_amd64.zip",
+    "assetKind": "zip",
+    "exe": "retip.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 7238
+  },
+  {
+    "id": "wwe-svr2011-pc",
+    "name": "SvR 2011 PC",
+    "originalTitle": "WWE SmackDown vs. Raw 2011",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Bundled mods and a mod maker.",
+    "repo": "KaikoClanworth1/wwe-svr2011-pc",
+    "homepage": "https://github.com/KaikoClanworth1/wwe-svr2011-pc",
+    "assetMatch": "SvR2011-PC-v*.zip",
+    "assetKind": "zip",
+    "exe": "SvR2011 Launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2265
+  },
+  {
+    "id": "ac6-recomp",
+    "name": "AC6 Recomp",
+    "originalTitle": "Ace Combat 6: Fires of Liberation",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Boots and runs in-game; US disc only.",
+    "repo": "sal063/AC6_recomp",
+    "homepage": "https://github.com/sal063/AC6_recomp",
+    "assetMatch": "ac6recomp-*.zip",
+    "assetKind": "zip",
+    "exe": "ac6recomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 5476
+  },
+  {
+    "id": "renut",
+    "name": "reNut",
+    "originalTitle": "Banjo-Kazooie: Nuts & Bolts",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Extracts your disc and title update in its launcher.",
+    "repo": "masterspike52/reNut",
+    "homepage": "https://github.com/masterspike52/reNut",
+    "assetMatch": "renut.zip",
+    "assetKind": "zip",
+    "exe": "renut.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3008
+  },
+  {
+    "id": "fable-2-recomp",
+    "name": "Fable 2 Recomp",
+    "originalTitle": "Fable II",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Extracts the game from your disc image in its launcher.",
+    "repo": "himdo/Fable-2-Recomp",
+    "homepage": "https://github.com/himdo/Fable-2-Recomp",
+    "assetMatch": "Fable_2_recomp_v*_windows.zip",
+    "assetKind": "zip",
+    "exe": "Fable2Launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 522
+  },
+  {
+    "id": "estacado-the-darkness-recomp",
+    "name": "Estacado",
+    "originalTitle": "The Darkness",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the USA/Europe disc.",
+    "repo": "invinceble55-wq/Estacado-The-Darkness-Recomp",
+    "homepage": "https://github.com/invinceble55-wq/Estacado-The-Darkness-Recomp",
+    "assetMatch": "Estacado-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "TheDarkness.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [
+        {
+          "label": "USA, Europe (Redump)",
+          "sha256": "46f7305c1e1972e888d3624f15b0ed483923aeeb50ecad0c6bf5b42f69d52a90"
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1347
+  },
+  {
+    "id": "gears-of-war-2-pc-port",
+    "name": "Gears of War 2 PC Port",
+    "originalTitle": "Gears of War 2",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "1440p/4K, FSR, 4K texture packs, keyboard and mouse.",
+    "repo": "santiquiroz/gears-of-war-2-pc-port",
+    "homepage": "https://github.com/santiquiroz/gears-of-war-2-pc-port",
+    "assetMatch": "gow2-recomp-*-win64.zip",
+    "assetKind": "zip",
+    "exe": "gow2.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 548
+  },
+  {
+    "id": "lostodysseyrecomp",
+    "name": "Lost Odyssey Recomp",
+    "originalTitle": "Lost Odyssey",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Imports your four-disc set in its launcher.",
+    "repo": "freefrank/LostOdysseyRecomp",
+    "homepage": "https://github.com/freefrank/LostOdysseyRecomp",
+    "assetMatch": "LostOdysseyRecomp-windows-x64-*.zip",
+    "assetKind": "zip",
+    "exe": "LostOdysseyRecomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 7057
+  },
+  {
+    "id": "dbz-burst-limit-recompiled",
+    "name": "Burst Limit Recompiled",
+    "originalTitle": "Dragon Ball Z: Burst Limit",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Installs from your US disc on first run.",
+    "repo": "iExplosiveRage/DBZ-Burst-Limit-Recompiled",
+    "homepage": "https://github.com/iExplosiveRage/DBZ-Burst-Limit-Recompiled",
+    "assetMatch": "DBZ-Burst-Limit-Recompiled-*-alpha.zip",
+    "assetKind": "zip",
+    "exe": "burstlimit.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{installDir}/saves"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 2569
+  },
+  {
+    "id": "king-kong-recompiled",
+    "name": "King Kong Recompiled",
+    "originalTitle": "Peter Jackson's King Kong: The Official Game of the Movie",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Its own renderer with global illumination; online co-op.",
+    "repo": "TekRantGaming/king-kong-recompiled",
+    "homepage": "https://github.com/TekRantGaming/king-kong-recompiled",
+    "assetMatch": "KingKong-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "king_kong.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 248543
+  },
+  {
+    "id": "eternalsonatareprise",
+    "name": "Eternal Sonata Reprise",
+    "originalTitle": "Eternal Sonata",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Plays from the Xbox 360 or PS3 version, any region.",
+    "repo": "birabittoh/EternalSonataReprise",
+    "homepage": "https://github.com/birabittoh/EternalSonataReprise",
+    "assetMatch": "eternalsonata-*-win-amd64.zip",
+    "assetKind": "zip",
+    "exe": "eternalsonata.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app",
+      "pickHint": "Extract your ISO into the assets folder of the port."
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 6990
+  },
+  {
+    "id": "hl360-forza2",
+    "name": "Forza 2 Native",
+    "originalTitle": "Forza Motorsport 2",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Imports your European or American disc in its launcher.",
+    "repo": "0herculabs/hl360-Forza2",
+    "homepage": "https://github.com/0herculabs/hl360-Forza2",
+    "assetMatch": "Forza2-Native-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "Forza2Launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3072
+  },
+  {
+    "id": "hl360-forza3",
+    "name": "Forza 3 Native",
+    "originalTitle": "Forza Motorsport 3",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Local profiles; needs the Ultimate Collection (USA).",
+    "repo": "0herculabs/hl360-forza3",
+    "homepage": "https://github.com/0herculabs/hl360-forza3",
+    "assetMatch": "FM3.zip",
+    "assetKind": "zip",
+    "exe": "fm3-launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [
+        {
+          "label": "Ultimate Collection (USA), Disc 1",
+          "md5": "a527154d55c7b39849ec68cd46f17281",
+          "size": 7838695424
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3069
+  },
+  {
+    "id": "hl360-forza4",
+    "name": "Forza 4 Native",
+    "originalTitle": "Forza Motorsport 4",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Force feedback wheels supported.",
+    "repo": "0herculabs/hl360-forza4",
+    "homepage": "https://github.com/0herculabs/hl360-forza4",
+    "assetMatch": "FM4-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "fm4-launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [
+        {
+          "label": "USA Rev 1, Disc 1",
+          "md5": "2470358250b8566bf5ddc3aaf1b76c68",
+          "size": 8738846720
+        }
+      ],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3068
+  },
+  {
+    "id": "naruto-rise-recomp",
+    "name": "Naruto Rise Recomp",
+    "originalTitle": "Naruto: Rise of a Ninja",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Reads your ISO directly; a native renderer is the default.",
+    "repo": "jorjbarbosa/naruto-rise-recomp",
+    "homepage": "https://github.com/jorjbarbosa/naruto-rise-recomp",
+    "assetMatch": "naruto-rise-recomp-win-amd64.zip",
+    "assetKind": "zip",
+    "exe": "narutorise.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 7101
+  },
+  {
+    "id": "nfsmw-recompiled",
+    "name": "NFSMW Recompiled",
+    "originalTitle": "Need for Speed: Most Wanted",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Works with the USA or Spanish PAL disc.",
+    "repo": "madelrandel-blip/NFSMW-Recompiled",
+    "homepage": "https://github.com/madelrandel-blip/NFSMW-Recompiled",
+    "assetMatch": "NFSMW-Recomp-*-Windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "NFSMW Recomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3193
+  },
+  {
+    "id": "ridgeracer6-recompilation",
+    "name": "Ridge Racer 6 Recompilation",
+    "originalTitle": "Ridge Racer 6",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Copies your USA disc in on first run.",
+    "repo": "Sirhalo23/RidgeRacer6-Recompilation",
+    "homepage": "https://github.com/Sirhalo23/RidgeRacer6-Recompilation",
+    "assetMatch": "RidgeRacer6-PC-*.zip",
+    "assetKind": "zip",
+    "exe": "RR6 Launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 7160
+  },
+  {
+    "id": "free-riders-recompiled",
+    "name": "Free Riders Recompiled",
+    "originalTitle": "Sonic Free Riders",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Controller or keyboard instead of Kinect, with VRM avatars.",
+    "repo": "YuutaTsubasa/Free-Riders-Recompiled",
+    "homepage": "https://github.com/YuutaTsubasa/Free-Riders-Recompiled",
+    "assetMatch": "FreeRidersRecompiled-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "FreeRidersRecompiled.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 20118
+  },
+  {
+    "id": "thesimpsonsgamerecomp",
+    "name": "The Simpsons Game Recomp",
+    "originalTitle": "The Simpsons Game",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Installs from your ISO in its launcher.",
+    "repo": "YesterMester/TheSimpsonsGameRecomp",
+    "homepage": "https://github.com/YesterMester/TheSimpsonsGameRecomp",
+    "assetMatch": "TheSimpsonsGame-Recompiled-Windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "simpsons-launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [
+      "{localAppData}/simpsons"
+    ],
+    "addedAt": "2026-10-31",
+    "igdbId": 2656
+  },
+  {
+    "id": "wwe12-pc",
+    "name": "WWE '12 PC",
+    "originalTitle": "WWE '12",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "All five European languages.",
+    "repo": "iMrBurn/wwe12-pc",
+    "homepage": "https://github.com/iMrBurn/wwe12-pc",
+    "assetMatch": "WWE12-PC-*.zip",
+    "assetKind": "zip",
+    "exe": "WWE12 Launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app",
+      "pickHint": "Put your ISO in the port's game folder."
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 5294
+  },
+  {
+    "id": "wwe2k14-recomp",
+    "name": "WWE 2K14 Recomp",
+    "originalTitle": "WWE 2K14",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Imports saves from an older install.",
+    "repo": "PromethenDev/wwe2k14-recomp",
+    "homepage": "https://github.com/PromethenDev/wwe2k14-recomp",
+    "assetMatch": "WWE2K14-Recomp-*-x64.zip",
+    "assetKind": "zip",
+    "exe": "WWE 2K14 Launcher.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 5297
+  },
+  {
+    "id": "condemned2recomp",
+    "name": "Condemned 2 Recomp",
+    "originalTitle": "Condemned 2: Bloodshot",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Native build of the Xbox 360 game.",
+    "repo": "psxrestore/Condemned2Recomp",
+    "homepage": "https://github.com/psxrestore/Condemned2Recomp",
+    "assetMatch": "condemned2recompV*_windows.zip",
+    "assetKind": "zip",
+    "exe": "condemned2recomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 6943
+  },
+  {
+    "id": "luigis-mansion-recompiled",
+    "name": "Luigi's Mansion Recompiled",
+    "originalTitle": "Luigi's Mansion",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Adds the European Hidden Mansion when you have both discs.",
+    "repo": "rob646464/luigis-mansion-recompiled",
+    "homepage": "https://github.com/rob646464/luigis-mansion-recompiled",
+    "assetMatch": "LuigisMansionRecompiled-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "LuigisMansionRecomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "gamecube",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2485
+  },
+  {
+    "id": "metroidprimeport",
+    "name": "Metroid Prime Port",
+    "originalTitle": "Metroid Prime",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Imports and exports saves; reads ISO, RVZ and more.",
+    "repo": "Odrannnn/MetroidPrimePort",
+    "homepage": "https://github.com/Odrannnn/MetroidPrimePort",
+    "assetMatch": "metroid-prime-port-*-windows-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "metroid_prime_port.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "gamecube",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1105
+  },
+  {
+    "id": "strikers",
+    "name": "Strikers",
+    "originalTitle": "Super Mario Strikers",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "US, European and Japanese discs in one program.",
+    "repo": "new-coke/strikers",
+    "homepage": "https://github.com/new-coke/strikers",
+    "assetMatch": "strikers-windows-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "strikers.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "gamecube",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2256
+  },
+  {
+    "id": "ringout",
+    "name": "RingOut",
+    "originalTitle": "SoulCalibur II",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Plays any region's disc.",
+    "repo": "jackpoison-prog/RingOut",
+    "homepage": "https://github.com/jackpoison-prog/RingOut",
+    "assetMatch": "RingOut-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "RingOut.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "gamecube",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 227987
+  },
+  {
+    "id": "eternaldarknessrecomp",
+    "name": "Eternal Darkness Recomp",
+    "originalTitle": "Eternal Darkness: Sanity's Requiem",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Needs the European disc (GEDP01).",
+    "repo": "griches/EternalDarknessRecomp",
+    "homepage": "https://github.com/griches/EternalDarknessRecomp",
+    "assetMatch": "EternalDarkness-windows-x64-*.zip",
+    "assetKind": "zip",
+    "exe": "EternalDarkness.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "gamecube",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 3907
+  },
+  {
+    "id": "melee-pc",
+    "name": "Melee PC",
+    "originalTitle": "Super Smash Bros. Melee",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Checks your NTSC-U 1.02 disc against Redump.",
+    "repo": "999sian/melee-pc",
+    "homepage": "https://github.com/999sian/melee-pc",
+    "assetMatch": "Melee-Windows-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "melee.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "gamecube",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1627
+  },
+  {
+    "id": "newsuperpaperbros",
+    "name": "New Super Paper Bros",
+    "originalTitle": "Super Paper Mario",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "4K, widescreen, 120 fps and HD textures.",
+    "repo": "josiahg2502-glitch/NewSuperPaperBros",
+    "homepage": "https://github.com/josiahg2502-glitch/NewSuperPaperBros",
+    "assetMatch": "NewSuperPaperBros.zip",
+    "assetKind": "zip",
+    "exe": "New Super Paper Bros.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "wii",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2191
+  },
+  {
+    "id": "nsmb-wii-multiplayer-recompilation",
+    "name": "NSMB Wii Recompiled",
+    "originalTitle": "New Super Mario Bros. Wii",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Needs the USA revision 1 disc.",
+    "repo": "WitherBlitz/NSMB-Wii-Multiplayer-Recompilation",
+    "homepage": "https://github.com/WitherBlitz/NSMB-Wii-Multiplayer-Recompilation",
+    "assetMatch": "NSMBW-*-windows-x64.zip",
+    "assetKind": "zip",
+    "exe": "NSMBW.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "wii",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app",
+      "pickHint": "Extract your disc with Dolphin first."
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2178
+  },
+  {
+    "id": "zeldawwhdrecomp",
+    "name": "Wind Waker HD Recomp",
+    "originalTitle": "The Legend of Zelda: The Wind Waker HD",
+    "method": "recomp",
+    "status": "beta",
+    "summary": "Brings in saves from Cemu or the GameCube.",
+    "repo": "ZeldaWWHDRecomp/ZeldaWWHDRecomp",
+    "homepage": "https://github.com/ZeldaWWHDRecomp/ZeldaWWHDRecomp",
+    "assetMatch": "WindWakerHD-*-windows-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "Wind Waker HD.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "wiiu",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 2276
+  },
+  {
+    "id": "unleashedrecomp",
+    "name": "Unleashed Recompiled",
+    "originalTitle": "Sonic Unleashed",
+    "method": "recomp",
+    "status": "playable",
+    "summary": "High resolutions, ultrawide, high frame rates and mods.",
+    "repo": "hedge-dev/UnleashedRecomp",
+    "homepage": "https://github.com/hedge-dev/UnleashedRecomp",
+    "assetMatch": "UnleashedRecomp-Windows.zip",
+    "assetKind": "zip",
+    "exe": "UnleashedRecomp.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "xbox360",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 5169
+  },
+  {
+    "id": "dusklight",
+    "name": "Dusklight",
+    "originalTitle": "The Legend of Zelda: Twilight Princess",
+    "method": "decomp",
+    "status": "beta",
+    "summary": "Plays any commercial GameCube or Wii disc except Korean.",
+    "repo": "TwilitRealm/dusklight",
+    "homepage": "https://github.com/TwilitRealm/dusklight",
+    "assetMatch": "Dusklight-*-win32-x86_64.zip",
+    "assetKind": "zip",
+    "exe": "dusklight.exe",
+    "args": [],
+    "gameFile": {
+      "systemSlug": "gamecube",
+      "accepted": [],
+      "source": "library",
+      "delivery": "in-app"
+    },
+    "saveDirs": [],
+    "addedAt": "2026-10-31",
+    "igdbId": 1036
   }
 ]

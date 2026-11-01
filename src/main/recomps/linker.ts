@@ -251,8 +251,10 @@ export async function deliverFile(recompId: string): Promise<void> {
   const dest = joinInside(row.install_dir, manifest.gameFile.placePath);
   const [s, d] = await Promise.all([stat(src), stat(dest).catch(() => null)]);
   if (s.isDirectory()) {
-    // A picked folder (e.g. a PSP EBOOT + PSP_GAME tree): copy it in once.
-    if (!d) await cp(src, dest, { recursive: true });
+    // A picked folder (e.g. a PSP EBOOT + PSP_GAME tree): merge it in. The port's own
+    // release may already ship that folder (with a readme, say), so files already there
+    // are kept and only missing ones are copied - which also makes it idempotent.
+    await cp(src, dest, { recursive: true, force: false, errorOnExist: false });
   } else if (!d || d.size !== s.size) {
     await mkdir(dirname(dest), { recursive: true });
     await rm(dest, { force: true }); // a stale/partial copy from an earlier attempt

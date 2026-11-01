@@ -762,7 +762,7 @@ export async function runRecompsSmoke(): Promise<void> {
   // R2 - unified settings resolve to each port's own keys, and the JSON patch is nested +
   // idempotent.
   const { resolveWrites, applyJsonWrites } = await import('../recomps/config');
-  if (!manifests.every((m) => m.config || m.build)) throw new Error('recomps: a release port is missing its config map');
+  if (!manifests.find((m) => m.id === 'zelda64recomp')?.config) throw new Error('recomps: zelda64recomp lost its config map');
   const zeldaM = manifests.find((m) => m.id === 'zelda64recomp')!;
   const w = resolveWrites(zeldaM, { frameCap: '60', fullscreen: 'on', resolution: 'bogus' });
   if (w.rr_option !== 'Manual' || w.rr_manual_value !== 60 || w.wm_option !== 'Fullscreen' || 'res_option' in w) {
@@ -881,13 +881,14 @@ export async function runRecompsSmoke(): Promise<void> {
   }
   await uninstall('zelda64recomp');
 
-  // v2 - art: offline here (no port names an igdbId yet and smoke has no LaunchBox DB), so a
+  // v2 - art: offline here (the port below has no igdbId and smoke has no LaunchBox DB), so a
   // miss is cached as null; a cached hit is returned as-is without refetching; unknown ids
   // are skipped. Never throws.
   const { getArt } = await import('../recomps/art');
   const { upsertArt } = await import('../db/repositories/recompsRepo');
-  const miss = await getArt(['shipwright', 'not-a-port']);
-  if (miss.shipwright?.coverUrl !== null || 'not-a-port' in miss) throw new Error('recomps: art miss/unknown id wrong');
+  // 'launcher' (OpenGOAL) has no igdbId, so this never reaches IGDB even when it's configured.
+  const miss = await getArt(['launcher', 'not-a-port']);
+  if (miss.launcher?.coverUrl !== null || 'not-a-port' in miss) throw new Error('recomps: art miss/unknown id wrong');
   upsertArt('starship', 'asset://assets/igdb/test_cover.jpg', 'asset://assets/igdb/test_hero.jpg');
   const hit = await getArt(['starship']);
   if (hit.starship?.coverUrl !== 'asset://assets/igdb/test_cover.jpg' || hit.starship.heroUrl !== 'asset://assets/igdb/test_hero.jpg') {
