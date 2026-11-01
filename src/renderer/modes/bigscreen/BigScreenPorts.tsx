@@ -6,11 +6,19 @@ import { EmptyState } from '@renderer/components/EmptyState';
 import { ConsoleLogo } from '@renderer/components/SystemIcon';
 import { PortChips } from '@renderer/components/PortsView';
 import { PortDetailPage } from '@renderer/components/PortDetailPage';
-import { useConsoles, filterPorts, groupByConsole, matchesChip, isBusyPort } from '@renderer/components/portsModel';
+import { useConsoles, filterPorts, groupByConsole, matchesChip, isBusyPort, portCardLabel } from '@renderer/components/portsModel';
+import { ProgressRing } from '@renderer/components/PortCard';
 import { setFocus } from '@renderer/input/spatialNav';
 import { GP_EVENT } from '@renderer/input/gamepad';
 import { useUiStore } from '@renderer/store/uiStore';
-import { useRecomps, useRecompArt, useLaunchRecomp } from '@renderer/query/useRecomps';
+import {
+  useRecomps,
+  useRecompArt,
+  useLaunchRecomp,
+  useRecompProgress,
+  useRecompBuildStatus,
+  busyFraction,
+} from '@renderer/query/useRecomps';
 import type { RecompDTO } from '@shared/contracts/recomps';
 
 const GRID = 'grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-6';
@@ -158,9 +166,12 @@ function BigScreenPortCard({
 }) {
   const m = port.manifest;
   const busy = isBusyPort(port);
+  const progress = useRecompProgress(m.id);
+  const build = useRecompBuildStatus(m.id);
+  const fraction = busy ? busyFraction(port, progress, build) : null;
   return (
     <Focusable
-      ariaLabel={m.name}
+      ariaLabel={portCardLabel(port, fraction)}
       focusKey={`bs-port-${m.id}`}
       focusClassName=""
       className="rounded-xl"
@@ -169,7 +180,7 @@ function BigScreenPortCard({
     >
       {(focused) => (
         <div
-          className={`overflow-hidden rounded-xl transition-all duration-150 ${
+          className={`overflow-hidden rounded-xl transition-all duration-150 motion-reduce:transition-none ${
             focused ? '-translate-y-1 scale-[1.04] shadow-e3 ring-2 ring-accent' : ''
           }`}
         >
@@ -178,15 +189,17 @@ function BigScreenPortCard({
               <img src={coverUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-2 to-bg p-3">
-                <span className="line-clamp-4 select-none text-center text-xl font-semibold leading-snug text-fg-faint/80">
+                <span className="line-clamp-4 select-none text-center text-xl font-semibold leading-snug text-fg-muted">
                   {m.originalTitle}
                 </span>
               </div>
             )}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-            <div className="absolute left-2 top-2">
+            {/* Same glyphs as the desktop card: a ring while installing (not a second dot),
+                the update dot, or the ready check. */}
+            <div className="absolute left-2 top-2" aria-hidden>
               {busy ? (
-                <span className="block h-3 w-3 animate-pulse rounded-full bg-accent" />
+                <ProgressRing fraction={fraction} size="lg" />
               ) : port.updateAvailable ? (
                 <span className="block h-3 w-3 rounded-full bg-accent" />
               ) : port.canPlay ? (
@@ -196,7 +209,7 @@ function BigScreenPortCard({
               ) : null}
             </div>
             {m.status === 'beta' && (
-              <span className="absolute right-2 top-2 rounded bg-black/70 px-2 py-0.5 text-sm font-medium text-warning">
+              <span className="absolute right-2 top-2 rounded bg-black/70 px-2 py-0.5 text-sm font-medium text-warning" aria-hidden>
                 Beta
               </span>
             )}

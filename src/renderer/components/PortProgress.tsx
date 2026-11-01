@@ -12,15 +12,15 @@ export function PortProgress({ port, size = 'sm', prefix }: { port: RecompDTO; s
   const label = busyLabel(port, progress, build);
   return (
     <div className="min-w-0 flex-1">
-      <p className={`truncate ${size === 'lg' ? 'text-base' : 'text-2xs'} text-fg-muted`} title={label}>
+      <p className={`truncate ${size === 'lg' ? 'text-base' : 'text-xs'} text-fg-muted`} title={label}>
         {prefix ? `${prefix}: ` : ''}
         {label}
       </p>
       <div className={`mt-1.5 overflow-hidden rounded-full bg-bg/70 ${size === 'lg' ? 'h-2' : 'h-1.5'}`}>
         {fraction == null ? (
-          <div className="h-full w-full animate-pulse rounded-full bg-accent/40" />
+          <div className="h-full w-full animate-pulse rounded-full bg-accent/40 motion-reduce:animate-none" />
         ) : (
-          <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${Math.round(fraction * 100)}%` }} />
+          <div className="h-full rounded-full bg-accent transition-all motion-reduce:transition-none" style={{ width: `${Math.round(fraction * 100)}%` }} />
         )}
       </div>
     </div>

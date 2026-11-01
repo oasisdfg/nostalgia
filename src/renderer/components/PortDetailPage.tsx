@@ -18,7 +18,7 @@ import { Button } from './Button';
 import { Badge } from './Badge';
 import { EmptyState } from './EmptyState';
 import { FocusSection, Focusable } from './Focusable';
-import { ContextMenu, type ContextMenuItem } from './ContextMenu';
+import type { ContextMenuItem } from './ContextMenu';
 import { PortProgress } from './PortProgress';
 import { PortSettings, PortSettingsCycle, portSettingOptions } from './PortSettings';
 import { useConsoles, isBusyPort } from './portsModel';
@@ -126,10 +126,9 @@ function PortDetailBody({
   const buildLog = useRevealRecompBuildLog();
   const clearPicked = useClearRecompPicked();
 
-  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const [menu, setMenu] = useState(false);
   const [bsMenu, setBsMenu] = useState(bigScreen && initialMore);
   const [confirmUninstall, setConfirmUninstall] = useState(false);
-  const moreRef = useRef<HTMLSpanElement>(null);
   const size = bigScreen ? 'lg' : 'md';
   const openProject = (): void => void invoke('app:openExternal', { url: m.homepage });
 
@@ -158,6 +157,12 @@ function PortDetailBody({
       onClick: () => setConfirmUninstall(true),
     });
   }
+
+  useEffect(() => {
+    if (!confirmUninstall) return;
+    const r = requestAnimationFrame(() => setFocus('port-uninstall-keep'));
+    return () => cancelAnimationFrame(r);
+  }, [confirmUninstall]);
 
   // Big Screen: X plays, Y opens More.
   useEffect(() => {
@@ -201,7 +206,7 @@ function PortDetailBody({
           variant="primary"
           icon={<Play className="h-4 w-4" fill="currentColor" />}
           disabled={!port.canPlay || launch.isPending}
-          title={port.canPlay ? undefined : `Link your copy of ${m.originalTitle} first`}
+          title={port.canPlay ? undefined : `Play: link your copy of ${m.originalTitle} first`}
           onClick={() => launch.mutate(m.id)}
         >
           {launch.isPending ? 'Starting…' : 'Play'}
@@ -249,13 +254,13 @@ function PortDetailBody({
   const version = installed && port.installedTag && port.installedTag !== 'located' ? port.installedTag : null;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-7 animate-fade-in md:flex-row md:items-start">
+    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-7 animate-fade-in motion-reduce:animate-none md:flex-row md:items-start">
       <div className={`shrink-0 overflow-hidden rounded-lg bg-black shadow-e2 ${bigScreen ? 'w-72' : 'w-56'} aspect-[3/4]`}>
         {coverUrl ? (
           <img src={coverUrl} alt="" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-2 to-bg p-4">
-            <span className="text-center text-base font-semibold text-fg-faint/80">{m.originalTitle}</span>
+            <span className="text-center text-base font-semibold text-fg-muted">{m.originalTitle}</span>
           </div>
         )}
       </div>
@@ -272,8 +277,10 @@ function PortDetailBody({
             {m.status === 'beta' && <Badge tone="warning">Beta</Badge>}
           </div>
           <p className={`mt-3 ${bigScreen ? 'text-base' : 'text-sm'} text-fg-muted`}>{m.summary}</p>
-          {version && <p className={`mt-2 ${bigScreen ? 'text-sm' : 'text-2xs'} text-fg-muted`}>Version {version}</p>}
-          {m.build && !installed && <p className="mt-2 text-2xs text-fg-faint">Needs {m.build.requirements}</p>}
+          {version && <p className={`mt-2 ${bigScreen ? 'text-sm' : 'text-xs'} text-fg-muted`}>Version {version}</p>}
+          {m.build && !installed && (
+            <p className={`mt-2 ${bigScreen ? 'text-sm' : 'text-xs'} text-fg-muted`}>Needs {m.build.requirements}</p>
+          )}
         </div>
 
         <YourCopy port={port} consoleName={consoleName} bigScreen={bigScreen} />
@@ -281,34 +288,38 @@ function PortDetailBody({
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             {primary}
-            <span ref={moreRef} className="ml-auto">
+            <span className="relative ml-auto">
               <Button
+                focusKey="port-more-button"
                 size={size}
                 variant="ghost"
                 icon={<MoreHorizontal className="h-4 w-4" />}
-                onClick={() => {
-                  if (bigScreen) return setBsMenu(true);
-                  const r = moreRef.current?.getBoundingClientRect();
-                  setMenu({ x: r ? r.left : 0, y: r ? r.bottom + 4 : 0 });
-                }}
+                onClick={() => (bigScreen ? setBsMenu(true) : setMenu((v) => !v))}
               >
                 More
               </Button>
+              {menu && <MorePopover items={moreItems} onClose={() => setMenu(false)} />}
             </span>
           </div>
-          {port.lastError && !busy && <p className={`${bigScreen ? 'text-sm' : 'text-2xs'} text-danger`}>{port.lastError}</p>}
+          {port.lastError && !busy && (
+            <p role="alert" className={`${bigScreen ? 'text-sm' : 'text-xs'} text-danger`}>
+              {port.lastError}
+            </p>
+          )}
           {launch.isError && (
-            <p className="text-2xs text-danger">{launch.error instanceof Error ? launch.error.message : "Couldn't start it."}</p>
+            <p role="alert" className={`${bigScreen ? 'text-sm' : 'text-xs'} text-danger`}>
+              {launch.error instanceof Error ? launch.error.message : "Couldn't start it."}
+            </p>
           )}
           {confirmUninstall && (
             <div className={`${well} flex flex-wrap items-center justify-between gap-3 px-3 py-2`}>
-              <p className="text-2xs text-fg">
+              <p className={`${bigScreen ? 'text-base' : 'text-xs'} text-fg`}>
                 {external
                   ? `Forget where ${m.name} is installed? Its files stay where they are.`
                   : `Uninstall ${m.name}? Your game and its saves stay.`}
               </p>
               <span className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => setConfirmUninstall(false)}>
+                <Button focusKey="port-uninstall-keep" size="sm" variant="ghost" onClick={() => setConfirmUninstall(false)}>
                   Keep
                 </Button>
                 <Button
@@ -331,7 +342,6 @@ function PortDetailBody({
         )}
       </FocusSection>
 
-      {menu && <ContextMenu x={menu.x} y={menu.y} items={moreItems} onClose={() => setMenu(null)} />}
       {bsMenu && <BigScreenMore items={moreItems} onClose={() => setBsMenu(false)} />}
     </div>
   );
@@ -354,7 +364,9 @@ function YourCopy({ port, consoleName, bigScreen }: { port: RecompDTO; consoleNa
 
   const textButton = (label: string, onClick: () => void): ReactNode => (
     <Focusable ariaLabel={label} onSelect={onClick} className="inline-flex rounded">
-      <span className={`cursor-pointer font-semibold text-accent hover:underline ${text}`}>{label}</span>
+      <span className={`-mx-1 inline-block cursor-pointer rounded px-1 py-1 font-semibold text-accent hover:underline ${text}`}>
+        {label}
+      </span>
     </Focusable>
   );
 
@@ -417,7 +429,7 @@ function YourCopy({ port, consoleName, bigScreen }: { port: RecompDTO; consoleNa
             {textButton(libraryGames.length > 0 ? 'or choose files…' : 'Choose files…', () =>
               pick.mutate(m.id, { onSuccess: () => setChanging(false) }),
             )}
-            {m.gameFile.pickHint && <span className="text-fg-faint">{m.gameFile.pickHint}</span>}
+            {m.gameFile.pickHint && <span className="text-fg-muted">{m.gameFile.pickHint}</span>}
             {changing && textButton('Keep current', () => setChanging(false))}
           </div>
         </div>
@@ -444,7 +456,7 @@ function BigScreenMore({ items, onClose }: { items: ContextMenuItem[]; onClose: 
   }, [onClose]);
   return (
     <div data-port-more className="absolute inset-0 z-50 grid place-items-center bg-black/70">
-      <FocusSection focusKey="port-more" className="w-80 rounded-2xl bg-overlay p-6 shadow-e3 animate-pop-in">
+      <FocusSection focusKey="port-more" className="w-80 rounded-2xl bg-overlay p-6 shadow-e3 animate-pop-in motion-reduce:animate-none">
         <h2 className="mb-4 text-xl font-semibold">More</h2>
         <div className="flex flex-col gap-2">
           {items.map((it) => (
@@ -463,6 +475,76 @@ function BigScreenMore({ items, onClose }: { items: ContextMenuItem[]; onClose: 
             </Button>
           ))}
         </div>
+      </FocusSection>
+    </div>
+  );
+}
+
+/**
+ * Desktop "More": a small popover under the button, on the spatial-nav focus system so the
+ * keyboard reaches every item (the portal ContextMenu is mouse-only). Escape or a click
+ * outside closes it and returns focus to More.
+ */
+function MorePopover({ items, onClose }: { items: ContextMenuItem[]; onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const r = requestAnimationFrame(() => setFocus('port-more-desktop'));
+    const close = (): void => {
+      onClose();
+      requestAnimationFrame(() => setFocus('port-more-button'));
+    };
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key !== 'Escape') return;
+      e.stopImmediatePropagation(); // close the menu, not the whole page
+      close();
+    };
+    const onDown = (e: MouseEvent): void => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    };
+    window.addEventListener('keydown', onKey, true);
+    window.addEventListener('mousedown', onDown);
+    return () => {
+      cancelAnimationFrame(r);
+      window.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('mousedown', onDown);
+    };
+  }, [onClose]);
+  return (
+    <div
+      ref={ref}
+      role="menu"
+      className="absolute right-0 top-full z-50 mt-1 w-56 rounded-lg bg-overlay py-1 shadow-e3 animate-pop-in motion-reduce:animate-none"
+    >
+      <FocusSection focusKey="port-more-desktop">
+        {items.map((it) => (
+          <Focusable
+            key={it.label}
+            ariaLabel={it.label}
+            focusClassName=""
+            className="block"
+            onSelect={() => {
+              onClose();
+              it.onClick();
+            }}
+          >
+            {(focused) => (
+              <span
+                className={`flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-sm transition-colors motion-reduce:transition-none ${
+                  it.danger
+                    ? focused
+                      ? 'bg-danger/15 text-danger'
+                      : 'text-danger hover:bg-danger/10'
+                    : focused
+                      ? 'bg-surface-2 text-fg'
+                      : 'text-fg hover:bg-surface-2'
+                }`}
+              >
+                {it.icon && <span className="flex h-4 w-4 shrink-0 items-center justify-center">{it.icon}</span>}
+                {it.label}
+              </span>
+            )}
+          </Focusable>
+        ))}
       </FocusSection>
     </div>
   );

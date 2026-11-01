@@ -10,7 +10,7 @@ import {
   useRecompBuildStatus,
   busyFraction,
 } from '@renderer/query/useRecomps';
-import { cardAction, CARD_ACTION_LABEL, isBusyPort, type CardAction } from './portsModel';
+import { cardAction, CARD_ACTION_LABEL, isBusyPort, portCardLabel, type CardAction } from './portsModel';
 import type { RecompDTO } from '@shared/contracts/recomps';
 
 /** Runs a card's one action. 'link' has no direct action - it opens the detail page. */
@@ -43,12 +43,15 @@ export function usePortCardAction(onOpen: (id: string) => void): (port: RecompDT
 }
 
 /** A small ring for an in-flight install/build (pulses when there's no percentage). */
-function ProgressRing({ fraction }: { fraction: number | null }) {
+export function ProgressRing({ fraction, size = 'sm' }: { fraction: number | null; size?: 'sm' | 'lg' }) {
   const r = 7;
   const c = 2 * Math.PI * r;
   return (
-    <span className="grid h-6 w-6 place-items-center rounded-full bg-black/70">
-      <svg viewBox="0 0 18 18" className={`h-4 w-4 -rotate-90 ${fraction == null ? 'animate-pulse' : ''}`}>
+    <span className={`grid place-items-center rounded-full bg-black/70 ${size === 'lg' ? 'h-8 w-8' : 'h-6 w-6'}`} aria-hidden>
+      <svg
+        viewBox="0 0 18 18"
+        className={`-rotate-90 ${size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} ${fraction == null ? 'animate-pulse motion-reduce:animate-none' : ''}`}
+      >
         <circle cx="9" cy="9" r={r} fill="none" strokeWidth="2.5" className="stroke-white/20" />
         <circle
           cx="9"
@@ -57,7 +60,7 @@ function ProgressRing({ fraction }: { fraction: number | null }) {
           fill="none"
           strokeWidth="2.5"
           strokeLinecap="round"
-          className="stroke-accent transition-all"
+          className="stroke-accent transition-all motion-reduce:transition-none"
           strokeDasharray={c}
           strokeDashoffset={c * (1 - (fraction ?? 0.25))}
         />
@@ -93,7 +96,7 @@ export function PortCard({
 
   return (
     <Focusable
-      ariaLabel={m.name}
+      ariaLabel={portCardLabel(port, fraction)}
       focusClassName=""
       className="group block rounded-lg"
       onSelect={() => onOpen(m.id)}
@@ -107,7 +110,7 @@ export function PortCard({
               <img src={coverUrl} alt="" loading="lazy" className="h-full w-full rounded-lg object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center rounded-lg bg-gradient-to-br from-surface-2 to-bg p-2.5 pb-14">
-                <span className="line-clamp-4 select-none text-center text-sm font-semibold leading-snug text-fg-faint/80">
+                <span className="line-clamp-4 select-none text-center text-sm font-semibold leading-snug text-fg-muted">
                   {m.originalTitle}
                 </span>
               </div>
@@ -121,29 +124,32 @@ export function PortCard({
               {busy ? (
                 <ProgressRing fraction={fraction} />
               ) : port.updateAvailable ? (
-                <span className="block h-2.5 w-2.5 rounded-full bg-accent" title="Update available" />
+                <span className="block h-2.5 w-2.5 rounded-full bg-accent" title="Update available" aria-hidden />
               ) : port.canPlay ? (
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-black/70 text-positive" title="Ready to play">
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-black/70 text-positive" title="Ready to play" aria-hidden>
                   <Check className="h-3.5 w-3.5" />
                 </span>
               ) : null}
             </div>
             {m.status === 'beta' && (
-              <span className="absolute right-1.5 top-1.5 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-warning">
+              <span className="absolute right-1.5 top-1.5 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-warning" aria-hidden>
                 Beta
               </span>
             )}
 
             <div className="absolute inset-x-2 bottom-2 flex flex-col gap-1.5">
-              {/* The one action - hover or spatial focus (the gamepad has no hover). */}
+              {/* The one action - hover or spatial focus (the gamepad has no hover). A mouse
+                  shortcut only: hidden from assistive tech so the card isn't a button inside a
+                  button; keyboard and controller users act from the detail page (A, or X). */}
               <button
                 type="button"
                 tabIndex={-1}
+                aria-hidden
                 onClick={(e) => {
                   e.stopPropagation(); // act directly; selecting the card opens the detail
                   act(port, action);
                 }}
-                className={`w-full truncate rounded-full px-3 py-1 text-2xs font-semibold transition-opacity duration-150 ${
+                className={`w-full truncate rounded-full px-3 py-1.5 text-2xs font-semibold transition-opacity duration-150 motion-reduce:transition-none ${
                   action === 'play' ? 'bg-accent text-accent-fg' : 'bg-white/15 text-fg backdrop-blur-sm hover:bg-white/25'
                 } ${focused ? 'opacity-100' : 'pointer-events-none opacity-0 group-hover:pointer-events-auto group-hover:opacity-100'}`}
               >
@@ -151,6 +157,7 @@ export function PortCard({
               </button>
               <div className="flex items-center gap-1.5">
                 <span
+                  title={m.name}
                   className={`min-w-0 flex-1 truncate font-semibold text-fg ${focused ? 'text-xs' : 'text-2xs group-hover:text-xs'}`}
                 >
                   {m.name}
@@ -163,9 +170,9 @@ export function PortCard({
             {busy && (
               <div className="absolute inset-x-0 bottom-0 h-0.5 bg-black/60">
                 {fraction == null ? (
-                  <div className="h-full w-full animate-pulse bg-accent/40" />
+                  <div className="h-full w-full animate-pulse bg-accent/40 motion-reduce:animate-none" />
                 ) : (
-                  <div className="h-full bg-accent transition-all" style={{ width: `${Math.round(fraction * 100)}%` }} />
+                  <div className="h-full bg-accent transition-all motion-reduce:transition-none" style={{ width: `${Math.round(fraction * 100)}%` }} />
                 )}
               </div>
             )}

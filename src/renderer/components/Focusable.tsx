@@ -10,6 +10,8 @@ interface FocusableProps {
   className?: string;
   focusClassName?: string;
   ariaLabel?: string;
+  /** Toggle/segment state for assistive tech (e.g. the selected filter chip). */
+  ariaPressed?: boolean;
   children: ReactNode | ((focused: boolean) => ReactNode);
 }
 
@@ -22,6 +24,7 @@ export function Focusable({
   className = '',
   focusClassName = focusRing,
   ariaLabel,
+  ariaPressed,
   children,
 }: FocusableProps) {
   const { ref, focused } = useFocusable<object, HTMLDivElement>({
@@ -40,6 +43,7 @@ export function Focusable({
       role="button"
       tabIndex={-1}
       aria-label={ariaLabel}
+      aria-pressed={ariaPressed}
       onClick={() => onSelect?.()}
       className={`outline-none ${focused ? focusClassName : ''} ${className}`}
     >

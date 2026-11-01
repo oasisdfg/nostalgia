@@ -127,7 +127,7 @@ export function PortPlayButton({
       )}
       {m.gameFile.delivery === 'in-app' && !port.fileDelivered && (
         <div className="flex items-center justify-between gap-3 rounded-md bg-bg/60 px-3 py-2 shadow-inset-1">
-          <p className="min-w-0 text-2xs text-fg-muted">
+          <p className="min-w-0 text-xs text-fg-muted">
             Choose <span className="font-medium text-fg">{fileName ?? m.originalTitle}</span> when the port asks for
             your game.
           </p>

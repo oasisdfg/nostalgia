@@ -91,7 +91,10 @@ export function PortsView() {
       <div className="flex shrink-0 flex-wrap items-center gap-3 px-5 py-3">
         <div className="mr-auto flex items-baseline gap-2">
           <h1 className="text-lg font-semibold">Native Ports</h1>
-          <span className="text-sm text-fg-muted">{ports.length} ports</span>
+          {/* The count follows the filters, so an empty-looking grid explains itself. */}
+          <span className="text-sm tabular-nums text-fg-muted" aria-live="polite">
+            {shown.length === ports.length ? `${ports.length} ports` : `${shown.length} of ${ports.length} ports`}
+          </span>
         </div>
         <SearchBar value={ui.search} onChange={(search) => setUi({ search })} />
         <div className="flex items-center gap-1.5">
@@ -126,7 +129,7 @@ export function PortsView() {
           <option value="added">Recently added</option>
         </Select>
         <IconButton
-          icon={<RefreshCw className={`h-4 w-4 ${check.isPending ? 'animate-spin' : ''}`} />}
+          icon={<RefreshCw className={`h-4 w-4 ${check.isPending ? 'animate-spin motion-reduce:animate-none' : ''}`} />}
           label="Check for updates"
           disabled={check.isPending}
           onClick={() => check.mutate(undefined)}
@@ -150,7 +153,7 @@ export function PortsView() {
               hint={ports.length === 0 ? undefined : 'Try another console, status or search.'}
             />
           ) : (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-6 animate-fade-in motion-reduce:animate-none">
               {ready.length > 0 && (
                 <section>
                   <SectionLabel label="Ready to play" count={readyAll.length} />
@@ -181,7 +184,7 @@ function SectionLabel({ slug, label, count }: { slug?: string; label: string; co
     <div className="mb-1 flex items-center gap-2">
       {slug && <ConsoleLogo slug={slug} className="text-fg-muted" />}
       <h2 className="text-sm font-semibold text-fg">{label}</h2>
-      <span className="text-xs tabular-nums text-fg-faint">{count}</span>
+      <span className="text-xs tabular-nums text-fg-muted">{count}</span>
     </div>
   );
 }
@@ -197,10 +200,17 @@ export function PortChips({ ports, size = 'md' }: { ports: RecompDTO[]; size?: '
     <FocusSection focusKey={size === 'lg' ? 'bs-port-chips' : undefined} className="shrink-0 px-5">
       <div className="inline-flex flex-wrap gap-1 rounded-lg bg-bg/60 p-1 shadow-inset-1">
         {chips.map((c) => (
-          <Focusable key={c.id} ariaLabel={c.label} focusClassName="" className="rounded-md" onSelect={() => setUi({ chip: c.id })}>
+          <Focusable
+            key={c.id}
+            ariaLabel={`${c.label}, ${c.count}`}
+            ariaPressed={chip === c.id}
+            focusClassName=""
+            className="rounded-md"
+            onSelect={() => setUi({ chip: c.id })}
+          >
             {(focused) => (
               <span
-                className={`flex cursor-pointer items-center gap-1.5 rounded-md px-3 transition-colors ${
+                className={`flex cursor-pointer items-center gap-1.5 rounded-md px-3 transition-colors motion-reduce:transition-none ${
                   size === 'lg' ? 'py-2 text-base' : 'py-1 text-xs'
                 } ${
                   chip === c.id
@@ -211,7 +221,7 @@ export function PortChips({ ports, size = 'md' }: { ports: RecompDTO[]; size?: '
                 }`}
               >
                 {c.label}
-                <span className={`tabular-nums ${chip === c.id ? 'text-accent' : 'text-fg-faint'}`}>{c.count}</span>
+                <span className={`tabular-nums ${chip === c.id ? 'text-accent' : 'text-fg-muted'}`}>{c.count}</span>
               </span>
             )}
           </Focusable>
