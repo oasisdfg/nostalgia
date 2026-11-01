@@ -128,8 +128,8 @@ export function PortPlayButton({
       {m.gameFile.delivery === 'in-app' && !port.fileDelivered && (
         <div className="flex items-center justify-between gap-3 rounded-md bg-bg/60 px-3 py-2 shadow-inset-1">
           <p className="min-w-0 text-2xs text-fg-muted">
-            This port asks for your game file the first time. Choose:{' '}
-            <span className="font-medium text-fg">{fileName ?? m.originalTitle}</span>
+            Choose <span className="font-medium text-fg">{fileName ?? m.originalTitle}</span> when the port asks for
+            your game.
           </p>
           <Button variant="ghost" size="sm" icon={<FolderOpen className="h-3.5 w-3.5" />} onClick={() => reveal.mutate(m.id)}>
             Reveal

@@ -1,18 +1,12 @@
 import { useSystems } from '@renderer/query/useSystems';
 import { DISPLAY_ONLY_CONSOLES } from '@shared/contracts/catalog';
-import type { RecompDTO, RecompMethod } from '@shared/contracts/recomps';
+import type { RecompDTO } from '@shared/contracts/recomps';
 import type { PortsChip, PortsUiState } from '@renderer/store/uiStore';
 
 /**
  * Shared Native Ports view model: console names/order, filtering, sorting and chip counts.
  * Desktop (PortsView) and Big Screen (BigScreenPorts) render the same list from this.
  */
-
-export const METHOD_LABEL: Record<RecompMethod, string> = {
-  recomp: 'Recompilation',
-  decomp: 'Decompilation',
-  runtime: 'Native runtime',
-};
 
 /** Console display name + sort order: Nostalgia systems first (their order), then display-only consoles. */
 export function useConsoles(): { name: (slug: string) => string; order: (slug: string) => number } {

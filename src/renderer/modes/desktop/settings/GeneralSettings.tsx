@@ -240,7 +240,7 @@ function AboutCard() {
           About
         </span>
       }
-      description="Nostalgia keeps itself up to date. Updates download in the background and install when you close the app."
+      description="Updates install when you close Nostalgia."
     >
       <div className="space-y-3">
         <div className="space-y-1 text-2xs text-fg-muted">
@@ -321,7 +321,6 @@ function PortsSettingsCard() {
           Native Ports
         </span>
       }
-      description="PC ports of console games, installed and kept up to date by Nostalgia."
     >
       <div className="space-y-4">
         <FormField label="Native Ports folder" hint="New installs go here. Ports already installed stay where they are.">

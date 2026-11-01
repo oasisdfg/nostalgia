@@ -21,7 +21,7 @@ import { FocusSection, Focusable } from './Focusable';
 import { ContextMenu, type ContextMenuItem } from './ContextMenu';
 import { PortProgress } from './PortProgress';
 import { PortSettings, PortSettingsCycle, portSettingOptions } from './PortSettings';
-import { useConsoles, isBusyPort, METHOD_LABEL } from './portsModel';
+import { useConsoles, isBusyPort } from './portsModel';
 import { invoke } from '@renderer/bridge/ipc';
 import { well } from '@renderer/theme/classes';
 import { setFocus } from '@renderer/input/spatialNav';
@@ -50,7 +50,7 @@ import type { RecompDTO } from '@shared/contracts/recomps';
 /**
  * A Native Port's page, modelled on CatalogDetailPage: the original game's art fills the app
  * backdrop, the cover sits left, and a raised panel holds what the user acts on - one primary
- * button chosen by state, the "Your copy" block, settings, and everything else under More.
+ * button chosen by state, the user's-copy block, settings, and everything else under More.
  * Desktop uses a mouse context menu for More; Big Screen gets a focusable overlay (Y), and X
  * plays.
  */
@@ -244,11 +244,9 @@ function PortDetailBody({
     );
   }
 
-  const facts = [
-    METHOD_LABEL[m.method],
-    port.installedTag && installed ? `Installed ${port.installedTag}` : null,
-    port.latestTag ? `Latest ${port.latestTag}` : null,
-  ].filter(Boolean);
+  // The installed version is the one fact worth showing; an update names its own version on
+  // its button. ('located' marks an external port whose version wasn't known when found.)
+  const version = installed && port.installedTag && port.installedTag !== 'located' ? port.installedTag : null;
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-7 animate-fade-in md:flex-row md:items-start">
@@ -274,11 +272,7 @@ function PortDetailBody({
             {m.status === 'beta' && <Badge tone="warning">Beta</Badge>}
           </div>
           <p className={`mt-3 ${bigScreen ? 'text-base' : 'text-sm'} text-fg-muted`}>{m.summary}</p>
-          <p className={`mt-2 flex flex-wrap gap-x-4 gap-y-1 ${bigScreen ? 'text-sm' : 'text-2xs'} text-fg-muted`}>
-            {facts.map((f) => (
-              <span key={f}>{f}</span>
-            ))}
-          </p>
+          {version && <p className={`mt-2 ${bigScreen ? 'text-sm' : 'text-2xs'} text-fg-muted`}>Version {version}</p>}
           {m.build && !installed && <p className="mt-2 text-2xs text-fg-faint">Needs {m.build.requirements}</p>}
         </div>
 
@@ -333,10 +327,7 @@ function PortDetailBody({
         </div>
 
         {portSettingOptions(m).length > 0 && (
-          <div className="space-y-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-fg-faint">Settings</h2>
-            {bigScreen ? <PortSettingsCycle manifest={m} /> : <PortSettings manifest={m} />}
-          </div>
+          <div>{bigScreen ? <PortSettingsCycle manifest={m} /> : <PortSettings manifest={m} />}</div>
         )}
       </FocusSection>
 
@@ -372,7 +363,6 @@ function YourCopy({ port, consoleName, bigScreen }: { port: RecompDTO; consoleNa
 
   return (
     <div className={`${well} space-y-2 px-4 py-3`}>
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-fg-faint">Your copy</h2>
       {port.linkedGameId != null && !changing ? (
         <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${text}`}>
           <span className="min-w-0 text-fg">
