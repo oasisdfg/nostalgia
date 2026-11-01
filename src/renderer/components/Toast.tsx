@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { IconButton } from './IconButton';
 import { X } from 'lucide-react';
 
 type Tone = 'error' | 'info';
@@ -39,13 +40,7 @@ export function ToastHost() {
           }`}
         >
           <span className="flex-1 break-words">{t.message}</span>
-          <button
-            type="button"
-            onClick={() => dismiss(t.id)}
-            className="shrink-0 text-fg-faint transition-colors hover:text-fg"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
+          <IconButton icon={<X className="h-3.5 w-3.5" />} label="Dismiss" onClick={() => dismiss(t.id)} className="-m-1 p-1" />
         </div>
       ))}
     </div>

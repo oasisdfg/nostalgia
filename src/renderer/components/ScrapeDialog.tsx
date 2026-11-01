@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Focusable } from './Focusable';
 import { X } from 'lucide-react';
 import { IconButton } from './IconButton';
 import { useScrapeCandidates, useApplyManual } from '@renderer/query/useScrape';
@@ -36,16 +37,25 @@ export function ScrapeDialog({ gameId, onClose }: { gameId: number; onClose: () 
             <p className="p-3 text-sm text-fg-muted">No candidates found.</p>
           )}
           {candidates.data?.map((c) => (
-            <button
+            <Focusable
               key={`${c.provider}:${c.providerGameId}`}
-              type="button"
-              disabled={apply.isPending}
-              onClick={() => void onApply(c.provider, c.providerGameId)}
-              className="flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-surface-2 disabled:opacity-50"
+              ariaLabel={c.title}
+              focusable={!apply.isPending}
+              focusClassName=""
+              className="block rounded-md"
+              onSelect={apply.isPending ? undefined : () => void onApply(c.provider, c.providerGameId)}
             >
-              <span className="truncate text-fg">{c.title}</span>
-              <span className="shrink-0 text-2xs text-fg-faint">{c.provider}</span>
-            </button>
+              {(focused) => (
+                <span
+                  className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors ${
+                    focused ? 'bg-surface-2' : 'hover:bg-surface-2'
+                  } ${apply.isPending ? 'opacity-50' : ''}`}
+                >
+                  <span className="truncate text-fg">{c.title}</span>
+                  <span className="shrink-0 text-xs text-fg-muted">{c.provider}</span>
+                </span>
+              )}
+            </Focusable>
           ))}
         </div>
       </div>

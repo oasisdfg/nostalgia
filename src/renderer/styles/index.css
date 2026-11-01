@@ -79,3 +79,11 @@ body {
     transform: translateX(100%);
   }
 }
+
+/* Big Screen: no scrollbars - the controller scrolls, and a scrollbar is mouse chrome. */
+.bigscreen * {
+  scrollbar-width: none;
+}
+.bigscreen *::-webkit-scrollbar {
+  display: none;
+}

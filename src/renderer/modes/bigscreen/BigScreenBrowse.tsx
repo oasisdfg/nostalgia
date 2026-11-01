@@ -20,7 +20,8 @@ export function BigScreenBrowse({
   onOpen: (igdbId: number) => void;
   onOpenPorts: () => void;
 }) {
-  const activeSlug = systems.find((s) => s.id === activeSystemId)?.slug;
+  const active = systems.find((s) => s.id === activeSystemId);
+  const activeSlug = active?.slug;
   const accentVars = consoleAccentVars(getPlatformTheme(activeSlug));
 
   return (
@@ -31,7 +32,11 @@ export function BigScreenBrowse({
           the padding keeps a margin so the top row is never clipped. */}
       <div className="min-w-0 flex-1 overflow-auto scroll-py-10">
         {activeSystemId != null ? (
-          <BigScreenGrid systemId={activeSystemId} onOpen={onOpen} />
+          <>
+            {/* The rail shows logos only (no hover tooltips on a TV), so name the console here. */}
+            {active && <h1 className="px-8 pt-8 text-3xl font-semibold">{active.name}</h1>}
+            <BigScreenGrid systemId={activeSystemId} onOpen={onOpen} />
+          </>
         ) : (
           <EmptyState title="Choose a system" hint="Pick a console on the left to browse its games." />
         )}

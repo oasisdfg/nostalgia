@@ -72,8 +72,9 @@ export function ProgressRing({ fraction, size = 'sm' }: { fraction: number | nul
 /**
  * A Native Port in the grid - library-card sized (190px wide, 3:4): the ORIGINAL game's box
  * art with the port name over the UI-STYLE scrim. One state glyph at most (busy ring,
- * update dot, or ready check), a Beta chip only for beta ports, and one action pill
- * revealed on hover OR spatial focus. Selecting the card opens its detail page.
+ * update dot, or ready check) and one action pill revealed on hover OR spatial focus. No
+ * Beta chip: nearly every port is beta, so it said nothing and covered the art - the port's
+ * page and the status filter carry it. Selecting the card opens its detail page.
  */
 export function PortCard({
   port,
@@ -131,11 +132,6 @@ export function PortCard({
                 </span>
               ) : null}
             </div>
-            {m.status === 'beta' && (
-              <span className="absolute right-1.5 top-1.5 rounded bg-black/70 px-1.5 py-0.5 text-2xs font-medium text-warning" aria-hidden>
-                Beta
-              </span>
-            )}
 
             <div className="absolute inset-x-2 bottom-2 flex flex-col gap-1.5">
               {/* The one action - hover or spatial focus (the gamepad has no hover). A mouse

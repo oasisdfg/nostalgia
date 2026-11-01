@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Switch } from '@renderer/components/Switch';
 import { Trash2, Scissors, Database, Download, RefreshCw, Info, ExternalLink, Boxes, FolderOpen } from 'lucide-react';
 import { invoke } from '@renderer/bridge/ipc';
 import { useSetting, useSetSetting } from '@renderer/query/useSettings';
@@ -63,7 +64,9 @@ export function GeneralSettings() {
   };
 
   return (
-    <div className="grid auto-rows-fr grid-cols-1 gap-6 lg:grid-cols-2">
+    // Rows size to their own tallest card (no auto-rows-fr), and the short cards are
+    // paired, so no card is left mostly empty.
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <Card title="Storage">
         <div className="space-y-4">
           <FormField label="Game files folder">
@@ -124,6 +127,10 @@ export function GeneralSettings() {
         </div>
       </Card>
 
+      <LaunchboxCard />
+
+      <PortsSettingsCard />
+
       <Card title="Appearance">
         <FormField label="Start in" className="max-w-xs">
           <Select
@@ -135,10 +142,6 @@ export function GeneralSettings() {
           </Select>
         </FormField>
       </Card>
-
-      <LaunchboxCard />
-
-      <PortsSettingsCard />
 
       <AboutCard />
     </div>
@@ -344,17 +347,11 @@ function PortsSettingsCard() {
             </Button>
           </div>
         </FormField>
-        <FormField label="Check for port updates at startup" className="max-w-xs">
-          <Select
-            value={auto ? 'on' : 'off'}
-            onChange={(e) =>
-              setSetting.mutate({ key: 'recomps.autoCheck', value: e.target.value === 'on', encrypted: false })
-            }
-          >
-            <option value="on">On</option>
-            <option value="off">Off</option>
-          </Select>
-        </FormField>
+        <Switch
+          label="Check installed ports for updates at startup"
+          checked={auto}
+          onChange={(next) => setSetting.mutate({ key: 'recomps.autoCheck', value: next, encrypted: false })}
+        />
       </div>
     </Card>
   );

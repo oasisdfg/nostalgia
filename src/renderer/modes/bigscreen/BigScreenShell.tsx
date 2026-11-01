@@ -3,7 +3,7 @@ import { useUiStore } from '@renderer/store/uiStore';
 import { useSystems } from '@renderer/query/useSystems';
 import { useDownloadEvents } from '@renderer/query/useDownloads';
 import { useUpdateEvents } from '@renderer/query/useUpdates';
-import { useRecompEvents } from '@renderer/query/useRecomps';
+import { useRecompEvents, useRecomps } from '@renderer/query/useRecomps';
 import { useLaunchEvents } from '@renderer/query/useLaunch';
 import { useScrapeEvents } from '@renderer/query/useScrape';
 import { useSavesEvents } from '@renderer/query/useSaves';
@@ -148,6 +148,12 @@ export function BigScreenShell() {
   // The header is gone (10-foot canvas is all content), so the ☰ hint doubles as the
   // mouse path into the menu - it's clickable.
   const openMenu = useCallback(() => setMenuOpen(true), []);
+  // Ports: X only means something when the port on screen (page or focused card) can play.
+  const { data: ports } = useRecomps();
+  const portsDetailId = useUiStore((s) => s.ports.detailId);
+  const focusedPortId = useUiStore((s) => s.focusedPortId);
+  const portPlayable = !!ports?.find((p) => p.manifest.id === (portsDetailId ?? focusedPortId))?.canPlay;
+  const backdropUrl = useUiStore((s) => s.detailBackdropUrl);
   const hints: ButtonHint[] = menuOpen
     ? [
         { glyph: 'A', label: 'Select', tone: 'bg-positive/20 text-positive' },
@@ -156,8 +162,8 @@ export function BigScreenShell() {
     : view === 'ports'
       ? [
           { glyph: '✛', label: 'Move' },
-          { glyph: 'A', label: 'Open', tone: 'bg-positive/20 text-positive' },
-          { glyph: 'X', label: 'Play' },
+          { glyph: 'A', label: portsDetailId ? 'Select' : 'Open', tone: 'bg-positive/20 text-positive' },
+          ...(portPlayable ? [{ glyph: 'X', label: 'Play' }] : []),
           { glyph: 'Y', label: 'More' },
           { glyph: 'B', label: 'Back', tone: 'bg-danger/20 text-danger' },
           { glyph: '☰', label: 'Menu', onClick: openMenu },
@@ -179,8 +185,16 @@ export function BigScreenShell() {
 
   return (
     <FocusProvider>
-      <div className="relative flex h-screen flex-col bg-bg text-fg">
-        <div className="min-h-0 flex-1">
+      {/* .bigscreen hides scrollbars: the controller scrolls, a scrollbar is mouse chrome. */}
+      <div className="bigscreen relative flex h-screen flex-col bg-bg text-fg">
+        {/* A port's page gets its key art behind it, as on the desktop (and as the game page). */}
+        {view === 'ports' && portsDetailId && backdropUrl && (
+          <div className="pointer-events-none absolute inset-0">
+            <img src={backdropUrl} alt="" className="h-full w-full object-cover opacity-45" />
+            <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-bg/25" />
+          </div>
+        )}
+        <div className="relative min-h-0 flex-1">
           {view === 'ports' ? (
             <BigScreenPorts />
           ) : view === 'detail' && selectedIgdbId != null && activeSystemId != null ? (
@@ -197,7 +211,9 @@ export function BigScreenShell() {
           )}
         </div>
 
-        <ButtonHints hints={hints} />
+        <div className="relative">
+          <ButtonHints hints={hints} />
+        </div>
         {menuOpen && (
           <BigScreenMenu
             onResume={() => {

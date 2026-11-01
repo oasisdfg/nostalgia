@@ -7,6 +7,7 @@ import { Select } from './Select';
 import { EmptyState } from './EmptyState';
 import { CardSkeleton } from './Skeleton';
 import { ConsoleLogo } from './SystemIcon';
+import { SectionLabel } from './SectionLabel';
 import { PortCard } from './PortCard';
 import { PortDetailPage } from './PortDetailPage';
 import { useConsoles, filterPorts, groupByConsole, matchesChip, CHIPS } from './portsModel';
@@ -175,17 +176,6 @@ export function PortsView() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-/** A section heading: spacing + label, never a line (UI-STYLE). */
-function SectionLabel({ slug, label, count }: { slug?: string; label: string; count: number }) {
-  return (
-    <div className="mb-1 flex items-center gap-2">
-      {slug && <ConsoleLogo slug={slug} className="text-fg-muted" />}
-      <h2 className="text-sm font-semibold text-fg">{label}</h2>
-      <span className="text-xs tabular-nums text-fg-muted">{count}</span>
     </div>
   );
 }

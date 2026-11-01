@@ -1,14 +1,16 @@
-import { type MouseEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DownloadCloud } from 'lucide-react';
 import { Focusable } from './Focusable';
 import { useUiStore } from '@renderer/store/uiStore';
+import { GP_EVENT } from '@renderer/input/gamepad';
 import type { GameDTO } from '@shared/contracts/ipc';
 
 interface GameCardProps {
   game: GameDTO;
   artUrl?: string | null;
   onOpen: (id: number) => void;
-  onContextMenu?: (e: MouseEvent, game: GameDTO) => void;
+  /** Opens the card's menu at a point - a right-click, or Y / the Menu key on the focused card. */
+  onContextMenu?: (at: { clientX: number; clientY: number }, game: GameDTO) => void;
   /** Console slug - picks the card height for that console's case shape. */
   slug?: string;
 }
@@ -33,8 +35,31 @@ const CASE_HEIGHT: Record<string, string> = {
  */
 export function GameCard({ game, artUrl, onOpen, onContextMenu, slug }: GameCardProps) {
   const setFocusedGame = useUiStore((s) => s.setFocusedGame);
+  // The game open in the detail panel keeps its ring after focus moves on.
+  const selected = useUiStore((s) => s.selectedGameId === game.id);
   const releaseYear = game.releaseDate ? game.releaseDate.slice(0, 4) : null;
   const heightClass = (slug && CASE_HEIGHT[slug]) || 'h-64';
+  const [hasFocus, setHasFocus] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!hasFocus || !onContextMenu) return;
+    const openAtCard = (): void => {
+      const r = boxRef.current?.getBoundingClientRect();
+      if (r) onContextMenu({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }, game);
+    };
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
+        e.preventDefault();
+        openAtCard();
+      }
+    };
+    window.addEventListener(GP_EVENT.y, openAtCard);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener(GP_EVENT.y, openAtCard);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [hasFocus, onContextMenu, game]);
   return (
     <Focusable
       ariaLabel={game.title}
@@ -42,16 +67,18 @@ export function GameCard({ game, artUrl, onOpen, onContextMenu, slug }: GameCard
       className="group block w-fit rounded-lg"
       onSelect={() => onOpen(game.id)}
       onFocusChange={(f) => {
+        setHasFocus(f);
         if (f) setFocusedGame({ id: game.id, favorite: game.favorite });
       }}
     >
       {(focused) => (
         <div
+          ref={boxRef}
           onContextMenu={onContextMenu ? (e) => onContextMenu(e, game) : undefined}
           // Flat box art - no drop shadow. Accent ring marks focus for gamepad nav.
           // No transform - scaling rasterizes the overlay badges and they render
           // blurry (UI-STYLE.md motion rule).
-          className={`relative w-fit rounded-lg ${focused ? 'ring-2 ring-accent' : ''}`}
+          className={`relative w-fit rounded-lg ${focused || selected ? 'ring-2 ring-accent' : ''}`}
         >
           <div className={`relative ${heightClass} w-fit overflow-hidden rounded-lg`}>
             {artUrl ? (

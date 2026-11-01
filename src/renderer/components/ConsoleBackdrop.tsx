@@ -51,7 +51,9 @@ export function consoleBackdropStyle(slug?: string): CSSProperties {
   if (img) {
     return {
       backgroundImage: [
-        'linear-gradient(rgb(var(--n-bg) / 0.42), rgb(var(--n-bg) / 0.42))',
+        // 0.6: the backdrop is atmosphere, not a colour wash - lighter dims let saturated
+        // art (the Xbox greens) tint the whole catalog.
+        'linear-gradient(rgb(var(--n-bg) / 0.6), rgb(var(--n-bg) / 0.6))',
         'linear-gradient(to right, rgb(var(--n-bg) / 0.55), rgb(var(--n-bg) / 0) 36%)',
         `url("${img}")`,
       ].join(', '),

@@ -55,6 +55,9 @@ interface UiState {
   /** When a game detail is open, its full-bleed artwork replaces the console backdrop app-wide. */
   detailBackdropUrl: string | null;
   setDetailBackdropUrl: (url: string | null) => void;
+  /** Big Screen: the port card the controller is on (drives whether the X/Play hint shows). */
+  focusedPortId: string | null;
+  setFocusedPortId: (id: string | null) => void;
   launchPrompt: LaunchPrompt | null;
   setLaunchPrompt: (prompt: LaunchPrompt | null) => void;
   ports: PortsUiState;
@@ -86,6 +89,8 @@ export const useUiStore = create<UiState>((set) => ({
   sidebarCollapsed: false,
   detailBackdropUrl: null,
   setDetailBackdropUrl: (detailBackdropUrl) => set({ detailBackdropUrl }),
+  focusedPortId: null,
+  setFocusedPortId: (focusedPortId) => set({ focusedPortId }),
   launchPrompt: null,
   setLaunchPrompt: (launchPrompt) => set({ launchPrompt }),
   ports: PORTS_UI_DEFAULT,

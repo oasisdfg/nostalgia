@@ -158,11 +158,17 @@ const LOGO_SIZE = {
   // Logo height caps sit BELOW the box height so square/compact marks (N64, GameCube,
   // Switch, Xbox) fill more of the row and read at a comparable size to wide wordmarks
   // (which stay width-bound by max-w-full and are unaffected).
-  sidebar: { box: 'h-6 w-11 justify-center', logo: 'max-h-5 max-w-full', glyph: 'h-4 w-4' },
-  rail: { box: 'h-9 w-24 justify-center', logo: 'max-h-7 max-w-full', glyph: 'h-6 w-6' },
+  sidebar: { box: 'h-6 w-11 justify-center', logo: 'max-h-5 max-w-full', wordmark: 'max-h-3.5 max-w-9', glyph: 'h-4 w-4' },
+  rail: { box: 'h-9 w-24 justify-center', logo: 'max-h-7 max-w-full', wordmark: 'max-h-5 max-w-20', glyph: 'h-6 w-6' },
   // Corner mark on a cover card (Native Ports) - small, right-aligned.
-  chip: { box: 'h-4 w-10 justify-end', logo: 'max-h-3.5 max-w-full', glyph: 'h-3.5 w-3.5' },
+  chip: { box: 'h-4 w-10 justify-end', logo: 'max-h-3.5 max-w-full', wordmark: 'max-h-3 max-w-full', glyph: 'h-3.5 w-3.5' },
 } as const;
+
+// Logos drawn in black/charcoal vanish on the near-black surfaces; they render as a white
+// silhouette instead (the same mark, readable).
+const DARK_LOGOS = new Set(['psp', 'ds', '3ds', 'gba', 'saturn']);
+// Bold, short wordmarks that read much bigger than the other marks at the same height.
+const WORDMARKS = new Set(['wii', 'wiiu', 'snes', 'nes', 'genesis', 'atari2600']);
 
 /**
  * Console brand logo for a slug, rendered in a fixed box (consistent height, auto
@@ -188,7 +194,15 @@ export function ConsoleLogo({
   return (
     <span className={`flex ${s.box} shrink-0 items-center ${className}`}>
       {url ? (
-        <img src={url} alt="" aria-hidden draggable={false} className={`${s.logo} object-contain ${imgClassName}`} />
+        <img
+          src={url}
+          alt=""
+          aria-hidden
+          draggable={false}
+          className={`${WORDMARKS.has(slug) ? s.wordmark : s.logo} object-contain ${
+            DARK_LOGOS.has(slug) ? 'opacity-90 brightness-0 invert' : ''
+          } ${imgClassName}`}
+        />
       ) : (
         <SystemIcon slug={slug} className={s.glyph} />
       )}

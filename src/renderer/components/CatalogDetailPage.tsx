@@ -8,6 +8,7 @@ import { Spinner } from './Spinner';
 import { EmptyState } from './EmptyState';
 import { DownloadProgress } from './DownloadProgress';
 import { FavoriteToggle } from './FavoriteToggle';
+import { gameFacts } from './gameFacts';
 import { useCatalogGameDetails, useCatalogAcquisition, useCatalogSetFavorite } from '@renderer/query/useCatalog';
 
 const errMsg = (e: unknown): string => (e instanceof Error ? e.message : 'Something went wrong.');
@@ -167,41 +168,27 @@ export function CatalogDetailPage({
                     )}
                   </div>
 
-                  {/* Description - collapsed by default; Show more expands it. */}
-                  {data.summary && (
-                    <div className="mt-5 max-w-2xl">
-                      <p
-                        className={`text-sm leading-relaxed text-fg-muted [text-shadow:0_1px_2px_rgb(0_0_0/0.8)] ${expanded ? '' : 'line-clamp-4'}`}
-                      >
-                        {data.summary}
-                      </p>
-                      {canExpand && (
-                        <button
-                          type="button"
-                          onClick={() => setExpanded((v) => !v)}
-                          className="mt-1 text-2xs font-semibold text-accent hover:underline"
-                        >
-                          {expanded ? 'Show less' : 'Show more'}
-                        </button>
+                  {/* Facts and description sit on a raised translucent panel (UI-STYLE level 2),
+                      so they stay readable over bright or busy artwork. The description is
+                      collapsed by default; Show more expands it. */}
+                  {(data.summary || gameFacts(data).length > 0) && (
+                    <div className="mt-5 max-w-2xl rounded-lg bg-surface/85 px-4 py-3 shadow-e2 backdrop-blur">
+                      {gameFacts(data).length > 0 && (
+                        <p className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg-muted">
+                          {gameFacts(data).map((f) => (
+                            <span key={f}>{f}</span>
+                          ))}
+                        </p>
                       )}
-                    </div>
-                  )}
-
-                  {/* Studio, release date, genres, players - hidden until Show more is pressed.
-                      When there's no Show more toggle (short/missing summary) they'd otherwise be
-                      unreachable, so show them by default in that case.
-                      fg-muted + text-shadow: fg-faint washed out over bright artwork
-                      backdrops (audit finding - illegible on light game art). */}
-                  {(expanded || !canExpand) && (
-                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-fg-muted [text-shadow:0_1px_2px_rgb(0_0_0/0.8)]">
-                      {data.releaseDate && <span>{data.releaseDate}</span>}
-                      {data.genres.length > 0 && <span>{data.genres.join(', ')}</span>}
-                      {data.players && <span>{data.players}</span>}
-                      {/* Prefer LaunchBox developer/publisher; fall back to IGDB companies. */}
-                      {data.developer || data.publisher ? (
-                        <span>{[data.developer, data.publisher].filter(Boolean).join(' · ')}</span>
-                      ) : (
-                        data.companies.length > 0 && <span>{data.companies.join(' · ')}</span>
+                      {data.summary && (
+                        <p className={`${gameFacts(data).length > 0 ? 'mt-2' : ''} text-sm leading-relaxed text-fg/90 ${expanded ? '' : 'line-clamp-4'}`}>
+                          {data.summary}
+                        </p>
+                      )}
+                      {canExpand && (
+                        <Button size="sm" variant="ghost" className="-ml-2 mt-1" onClick={() => setExpanded((v) => !v)}>
+                          {expanded ? 'Show less' : 'Show more'}
+                        </Button>
                       )}
                     </div>
                   )}

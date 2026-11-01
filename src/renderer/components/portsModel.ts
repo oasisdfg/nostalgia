@@ -108,7 +108,7 @@ export const CARD_ACTION_LABEL: Record<CardAction, string> = {
 
 /**
  * A card's accessible name: the port plus the state its glyphs show (busy ring, update dot,
- * ready check, Beta chip), so it isn't conveyed by colour or shape alone.
+ * ready check) and its beta status, so none of it is conveyed by colour or shape alone.
  */
 export function portCardLabel(p: RecompDTO, fraction: number | null): string {
   const parts = [p.manifest.name];

@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { LayoutGrid, Compass, Boxes, Download, Settings as SettingsIcon, Tv, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { FocusSection, Focusable } from './Focusable';
+import { IconButton } from './IconButton';
 import { ConsoleLogo } from './SystemIcon';
 import { SidebarUpdatePill } from './UpdatePill';
 import { useSystems } from '@renderer/query/useSystems';
@@ -78,19 +79,12 @@ export function AppSidebar() {
   );
 
   const iconBtn = (icon: ReactNode, label: string, onClick: () => void): ReactNode => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={label}
-      aria-label={label}
-      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-white/10 hover:text-fg"
-    >
-      {icon}
-    </button>
+    <IconButton icon={icon} label={label} onClick={onClick} />
   );
 
   const libraryActive = view === 'library' && activeSystemId == null && sidebarMode === 'library';
-  const browseActive = sidebarMode === 'browse' && view !== 'ports';
+  // Browse is a sidebar mode, but it's only the current PAGE while the catalog is showing.
+  const browseActive = sidebarMode === 'browse' && view === 'library' && activeSystemId == null;
 
   return (
     <FocusSection

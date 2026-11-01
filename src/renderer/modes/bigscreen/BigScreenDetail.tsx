@@ -4,7 +4,9 @@ import { Button } from '@renderer/components/Button';
 import { Spinner } from '@renderer/components/Spinner';
 import { EmptyState } from '@renderer/components/EmptyState';
 import { DownloadProgress } from '@renderer/components/DownloadProgress';
-import { useCatalogGameDetails, useCatalogAcquisition } from '@renderer/query/useCatalog';
+import { FavoriteToggle } from '@renderer/components/FavoriteToggle';
+import { gameFacts } from '@renderer/components/gameFacts';
+import { useCatalogGameDetails, useCatalogAcquisition, useCatalogSetFavorite } from '@renderer/query/useCatalog';
 import { setFocus } from '@renderer/input/spatialNav';
 
 const ACTION = 'bs-detail-action';
@@ -16,6 +18,8 @@ const errMsg = (e: unknown): string => (e instanceof Error ? e.message : 'Someth
 export function BigScreenDetail({ igdbId, systemId }: { igdbId: number; systemId: number }) {
   const details = useCatalogGameDetails(igdbId, systemId);
   const acq = useCatalogAcquisition(igdbId, systemId);
+  const setFav = useCatalogSetFavorite();
+  const favorite = acq.avail.data?.favorite ?? false;
   const data = details.data;
   const { available, fileId, downloaded, paused, downloadFailed, downloading, downloadId, status } = acq;
   const toneClass = {
@@ -143,7 +147,16 @@ export function BigScreenDetail({ igdbId, systemId }: { igdbId: number; systemId
               {checking ? 'Checking' : downloadFailed ? 'Retry download' : available ? 'Download' : 'Unavailable'}
             </Button>
           )}
+          <FavoriteToggle size="lg" favorite={favorite} onToggle={() => setFav.mutate({ igdbId, systemId, favorite: !favorite })} />
         </div>
+
+        {gameFacts(data).length > 0 && (
+          <p className="mx-auto mt-6 flex max-w-3xl flex-wrap justify-center gap-x-6 gap-y-1 text-lg text-fg-muted [text-shadow:0_1px_2px_rgb(0_0_0/0.8)]">
+            {gameFacts(data).map((f) => (
+              <span key={f}>{f}</span>
+            ))}
+          </p>
+        )}
 
         {status.text && (
           <p className={`mt-4 flex items-center justify-center gap-2 text-base ${toneClass}`}>
@@ -167,7 +180,7 @@ export function BigScreenDetail({ igdbId, systemId }: { igdbId: number; systemId
 
         {data.summary && (
           <div className="mx-auto mt-10 max-w-3xl">
-            <p className={`text-lg leading-relaxed text-fg-muted ${expanded ? '' : 'line-clamp-6'}`}>{data.summary}</p>
+            <p className={`text-lg leading-relaxed text-fg/85 [text-shadow:0_1px_2px_rgb(0_0_0/0.8)] ${expanded ? '' : 'line-clamp-6'}`}>{data.summary}</p>
             {canExpand && (
               <Button size="md" variant="ghost" className="mt-2" onClick={() => setExpanded((v) => !v)}>
                 {expanded ? 'Show less' : 'Show more'}
@@ -176,16 +189,6 @@ export function BigScreenDetail({ igdbId, systemId }: { igdbId: number; systemId
           </div>
         )}
 
-        {/* Release date, genres, players - hidden until Show more is pressed. When there's no
-            Show more toggle (short/missing summary) they'd otherwise be unreachable, so show
-            them by default in that case. */}
-        {(expanded || !canExpand) && (
-          <div className="mx-auto mt-4 flex max-w-3xl flex-wrap gap-x-6 gap-y-1 text-lg text-fg-muted">
-            {data.releaseDate && <span>{data.releaseDate}</span>}
-            {data.genres.length > 0 && <span>{data.genres.join(', ')}</span>}
-            {data.players && <span>{data.players}</span>}
-          </div>
-        )}
       </div>
     </div>
   );

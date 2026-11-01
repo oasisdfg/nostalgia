@@ -45,7 +45,6 @@ export function BigScreenRail({
         >
           {(focused) => (
             <div
-              title={s.name}
               className={`flex items-center justify-center rounded-lg py-3 transition-colors ${
                 s.id === activeSystemId
                   ? 'bg-accent/15'
@@ -63,7 +62,6 @@ export function BigScreenRail({
       <Focusable focusKey="bs-rail-ports" ariaLabel="Native Ports" focusClassName="" className="rounded-lg" onSelect={onOpenPorts}>
         {(focused) => (
           <div
-            title="Native Ports"
             className={`flex flex-col items-center justify-center gap-1 rounded-lg py-3 transition-colors ${
               focused ? 'bg-surface-2 text-fg' : 'text-fg-muted'
             }`}

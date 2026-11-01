@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { well } from '@renderer/theme/classes';
 import { Play, Download, X, Loader2 } from 'lucide-react';
 import { FocusSection } from './Focusable';
 import { Button } from './Button';
@@ -25,8 +26,8 @@ function primaryFile(files: GameFileDTO[]): GameFileDTO | undefined {
 function MetaRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (
-    <div className="flex items-baseline justify-between gap-4 px-4 py-2">
-      <span className="shrink-0 text-xs text-fg-faint">{label}</span>
+    <div className="flex items-baseline justify-between gap-4 px-4 py-1.5">
+      <span className="shrink-0 text-xs text-fg-muted">{label}</span>
       <span className="min-w-0 truncate text-right text-xs font-medium text-fg">{value}</span>
     </div>
   );
@@ -107,7 +108,7 @@ export function GameDetail() {
           disabled={fileDownloading}
           onClick={() => enqueue.mutate({ gameFileId: file.id })}
         >
-          {fileDl?.state === 'queued' ? 'Queued…' : fileDownloading ? 'Installing…' : 'Install'}
+          {fileDl?.state === 'queued' ? 'Queued…' : fileDownloading ? 'Downloading…' : 'Download'}
         </Button>
       );
     }
@@ -136,7 +137,7 @@ export function GameDetail() {
             disabled={acq.download.isPending}
             onClick={() => void acq.startDownload()}
           >
-            {acq.download.isPending ? 'Starting…' : 'Install'}
+            {acq.download.isPending ? 'Starting…' : 'Download'}
           </Button>
         );
       }
@@ -231,23 +232,22 @@ export function GameDetail() {
             {/* Label/value metadata rows (LaunchBox style). Hidden entirely when a game
                 has no metadata, so no empty card is left behind. */}
             {hasMeta && (
-              <div className="divide-y divide-white/5 rounded-lg bg-white/5">
+              <div className={`${well} py-1.5`}>
                 {metaRows.map(([label, value]) => (
                   <MetaRow key={label} label={label} value={value} />
                 ))}
               </div>
             )}
 
-            <div className="rounded-lg bg-white/5">
-              <h3 className="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-fg-faint">
-                Information
-              </h3>
-              <div className="divide-y divide-white/5">
-                {infoRows.map(([label, value]) => (
-                  <MetaRow key={label} label={label} value={value} />
-                ))}
-              </div>
+            {/* Rows are grouped by the recessed well and spacing - no divider lines (UI-STYLE). */}
+            <div className={`${well} pb-1.5`}>
+              <h3 className="px-4 pb-1 pt-3 text-xs font-semibold text-fg-muted">Information</h3>
+              {infoRows.map(([label, value]) => (
+                <MetaRow key={label} label={label} value={value} />
+              ))}
             </div>
+
+            {cat?.summary && <p className="line-clamp-6 text-xs leading-relaxed text-fg-muted">{cat.summary}</p>}
           </div>
         </div>
       )}

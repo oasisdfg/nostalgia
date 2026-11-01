@@ -99,10 +99,10 @@ function DownloadRow({ item }: { item: DownloadItemDTO }) {
       </div>
 
       <div className="min-w-0 flex-1">
-        {/* Completed rows are just the title + Play: the console name, the checkmark and
-            the "Ready to play · size" line were noise on a row that is already, by being
-            under COMPLETED, obviously ready. */}
+        {/* Completed rows are the title, its console, and Play - no checkmark or "Ready to
+            play" line: being under Completed already says that. */}
         <p className="truncate text-base font-semibold text-fg">{item.title}</p>
+        {completed && <p className="mt-1 truncate text-xs text-fg-muted">{item.systemName}</p>}
         {!completed && (
           <>
             <div className="mt-2 flex items-center justify-between gap-3 text-xs text-fg-muted">
@@ -185,7 +185,7 @@ export function DownloadsView() {
             )}
             {completed.length > 0 && (
               <>
-                <h2 className="mb-2 mt-7 text-xs font-semibold uppercase tracking-wide text-fg-faint">Completed</h2>
+                <h2 className="mb-2 mt-7 text-xs font-semibold uppercase tracking-wide text-fg-muted">Completed</h2>
                 <FocusSection className="space-y-3">
                   {completed.map((i) => (
                     <DownloadRow key={i.id} item={i} />

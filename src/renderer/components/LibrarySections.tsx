@@ -2,6 +2,7 @@ import { Gamepad2 } from 'lucide-react';
 import { GameGrid } from './GameGrid';
 import { CardSkeleton } from './Skeleton';
 import { EmptyState } from './EmptyState';
+import { SectionLabel } from './SectionLabel';
 import { useGames } from '@renderer/query/useGames';
 import { useSystems } from '@renderer/query/useSystems';
 import { useUiStore } from '@renderer/store/uiStore';
@@ -11,8 +12,8 @@ import type { GameDTO } from '@shared/contracts/ipc';
  * The all-systems Library: your favorited/owned games, split into one row per console
  * that actually has games. Grouping is by the game's `systemId` - the console it was
  * ADDED from - so a cross-platform title lands under the exact console you favorited
- * it on. No headers, backdrops, or labels: the retail case art IS the console
- * indicator (per-console libraries are reachable from the sidebar).
+ * it on. Each row carries a small console heading (logo, name, count) so the rows read as
+ * groups; per-console libraries are reachable from the sidebar.
  */
 export function LibrarySections() {
   const libraryQuery = useUiStore((s) => s.libraryQuery);
@@ -50,9 +51,12 @@ export function LibrarySections() {
   const sections = systems.filter((s) => bySystem.has(s.id));
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {sections.map((s) => (
-        <GameGrid key={s.id} items={bySystem.get(s.id)!} slug={s.slug} />
+        <section key={s.id}>
+          <SectionLabel slug={s.slug} label={s.name} count={bySystem.get(s.id)!.length} />
+          <GameGrid items={bySystem.get(s.id)!} slug={s.slug} />
+        </section>
       ))}
     </div>
   );

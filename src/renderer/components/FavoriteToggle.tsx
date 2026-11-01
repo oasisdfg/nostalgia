@@ -15,11 +15,11 @@ export function FavoriteToggle({
 }: {
   favorite: boolean;
   onToggle: () => void;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   label?: string;
 }) {
-  const box = size === 'sm' ? 'h-7 w-7' : 'h-9 w-9';
-  const icon = size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4';
+  const box = size === 'sm' ? 'h-7 w-7' : size === 'lg' ? 'h-12 w-12' : 'h-9 w-9';
+  const icon = size === 'sm' ? 'h-3.5 w-3.5' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4';
   return (
     <Focusable
       ariaLabel={favorite ? `Remove from ${label}` : `Add to ${label}`}

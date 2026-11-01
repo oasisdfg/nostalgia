@@ -3,7 +3,15 @@ import { Input } from '../Input';
 import { Button } from '../Button';
 import { IconButton } from '../IconButton';
 
-const TOKENS = ['{romPath}', '{romDir}', '{romName}', '{systemSlug}', '{emulatorDir}'];
+// Each placeholder with the plain-language name the editor shows for it.
+const TOKENS: { token: string; label: string }[] = [
+  { token: '{romPath}', label: 'Game file' },
+  { token: '{romDir}', label: 'Game folder' },
+  { token: '{romName}', label: 'Game name' },
+  { token: '{systemSlug}', label: 'Console' },
+  { token: '{emulatorDir}', label: 'Emulator folder' },
+];
+const labelFor = (arg: string): string | undefined => TOKENS.find((t) => t.token === arg)?.label;
 
 interface LaunchArgsEditorProps {
   value: string[];
@@ -24,12 +32,13 @@ export function LaunchArgsEditor({ value, onChange }: LaunchArgsEditorProps) {
     <div className="space-y-2.5">
       <div className="space-y-1.5">
         {value.length === 0 && (
-          <p className="text-2xs text-fg-faint">No arguments yet. The ROM path is passed via a token below.</p>
+          <p className="text-xs text-fg-muted">No arguments yet. Add “Game file” below so the emulator opens the game.</p>
         )}
         {value.map((arg, i) => (
           <div key={i} className="flex items-center gap-2">
-            <span className="w-5 text-right text-2xs tabular-nums text-fg-faint">{i + 1}</span>
+            <span className="w-5 text-right text-xs tabular-nums text-fg-muted">{i + 1}</span>
             <Input value={arg} onChange={(e) => setAt(i, e.target.value)} className="flex-1 font-mono" />
+            {labelFor(arg) && <span className="shrink-0 text-xs text-fg-muted">{labelFor(arg)}</span>}
             <IconButton icon={<X className="h-4 w-4" />} onClick={() => removeAt(i)} label="Remove argument" variant="danger" />
           </div>
         ))}
@@ -38,16 +47,11 @@ export function LaunchArgsEditor({ value, onChange }: LaunchArgsEditorProps) {
         <Button variant="secondary" size="sm" icon={<Plus className="h-3.5 w-3.5" />} onClick={() => add('')}>
           Argument
         </Button>
-        <span className="px-1 text-2xs text-fg-faint">Insert token</span>
+        <span className="px-1 text-xs text-fg-muted">Add</span>
         {TOKENS.map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => add(t)}
-            className="rounded-md bg-surface-2 px-2 py-1 font-mono text-2xs text-accent transition-colors hover:bg-accent/10"
-          >
-            {t}
-          </button>
+          <Button key={t.token} variant="secondary" size="sm" onClick={() => add(t.token)}>
+            {t.label}
+          </Button>
         ))}
       </div>
     </div>

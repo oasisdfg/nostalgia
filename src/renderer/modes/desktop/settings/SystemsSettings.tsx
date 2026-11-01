@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderSearch, Settings2, FolderOpen, ScanLine, Download, Trash2 } from 'lucide-react';
+import { FolderSearch, Settings2, FolderOpen, ScanLine, Download, Trash2, Check } from 'lucide-react';
 import { ConsoleLogo } from '@renderer/components/SystemIcon';
 import { EMULATOR_CATALOG } from '@shared/contracts/emulators';
 import { invoke } from '@renderer/bridge/ipc';
@@ -25,7 +25,8 @@ import { FormField } from '@renderer/components/FormField';
 import { Input } from '@renderer/components/Input';
 import { Select } from '@renderer/components/Select';
 import { Button } from '@renderer/components/Button';
-import { panel } from '@renderer/theme/classes';
+import { panel, well } from '@renderer/theme/classes';
+import { FocusSection, Focusable } from '@renderer/components/Focusable';
 
 export function SystemsSettings() {
   const { data: systems = [] } = useSystems(false);
@@ -48,10 +49,9 @@ export function SystemsSettings() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [emuId, setEmuId] = useState<number | null>(null);
   const [template, setTemplate] = useState<string[]>([]);
-  const [newSlug, setNewSlug] = useState('');
   const [newName, setNewName] = useState('');
 
-  const emuName = (id: number | null): string => emulators.find((e) => e.id === id)?.name ?? 'None';
+  const emuName = (id: number | null): string => emulators.find((e) => e.id === id)?.name ?? 'No emulator';
 
   const startEdit = (systemId: number, currentEmuId: number | null): void => {
     const chosen = currentEmuId ?? emulators[0]?.id ?? null;
@@ -72,10 +72,10 @@ export function SystemsSettings() {
     setSetting.mutate({ key: 'saves.dirs', value: { ...savesDirs, [slug]: folderPath }, encrypted: false });
   };
   const addSystem = async (): Promise<void> => {
-    const slug = newSlug.trim().toLowerCase().replace(/\s+/g, '-');
-    if (!slug || !newName.trim()) return;
+    // The internal id comes from the name ("Sega 32X" -> "sega-32x"); users never see it.
+    const slug = newName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (!slug) return;
     await createSystem.mutateAsync({ slug, name: newName.trim() });
-    setNewSlug('');
     setNewName('');
   };
 
@@ -104,55 +104,59 @@ export function SystemsSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Console tiles: click a tile to enable/disable it (enabled tiles glow). The corner
-          gear opens that console's config panel below the grid. */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {/* Console tiles: select a tile to turn that console on or off. On is a raised panel
+          with an "On" line; off sits recessed and dimmed. The corner gear opens that
+          console's settings below the grid. */}
+      <FocusSection className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {systems.map((s) => {
           const open = editingId === s.id;
           const toggle = (): void => updateSystem.mutate({ id: s.id, patch: { enabled: !s.enabled } });
           return (
-            <div
-              key={s.id}
-              role="button"
-              tabIndex={0}
-              aria-pressed={s.enabled}
-              onClick={toggle}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  toggle();
-                }
-              }}
-              className={`${panel} relative flex cursor-pointer flex-col items-center gap-3 px-3 py-5 text-center transition-all ${
-                s.enabled
-                  ? 'ring-1 ring-accent/60 shadow-[0_0_18px_-3px_rgb(var(--n-accent)/0.6)]'
-                  : 'opacity-55 hover:opacity-90'
-              } ${open ? 'ring-2 ring-accent ring-offset-2 ring-offset-bg' : ''}`}
-            >
-              <button
-                type="button"
-                aria-label={`Configure ${s.name}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  open ? setEditingId(null) : startEdit(s.id, s.defaultEmulatorId);
-                }}
-                className={`absolute right-1.5 top-1.5 rounded-md p-1 transition-colors hover:bg-surface-2 hover:text-fg ${
-                  open ? 'text-accent' : 'text-fg-faint'
-                }`}
+            <div key={s.id} className="relative">
+              <Focusable
+                ariaLabel={`${s.name}: ${s.enabled ? 'on' : 'off'}`}
+                ariaPressed={s.enabled}
+                onSelect={toggle}
+                className="block rounded-lg"
               >
-                <Settings2 className="h-4 w-4" />
-              </button>
-              <span className="flex h-10 items-center">
-                <ConsoleLogo slug={s.slug} size="rail" />
+                <div
+                  className={`flex cursor-pointer flex-col items-center gap-3 rounded-lg px-3 py-5 text-center transition-colors ${
+                    open
+                      ? 'bg-surface-2 shadow-e1'
+                      : s.enabled
+                        ? 'bg-surface shadow-e1 hover:bg-surface-2'
+                        : `${well} hover:bg-bg/80`
+                  }`}
+                >
+                  <span className={`flex h-10 items-center ${s.enabled ? '' : 'opacity-40'}`}>
+                    <ConsoleLogo slug={s.slug} size="rail" />
+                  </span>
+                  <div className="min-w-0 max-w-full">
+                    <p className={`truncate text-sm font-medium ${s.enabled ? 'text-fg' : 'text-fg-muted'}`}>{s.name}</p>
+                    <p className="flex items-center justify-center gap-1 truncate text-xs text-fg-muted">
+                      {s.enabled ? (
+                        <>
+                          {s.defaultEmulatorId != null && <Check className="h-3 w-3 shrink-0 text-accent" aria-hidden />}
+                          {emuName(s.defaultEmulatorId)}
+                        </>
+                      ) : (
+                        'Off'
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </Focusable>
+              <span className="absolute right-1 top-1">
+                <IconButton
+                  icon={<Settings2 className={`h-4 w-4 ${open ? 'text-accent' : ''}`} />}
+                  label={open ? `Close ${s.name} settings` : `${s.name} settings`}
+                  onClick={() => (open ? setEditingId(null) : startEdit(s.id, s.defaultEmulatorId))}
+                />
               </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-fg">{s.name}</p>
-                <p className="truncate text-2xs text-fg-faint">{emuName(s.defaultEmulatorId)}</p>
-              </div>
             </div>
           );
         })}
-      </div>
+      </FocusSection>
 
       {selected && (
         <Card
@@ -233,7 +237,7 @@ export function SystemsSettings() {
                   <LaunchArgsEditor value={template} onChange={setTemplate} />
                 </FormField>
                 <Button variant="primary" onClick={() => void saveBinding(selected.id)}>
-                  Save binding
+                  Save
                 </Button>
               </div>
             )}
@@ -283,9 +287,6 @@ export function SystemsSettings() {
         <div className="flex flex-wrap items-end gap-3">
           <FormField label="Name" className="min-w-48 flex-1">
             <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Sega Saturn" />
-          </FormField>
-          <FormField label="Slug" className="min-w-40 flex-1">
-            <Input value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder="e.g. saturn" />
           </FormField>
           <Button variant="secondary" onClick={() => void addSystem()}>
             Add system

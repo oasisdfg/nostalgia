@@ -151,7 +151,10 @@ export function CatalogView({ systemId }: { systemId: number }) {
             )}
             <div className="ml-auto flex items-center gap-2">
               {canPage && (page > 0 || list.data?.hasMore) && (
+                // A bare arrow by the search box read as a stray glyph - the page number
+                // says what these arrows do.
                 <div className="flex items-center gap-1">
+                  <span className="px-1 text-xs tabular-nums text-fg-muted">Page {page + 1}</span>
                   {page > 0 && (
                     <IconButton
                       icon={<ChevronLeft className="h-4 w-4" />}

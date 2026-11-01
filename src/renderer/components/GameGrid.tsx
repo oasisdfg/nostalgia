@@ -97,7 +97,7 @@ export function GameGrid({ items, wrap = false, slug }: { items: GameDTO[]; wrap
     }
   };
 
-  // Only a file-less favorite needs an availability check to decide whether "Install" shows.
+  // Only a file-less favorite needs an availability check to decide whether "Download" shows.
   const menuGame = menu?.game;
   const menuAvail = useCatalogAvailability(
     menuGame && !menuGame.hasFiles && menuGame.igdbId != null ? menuGame.igdbId : null,
@@ -105,8 +105,8 @@ export function GameGrid({ items, wrap = false, slug }: { items: GameDTO[]; wrap
   );
 
   const open = (g: GameDTO): void => setSelectedGameId(g.id);
-  const openMenu = (e: MouseEvent, game: GameDTO): void =>
-    setMenu({ x: e.clientX, y: e.clientY, game, confirmRemove: false });
+  const openMenu = (at: { clientX: number; clientY: number }, game: GameDTO): void =>
+    setMenu({ x: at.clientX, y: at.clientY, game, confirmRemove: false });
 
   const menuItems = (m: MenuState): ContextMenuItem[] => {
     const g = m.game;
@@ -125,12 +125,12 @@ export function GameGrid({ items, wrap = false, slug }: { items: GameDTO[]; wrap
         onClick: () => uninstall.mutate({ gameId: g.id }),
       });
     } else if (g.igdbId != null) {
-      // Install appears only once a real download is confirmed for this title.
+      // Download appears only once a real download is confirmed for this title.
       if (menuAvail.isLoading) {
         out.push({ label: 'Checking…', icon: <Loader2 className="h-4 w-4 animate-spin" />, disabled: true, onClick: () => {} });
       } else if (menuAvail.data?.available) {
         out.push({
-          label: 'Install',
+          label: 'Download',
           icon: <Download className="h-4 w-4" />,
           onClick: () => catalogDownload.mutate({ igdbId: g.igdbId!, systemId: g.systemId }),
         });

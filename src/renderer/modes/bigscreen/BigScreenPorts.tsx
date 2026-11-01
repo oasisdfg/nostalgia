@@ -38,6 +38,7 @@ export function BigScreenPorts() {
     filterPorts(ports, { search: '', console: 'all', status: 'all', sort: 'console' }, consoles).map((p) => p.manifest.id),
   );
   const launch = useLaunchRecomp();
+  const setFocusedPortId = useUiStore((s) => s.setFocusedPortId);
   const [moreOnOpen, setMoreOnOpen] = useState(false);
   const focused = useRef<RecompDTO | null>(null);
 
@@ -141,7 +142,10 @@ export function BigScreenPorts() {
                         setMoreOnOpen(false);
                         setUi({ detailId: id });
                       }}
-                      onFocus={() => (focused.current = p)}
+                      onFocus={() => {
+                        focused.current = p;
+                        setFocusedPortId(p.manifest.id);
+                      }}
                     />
                   ))}
                 </div>
@@ -210,11 +214,6 @@ function BigScreenPortCard({
                 </span>
               ) : null}
             </div>
-            {m.status === 'beta' && (
-              <span className="absolute right-2 top-2 rounded bg-black/70 px-2 py-0.5 text-sm font-medium text-warning" aria-hidden>
-                Beta
-              </span>
-            )}
             <p className="absolute inset-x-0 bottom-0 line-clamp-2 p-3 text-base font-semibold leading-snug text-fg">{m.name}</p>
           </div>
         </div>
