@@ -10,7 +10,7 @@ import { ConsoleLogo } from './SystemIcon';
 import { PortCard } from './PortCard';
 import { PortDetailPage } from './PortDetailPage';
 import { useConsoles, filterPorts, groupByConsole, matchesChip, CHIPS } from './portsModel';
-import { useRecomps, useRecompArt, useCheckRecompUpdates } from '@renderer/query/useRecomps';
+import { useRecomps, useRecompCovers, useCheckRecompUpdates } from '@renderer/query/useRecomps';
 import { useUiStore, type PortsUiState } from '@renderer/store/uiStore';
 import type { RecompDTO } from '@shared/contracts/recomps';
 
@@ -50,7 +50,8 @@ export function PortsView() {
   const consoles = useConsoles();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [rowRef, cols] = useColumns();
-  const art = useRecompArt(ports.map((p) => p.manifest.id)).data ?? {};
+  // Covers in display order, so the top of the grid fills in first.
+  const art = useRecompCovers(filterPorts(ports, ui, consoles).map((p) => p.manifest.id));
 
   const open = (id: string): void => setUi({ detailId: id, scrollTop: scrollRef.current?.scrollTop ?? 0 });
   const back = (): void => setUi({ detailId: null });

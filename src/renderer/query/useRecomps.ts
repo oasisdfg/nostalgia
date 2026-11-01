@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { invoke, on } from '@renderer/bridge/ipc';
 import { useToasts } from '@renderer/components/Toast';
 import { qk } from './keys';
@@ -21,18 +21,37 @@ export interface PortArt {
   heroUrl: string | null;
 }
 
-/**
- * The original game's art for a set of ports (asset:// URLs from main). One request per id
- * set; art barely changes, so it's kept for the session.
- */
-export function useRecompArt(ids: string[]) {
+/** One port's art with its hero key art (the port's page). Kept for the session. */
+export function useRecompArt(ids: string[], opts: { hero?: boolean } = {}) {
   const sorted = [...ids].sort();
   return useQuery({
-    queryKey: qk.recompArt(sorted),
-    queryFn: () => invoke('recomps:art', { ids: sorted }),
+    queryKey: qk.recompArt(sorted, opts.hero),
+    queryFn: () => invoke('recomps:art', { ids: sorted, hero: opts.hero }),
     enabled: sorted.length > 0,
     staleTime: Infinity,
   });
+}
+
+const ART_CHUNK = 24;
+
+/**
+ * Covers for a whole grid, asked for in chunks (in display order) so they appear as each
+ * chunk arrives instead of after every port's art is fetched. Returns what's in so far.
+ */
+export function useRecompCovers(ids: string[]): Record<string, PortArt> {
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += ART_CHUNK) chunks.push(ids.slice(i, i + ART_CHUNK));
+  const results = useQueries({
+    queries: chunks.map((chunk) => {
+      const sorted = [...chunk].sort();
+      return {
+        queryKey: qk.recompArt(sorted),
+        queryFn: () => invoke('recomps:art', { ids: sorted }),
+        staleTime: Infinity,
+      };
+    }),
+  });
+  return Object.assign({}, ...results.map((r) => r.data ?? {})) as Record<string, PortArt>;
 }
 
 /** Ports linked to one game (drives the split Play button). */

@@ -30,7 +30,7 @@ const portId = z
   .refine((id) => getManifest(id) != null, 'unknown port');
 const idSchema = z.object({ id: portId });
 // Art is asked for in bulk (a whole grid); unknown ids are simply skipped by getArt.
-const artSchema = z.object({ ids: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(500) });
+const artSchema = z.object({ ids: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(500), hero: z.boolean().optional() });
 const checkSchema = z.object({ id: portId.optional() }).optional();
 const gameSchema = z.object({ gameId: z.coerce.number().int() });
 const linkSchema = z.object({ id: portId, gameId: z.coerce.number().int() });
@@ -138,7 +138,10 @@ export function registerRecompsHandlers(): void {
     }
     return dtoFor(id);
   });
-  registerInvoke('recomps:art', (req) => getArt(artSchema.parse(req).ids));
+  registerInvoke('recomps:art', (req) => {
+    const p = artSchema.parse(req);
+    return getArt(p.ids, { hero: p.hero });
+  });
   registerInvoke('recomps:revealDir', async () => {
     const dir = recompsDir();
     await mkdir(dir, { recursive: true });

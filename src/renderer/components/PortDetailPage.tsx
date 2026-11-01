@@ -21,7 +21,7 @@ import { FocusSection, Focusable } from './Focusable';
 import type { ContextMenuItem } from './ContextMenu';
 import { PortProgress } from './PortProgress';
 import { PortSettings, PortSettingsCycle, portSettingOptions } from './PortSettings';
-import { useConsoles, isBusyPort } from './portsModel';
+import { useConsoles, isBusyPort, likelyCopies } from './portsModel';
 import { invoke } from '@renderer/bridge/ipc';
 import { well } from '@renderer/theme/classes';
 import { setFocus } from '@renderer/input/spatialNav';
@@ -68,7 +68,7 @@ export function PortDetailPage({
 }) {
   const { data: ports } = useRecomps();
   const port = ports?.find((p) => p.manifest.id === id);
-  const art = useRecompArt([id]).data?.[id];
+  const art = useRecompArt([id], { hero: true }).data?.[id];
   const coverUrl = art?.coverUrl ?? null;
 
   const setDetailBackdropUrl = useUiStore((s) => s.setDetailBackdropUrl);
@@ -359,6 +359,7 @@ function YourCopy({ port, consoleName, bigScreen }: { port: RecompDTO; consoleNa
   const pick = usePickRecompFiles();
   const clearPicked = useClearRecompPicked();
   const [changing, setChanging] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const text = bigScreen ? 'text-base' : 'text-xs';
   const verified = port.gameReady === 'verified';
 
@@ -371,7 +372,11 @@ function YourCopy({ port, consoleName, bigScreen }: { port: RecompDTO; consoleNa
   );
 
   const showPicker = port.gameReady === 'missing' || changing;
-  const libraryGames = m.gameFile.source === 'library' ? (games?.items ?? []) : [];
+  // Only games that look like the original; the rest of the console's library is one click away.
+  const allGames = m.gameFile.source === 'library' ? (games?.items ?? []) : [];
+  const matches = likelyCopies(allGames, m.originalTitle);
+  const libraryGames = showAll ? allGames : matches;
+  const hiddenCount = allGames.length - libraryGames.length;
 
   return (
     <div className={`${well} space-y-2 px-4 py-3`}>
@@ -430,6 +435,11 @@ function YourCopy({ port, consoleName, bigScreen }: { port: RecompDTO; consoleNa
               pick.mutate(m.id, { onSuccess: () => setChanging(false) }),
             )}
             {m.gameFile.pickHint && <span className="text-fg-muted">{m.gameFile.pickHint}</span>}
+            {hiddenCount > 0 &&
+              textButton(
+                matches.length > 0 ? `Show all ${allGames.length} ${consoleName} games` : `Pick from your ${allGames.length} ${consoleName} games`,
+                () => setShowAll(true),
+              )}
             {changing && textButton('Keep current', () => setChanging(false))}
           </div>
         </div>

@@ -13,7 +13,7 @@ import { GP_EVENT } from '@renderer/input/gamepad';
 import { useUiStore } from '@renderer/store/uiStore';
 import {
   useRecomps,
-  useRecompArt,
+  useRecompCovers,
   useLaunchRecomp,
   useRecompProgress,
   useRecompBuildStatus,
@@ -34,7 +34,9 @@ export function BigScreenPorts() {
   const setUi = useUiStore((s) => s.setPortsUi);
   const { data: ports = [], isLoading } = useRecomps();
   const consoles = useConsoles();
-  const art = useRecompArt(ports.map((p) => p.manifest.id)).data ?? {};
+  const art = useRecompCovers(
+    filterPorts(ports, { search: '', console: 'all', status: 'all', sort: 'console' }, consoles).map((p) => p.manifest.id),
+  );
   const launch = useLaunchRecomp();
   const [moreOnOpen, setMoreOnOpen] = useState(false);
   const focused = useRef<RecompDTO | null>(null);

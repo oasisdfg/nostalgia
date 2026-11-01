@@ -22,7 +22,8 @@ export function toDto(manifest: RecompManifest, row: RecompInstallRow | undefine
     pickedName: row?.picked_path ? basename(row.picked_path) : null,
     fileDelivered: (row?.file_delivered ?? 0) === 1,
     canPlay: row?.state === 'installed' && ready !== 'missing' && !isInstallingPort(manifest.id),
-    lastError: row?.last_error ?? null,
+    // An update-check error means nothing before the port is installed.
+    lastError: row && row.state !== 'not_installed' ? row.last_error : null,
   };
 }
 

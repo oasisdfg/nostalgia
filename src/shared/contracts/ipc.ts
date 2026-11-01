@@ -530,8 +530,9 @@ export interface IpcInvokeMap {
   /** 'external' ports: locate the exe the port's own installer put on disk (OS dialog in main). */
   'recomps:locateExe': { request: { id: string }; response: RecompDTO };
   /** The original game's art per port, as asset:// URLs (fetched + cached in main). */
+  /** `hero` also fetches key art (one port's page); without it, covers only (the grid). */
   'recomps:art': {
-    request: { ids: string[] };
+    request: { ids: string[]; hero?: boolean };
     response: Record<string, { coverUrl: string | null; heroUrl: string | null }>;
   };
 }

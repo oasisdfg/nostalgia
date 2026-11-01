@@ -133,10 +133,18 @@ export async function checkPort(manifest: RecompManifest): Promise<void> {
   }
 }
 
-/** Checks every port (or one), sequentially - a handful of requests, well under the limit. */
+/**
+ * Only installed ports have something to update, and the anonymous GitHub API allows 60
+ * requests an hour - checking the whole catalog would use that up.
+ */
+function isInstalled(id: string): boolean {
+  return getInstall(id)?.state === 'installed';
+}
+
+/** Checks every installed port (or the one asked for), sequentially. */
 export async function checkPorts(id?: string): Promise<void> {
   for (const m of listManifests()) {
-    if (id && m.id !== id) continue;
+    if (id ? m.id !== id : !isInstalled(m.id)) continue;
     await checkPort(m);
   }
 }
@@ -148,7 +156,8 @@ export async function checkPortsAtStartup(): Promise<void> {
   const now = Date.now();
   for (const m of listManifests()) {
     const row = getInstall(m.id);
-    if (row?.latest_checked_at && now - row.latest_checked_at < STARTUP_CHECK_INTERVAL_MS) continue;
+    if (row?.state !== 'installed') continue;
+    if (row.latest_checked_at && now - row.latest_checked_at < STARTUP_CHECK_INTERVAL_MS) continue;
     await checkPort(m);
   }
 }

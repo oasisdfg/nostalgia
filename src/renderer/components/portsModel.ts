@@ -119,3 +119,30 @@ export function portCardLabel(p: RecompDTO, fraction: number | null): string {
   if (p.manifest.status === 'beta') parts.push('beta');
   return parts.join(', ');
 }
+
+const TITLE_STOPWORDS = new Set(['the', 'a', 'an', 'of', 'and', 'in', 'on', 'to', 'for', 'edition']);
+
+function titleWords(title: string): string[] {
+  return title
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w && !TITLE_STOPWORDS.has(w));
+}
+
+/**
+ * Library games that look like the port's original, for the "your copy" picker: most of the
+ * original title's words (numbers included, so Halo 3 isn't Halo 2) appear in the game's title.
+ */
+export function likelyCopies<T extends { title: string }>(games: T[], originalTitle: string): T[] {
+  const want = titleWords(originalTitle);
+  if (want.length === 0) return [];
+  return games.filter((g) => {
+    const have = new Set(titleWords(g.title));
+    const hits = want.filter((w) => have.has(w));
+    if (!hits.some((w) => !/^\d+$/.test(w))) return false; // a shared "2" alone isn't a match
+    const wantNums = want.filter((w) => /^\d+$/.test(w));
+    if (wantNums.some((n) => !have.has(n))) return false;
+    return hits.length / want.length >= 0.6;
+  });
+}
